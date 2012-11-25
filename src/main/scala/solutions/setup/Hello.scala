@@ -6,46 +6,19 @@ import scala.virtualization.lms.common._
 
 object Hello {
 
-  object PrintIterable extends IterableOpsExp with MiscOpsExp {
-    def apply(x: Rep[Unit]): Rep[Unit] =
-      for (i <- unit(0 until 10)) { println(i) }
-  }
-
-  object PrintUnroll extends MiscOpsExp {
-    def apply(x: Rep[Unit]): Rep[Unit] =
-      for (i <- 0 until 10) { println(unit(i)) }
-  }
-
-  object PrintRange extends RangeOpsExp with MiscOpsExp {
-    def apply(x: Rep[Unit]): Rep[Unit] =
-      for (i <- unit(0) until unit(10)) { println(i) }
-  }
-
-  object PrintImplicitRange extends RangeOpsExp with LiftNumeric with MiscOpsExp {
-    def apply(x: Rep[Unit]): Rep[Unit] =
-      for (i <- 0 until 10) { println(i) }
+  object PrintIterable extends RangeOpsExp with IterableOpsExp with LiftNumeric with MiscOpsExp with StaticDataExp
+  {
+    def apply(x: Rep[Unit]): Rep[Unit] = {
+      for (i <- (0 until 10): Rep[Range])             { println(i) }
+      for (i <- (0 until 10): Range)                  { println(i) }
+      for (i <- staticData(List(1, 2, 3, 5, 7, 11)))  { println(i) }
+      for (i <- List(1, 2, 3, 5, 7, 11))              { println(i) }
+    }
   }
 
   def main(args: Array[String]): Unit = {
-
-    val writer = new java.io.PrintWriter(System.out)
-
-//    trait ScalaGenPrintln extends ScalaGenMiscOps with ScalaGenStringOps// with ScalaGenObjectOps
-
-    new ScalaGenIterableOps with ScalaGenMiscOps {
+    new ScalaGenRangeOps with ScalaGenIterableOps with ScalaGenMiscOps with ScalaGenStaticData {
       val IR: PrintIterable.type = PrintIterable
-    }.emitSource(PrintIterable.apply, "PrintIterable", writer)
-
-    new ScalaGenMiscOps {
-      val IR: PrintUnroll.type = PrintUnroll
-    }.emitSource(PrintUnroll.apply, "PrintUnroll", writer)
-
-    new ScalaGenRangeOps with ScalaGenMiscOps {
-      val IR: PrintRange.type = PrintRange
-    }.emitSource(PrintRange.apply, "PrintRange", writer)
-
-    new ScalaGenRangeOps with ScalaGenMiscOps {
-      val IR: PrintImplicitRange.type = PrintImplicitRange
-    }.emitSource(PrintImplicitRange.apply, "PrintImplicitRange", writer)
+    }.emitSource(PrintIterable.apply, "PrintIterable", new java.io.PrintWriter(System.out))
   }
 }
