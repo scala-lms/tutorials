@@ -1,2 +1,2 @@
-Tutorials on Lightweight Modular Staging
-========================================
+Tutorials on [Lightweight Modular Staging](http://scala-lms.github.io)
+======================================================================
