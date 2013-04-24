@@ -1,6 +1,4 @@
-.. sidebar::
-
-   .. contents::
+.. contents::
 
 DSL API
 =======
