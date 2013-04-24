@@ -1,38 +1,11 @@
-name := "lms-tutorials"
+name := "scala.lms.tutorials"
 
-organization := "EPFL"
-
-version := "0.1-SNAPSHOT"
+organization := "ch.epfl"
 
 scalaOrganization := "org.scala-lang.virtualized"
 
-scalaVersion := Option(System.getenv("SCALA_VIRTUALIZED_VERSION")).getOrElse("2.10.0-M7")
+scalaVersion := "2.10.1"
 
-//--- Dependencies
+libraryDependencies += "ch.epfl" %% "scala.lms" % "0.4-SNAPSHOT"
 
-resolvers ++= Seq(
-    ScalaToolsSnapshots, 
-    "Sonatype Public" at "https://oss.sonatype.org/content/groups/public"
-    )
-
-libraryDependencies ++= Seq(
-    "org.scalatest" % "scalatest_2.10.0-M7" % "1.9-2.10.0-M7-B1" % "test",
-    "EPFL" %% "lms" % "0.3-SNAPSHOT")
-
-//--- End of Dependencies
-
-scalacOptions ++= Seq("-deprecation", "-unchecked", //"-Xexperimental",
-                      "-P:continuations:enable", "-Yvirtualize")
-
-//Our tests are not threadsafe so disabling parallel execution for now
-parallelExecution in Test := false
-
-// disable publishing of main docs
-publishArtifact in (Compile, packageDoc) := false
-
-// continuations
-autoCompilerPlugins := true
-
-libraryDependencies <<= (scalaVersion, libraryDependencies) { (ver, deps) =>
-    deps :+ compilerPlugin("org.scala-lang.plugins" % "continuations" % ver)
-}
+scalacOptions += "-Yvirtualize"
