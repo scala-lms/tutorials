@@ -1,0 +1,55 @@
+{#
+    sbt/layout.html
+    ~~~~~~~~~~~~~~~~~
+    based on https://github.com/akka/akka/blob/master/akka-docs/_sphinx/themes/akka/layout.html
+#}
+
+
+
+{% extends "basic/layout.html" %}
+
+{% set script_files = script_files + ['_static/main.js'] %}
+
+{% set css_files = css_files + ['_static/stylesheet.css'] %}
+{% set css_files = css_files + ['_static/pygment_trac.css'] %}
+
+{# do not display relbars #}
+{% block relbar1 %}{% endblock %}
+{% block relbar2 %}{% endblock %}
+
+{% block content %}
+<div id="header_wrap" class="outer">
+   <a id="forkme_banner" href="https://github.com/scala-lms/tutorials">View on GitHub</a>
+    <header class="inner">
+         <h1 id="project_title">Tutorials</h1>
+         <h2 id="project_tagline">Lightweight Modular Staging</h2>
+    </header>
+    </div>
+
+
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+                {%- if prev %}
+                <div class="previous"><span class="divider">«</span> <a href="{{ prev.link|e }}">{{ prev.title }}</a> <span class="divider"></span></div>
+                {%- endif %}
+
+                {%- if next %}
+                <div class="next"><span class="divider"></span> <a href="{{ next.link|e }}">{{ next.title }}</a> <span class="divider">»</span></div>
+                {%- endif %}
+
+      <section id="main_content" class="inner">
+         {% block body %}{% endblock %}
+      </section>
+    </div>
+
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+
+      </footer>
+    </div>
+
+  {% block footer %}{% endblock %}
+{% endblock %}

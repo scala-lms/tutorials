@@ -13,3 +13,11 @@ libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT" intransitive()
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test" intransitive()
 
 scalacOptions += "-Yvirtualize"
+
+site.settings
+
+site.sphinxSupport()
+
+ghpages.settings
+
+git.remoteRepo := "git@github.com:scala-lms/tutorials.git"
