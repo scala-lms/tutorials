@@ -16,7 +16,7 @@ generates the second stage. The DSL program is partially evaluated
 during the first stage -- whether an expression belongs to the first
 or second stage is driven by types: expressions of type ``Rep[T]`` may
 be deferred to the second stage, while other expressions are evaluated
-during the first stage and become constants in the second stage.
+during the first stage, becoming constants in the second stage.
 
 .. container:: side-by-side
 
@@ -32,3 +32,24 @@ during the first stage and become constants in the second stage.
          :include: 2
       .. includecode:: ../out/dslapi2.check.scala
 
+Loops can be unrolled in the first stage, or be generated as loops in
+the second stage, driven by the type of their condition.
+
+.. container:: side-by-side
+
+   .. container:: left
+
+      .. includecode:: ../test/scala/lms/tutorial/dslapi.scala
+         :include: range1
+      .. includecode:: ../out/dslapirange1.check.scala
+         :include: for
+
+   .. container:: right
+
+      .. includecode:: ../test/scala/lms/tutorial/dslapi.scala
+         :include: range2
+      .. includecode:: ../out/dslapirange2.check.scala
+         :include: for
+
+With this fine-grain control, conditional loop unrolling can be
+implemented at the DSL user level.
