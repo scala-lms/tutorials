@@ -59,7 +59,7 @@ implemented at the DSL user level.
 
 We can use this conditional loop unrolling to optimize multiplying a
 matrix known at staging time with a vector. For example, consider a
-matrix with one dense rows, and otherwise sparse rows:
+matrix with a mix of dense and sparse rows:
 
 .. includecode:: ../test/scala/lms/tutorial/dslapi.scala
    :include: ex-a
