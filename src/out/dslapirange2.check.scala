@@ -1,8 +1,8 @@
 /*****************************************
   Emitting Generated Code                  
 *******************************************/
-class Snippet extends ((Int)=>(Int)) {
-def apply(x0:Int): Int = {
+class Snippet extends ((Int)=>(Unit)) {
+def apply(x0:Int): Unit = {
 val x7 = {
 //#for
 // generated code
@@ -15,7 +15,7 @@ x2 = x2 + 1
 x5
 //#for
 }
-0
+()
 }
 }
 /*****************************************

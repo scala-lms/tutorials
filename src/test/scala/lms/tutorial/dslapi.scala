@@ -40,13 +40,13 @@ trait DslImpl extends DslExp { q =>
   }
 }
 
-trait DslSnippet extends Dsl {
-  def snippet(x: Rep[Int]): Rep[Int]
+abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
+  def snippet(x: Rep[A]): Rep[B]
 }
 
-trait DslDriver extends DslSnippet with DslImpl {
+abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl {
   lazy val f = compile(snippet)
-  def eval(x: Int): Int = f(x)
+  def eval(x: A): B = f(x)
   lazy val code: String = {
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
@@ -56,7 +56,7 @@ trait DslDriver extends DslSnippet with DslImpl {
 class DslApiTest extends TutorialFunSuite {
   val under = "dslapi"
   test("1") {
-    val snippet = new DslSnippet with DslDriver {
+    val snippet = new DslDriver[Int,Int] {
       //#1
       def snippet(x: Rep[Int]) = {
         def compute(b: Boolean): Rep[Int] = {
@@ -72,7 +72,7 @@ class DslApiTest extends TutorialFunSuite {
   }
 
   test("2") {
-    val snippet = new DslSnippet with DslDriver {
+    val snippet = new  DslDriver[Int,Int] {
       //#2
       def snippet(x: Rep[Int]) = {
         def compute(b: Rep[Boolean]): Rep[Int] = {
@@ -88,7 +88,7 @@ class DslApiTest extends TutorialFunSuite {
   }
 
   test("power") {
-    val snippet = new DslSnippet with DslDriver {
+    val snippet = new DslDriver[Int,Int] {
       //#power
       def power(b: Rep[Int], x: Int): Rep[Int] = {
         if (x == 0) 1
@@ -103,7 +103,7 @@ class DslApiTest extends TutorialFunSuite {
   }
 
   test("range1") {
-    val snippet = new DslSnippet with DslDriver {
+    val snippet = new DslDriver[Int,Unit] {
       def snippet(x: Rep[Int]) = {
         label("for") {
           //#range1
@@ -112,14 +112,13 @@ class DslApiTest extends TutorialFunSuite {
           }
           //#range1
         }
-        0
       }
     }
     check("range1", snippet.code)
   }
 
   test("range2") {
-    val snippet = new DslSnippet with DslDriver {
+    val snippet = new DslDriver[Int,Unit] {
       def snippet(x: Rep[Int]) = {
         label("for") {
           //#range2
@@ -128,7 +127,6 @@ class DslApiTest extends TutorialFunSuite {
           }
           //#range2
         }
-        0
       }
     }
     check("range2", snippet.code)
