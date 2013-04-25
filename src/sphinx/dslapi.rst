@@ -53,3 +53,33 @@ the second stage, driven by the type of their condition.
 
 With this fine-grain control, conditional loop unrolling can be
 implemented at the DSL user level.
+
+.. includecode:: ../test/scala/lms/tutorial/dslapi.scala
+   :include: unrollIf
+
+We can use this conditional loop unrolling to optimize multiplying a
+matrix known at staging time with a vector. For example, consider a
+matrix with one dense rows, and otherwise sparse rows:
+
+.. includecode:: ../test/scala/lms/tutorial/dslapi.scala
+   :include: ex-a
+
+When scanning the columns, we would like to generate a loop for the
+dense row, and unroll the loop for the sparse rows.
+
+.. includecode:: ../test/scala/lms/tutorial/dslapi.scala
+   :include: matrix_vector_prod
+
+Let's compare the code generated for a dense vs sparse row.
+
+.. container:: side-by-side
+
+   .. container:: left
+
+      .. includecode:: ../out/dslapishonan-hmm.check.scala
+         :include: index_0
+
+   .. container:: right
+
+      .. includecode:: ../out/dslapishonan-hmm.check.scala
+         :include: index_2
