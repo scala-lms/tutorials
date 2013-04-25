@@ -77,9 +77,9 @@ Let's compare the code generated for a dense vs sparse row.
    .. container:: left
 
       .. includecode:: ../out/dslapishonan-hmm.check.scala
-         :include: index_0
+         :include: row_0
 
    .. container:: right
 
       .. includecode:: ../out/dslapishonan-hmm.check.scala
-         :include: index_2
+         :include: row_2

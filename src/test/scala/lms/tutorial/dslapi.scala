@@ -4,19 +4,19 @@ import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
 trait Dsl extends NumericOps with BooleanOps with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StaticData {
-  def comment[A:Manifest](l: String)(b: => Rep[A])
+  def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A])
 }
 trait DslExp extends Dsl with NumericOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StaticDataExp {
 
 
-  case class Comment[A:Manifest](l: String, b: Block[A]) extends Def[A]
-  def comment[A:Manifest](l: String)(b: => Rep[A]) = {
+  case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
+  def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]) = {
     val br = reifyEffects(b)
     val be = summarizeEffects(br)
-    reflectEffect(Comment(l, br), be)
+    reflectEffect(Comment(l, verbose, br), be)
   }
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
-    case Comment(s, b) => effectSyms(b)
+    case Comment(_, _, b) => effectSyms(b)
     case _ => super.boundSyms(e)
   }
 
@@ -31,10 +31,14 @@ trait DslGen extends ScalaGenNumericOps with ScalaGenBooleanOps with ScalaGenIfT
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case Comment(s,b) =>
+    case Comment(s, verbose, b) =>
       stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)
-      stream.println("// generated code")
+      if (verbose) {
+        stream.println("// generated code for " + s.replace('_', ' '))
+      } else {
+        stream.println("// generated code")
+      }
       emitBlock(b)
       stream.println(quote(getBlockResult(b)))
       stream.println("//#" + s)
@@ -113,7 +117,7 @@ class DslApiTest extends TutorialFunSuite {
   test("range1") {
     val snippet = new DslDriver[Int,Unit] {
       def snippet(x: Rep[Int]) = {
-        comment("for") {
+        comment("for", verbose = false) {
           //#range1
           for (i <- (0 until 3): Range) {
             println(i)
@@ -128,7 +132,7 @@ class DslApiTest extends TutorialFunSuite {
   test("range2") {
     val snippet = new DslDriver[Int,Unit] {
       def snippet(x: Rep[Int]) = {
-        comment("for") {
+        comment("for", verbose = false) {
           //#range2
           for (i <- (0 until x): Rep[Range]) {
             println(i)
@@ -174,7 +178,7 @@ class DslApiTest extends TutorialFunSuite {
         val n = a.length
         val v1 = NewArray[Int](n)
         for (i <- 0 until n: Range) {
-          comment("index_" + i) {
+          comment("row_" + i) {
             for (j <- unrollIf(0 until n)(sparse(a(i)))) {
               v1(i) = v1(i) + a.at(i, j) * v(j)
             }
