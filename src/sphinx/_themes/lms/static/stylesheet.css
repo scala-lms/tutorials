@@ -438,3 +438,16 @@ Small Device Styles
 .next {
  float: right;
 }
+
+.side-by-side {
+  position: relative;
+  max-width: none;
+  left: -20%;
+}
+
+.left, .right {
+  vertical-align: top;
+  display: inline-block;
+  width: 45%;
+  margin: 10px;
+}
