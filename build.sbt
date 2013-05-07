@@ -20,6 +20,8 @@ libraryDependencies += "org.scala-lang.virtualized" % "scala-actors" % "2.10.1-V
 
 scalacOptions += "-Yvirtualize"
 
+scalacOptions += "-deprecation"
+
 site.settings
 
 site.sphinxSupport()
