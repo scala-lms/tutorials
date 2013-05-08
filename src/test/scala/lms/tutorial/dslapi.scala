@@ -3,11 +3,18 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
-trait Dsl extends NumericOps with BooleanOps with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StaticData {
+trait Dsl extends NumericOps with BooleanOps with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with StaticData {
+  implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
+  def infix_isEmpty(s: Rep[String])(implicit pos: SourceContext) = s.length==0
+  def infix_to(start: Rep[Int], end: Rep[Int])(implicit pos: SourceContext) = range_until(start,end+1)
+  def infix_substring(s: Rep[String], i: Rep[Int]) = string_substring(s, i)
+  def string_substring(s: Rep[String], i: Rep[Int]): Rep[String]
+
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A])
 }
-trait DslExp extends Dsl with NumericOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StaticDataExp {
-
+trait DslExp extends Dsl with NumericOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with StaticDataExp {
+  case class StringSubstring(s: Rep[String], i: Rep[Int]) extends Def[String]
+  def string_substring(s: Rep[String], i: Rep[Int]): Rep[String] = StringSubstring(s, i)
 
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
   def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]) = {
@@ -25,12 +32,14 @@ trait DslExp extends Dsl with NumericOpsExpOpt with BooleanOpsExp with CompileSc
     case _ => super.array_apply(x,n)
   }
 }
-trait DslGen extends ScalaGenNumericOps with ScalaGenBooleanOps with ScalaGenIfThenElse with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStaticData {
+trait DslGen extends ScalaGenNumericOps with ScalaGenBooleanOps with ScalaGenIfThenElse with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenStaticData {
   val IR: DslExp
 
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case StringSubstring(s, i) =>
+      emitValDef(sym, quote(s)+".substring("+quote(i)+")")
     case Comment(s, verbose, b) =>
       stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)
