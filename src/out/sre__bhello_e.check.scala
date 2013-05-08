@@ -2,90 +2,80 @@
   Emitting Generated Code                  
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Boolean)) {
-def apply(x48:java.lang.String): Boolean = {
-val x49 = x48.length
-val x50 = x49 == 0
-val x95 = if (x50) {
-false
-} else {
-val x52 = x48(0)
-val x53 = 'h' == x52
-val x54 = false || x53
-val x94 = if (x54) {
-val x55 = x48.substring(1)
-val x56 = x55.length
-val x57 = x56 == 0
-val x93 = if (x57) {
-false
-} else {
-val x59 = x55(0)
-val x60 = 'e' == x59
-val x61 = false || x60
-val x92 = if (x61) {
-val x62 = x55.substring(1)
-val x63 = x62.length
-val x64 = x63 == 0
-val x91 = if (x64) {
-false
-} else {
-val x66 = x62(0)
-val x67 = 'l' == x66
-val x68 = false || x67
-val x90 = if (x68) {
-val x69 = x62.substring(1)
-val x70 = x69.length
-val x71 = x70 == 0
-val x89 = if (x71) {
-false
-} else {
-val x73 = x69(0)
-val x74 = 'l' == x73
-val x75 = false || x74
-val x88 = if (x75) {
-val x76 = x69.substring(1)
-val x77 = x76.length
-val x78 = x77 == 0
-val x87 = if (x78) {
-false
-} else {
-val x80 = x76(0)
-val x81 = 'o' == x80
-val x82 = false || x81
-val x86 = if (x82) {
-val x83 = x76.substring(1)
-val x84 = x83.length
-val x85 = x84 == 0
-x85
+def apply(x0:java.lang.String): Boolean = {
+val x1 = x0.length
+val x2 = 0 < x1
+val x6 = if (x2) {
+val x3 = x0(0)
+val x4 = 'h' == x3
+val x5 = false || x4
+x5
 } else {
 false
 }
-x86
-}
-x87
+val x32 = if (x6) {
+val x7 = 1 < x1
+val x11 = if (x7) {
+val x8 = x0(1)
+val x9 = 'e' == x8
+val x10 = false || x9
+x10
 } else {
 false
 }
-x88
-}
-x89
+val x31 = if (x11) {
+val x12 = 2 < x1
+val x16 = if (x12) {
+val x13 = x0(2)
+val x14 = 'l' == x13
+val x15 = false || x14
+x15
 } else {
 false
 }
-x90
-}
-x91
+val x30 = if (x16) {
+val x17 = 3 < x1
+val x21 = if (x17) {
+val x18 = x0(3)
+val x19 = 'l' == x18
+val x20 = false || x19
+x20
 } else {
 false
 }
-x92
-}
-x93
+val x29 = if (x21) {
+val x22 = 4 < x1
+val x26 = if (x22) {
+val x23 = x0(4)
+val x24 = 'o' == x23
+val x25 = false || x24
+x25
 } else {
 false
 }
-x94
+val x28 = if (x26) {
+val x27 = 5 == x1
+x27
+} else {
+false
 }
-x95
+x28
+} else {
+false
+}
+x29
+} else {
+false
+}
+x30
+} else {
+false
+}
+x31
+} else {
+false
+}
+x32
 }
 }
 /*****************************************

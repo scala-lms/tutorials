@@ -2,63 +2,85 @@
   Emitting Generated Code                  
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Boolean)) {
-def apply(x36:java.lang.String): Boolean = {
-var x59 = null.asInstanceOf[scala.Function1[Int, Boolean]]
-val x37 = x36.length
-val x38 = {x39: (Int) => 
-val x40 = x36.substring(x39)
-val x41 = x40.length
-val x42 = x41 == 0
-val x58 = if (x42) {
-false
+def apply(x0:java.lang.String): Boolean = {
+var x1: Int = 0
+val x2 = x1
+val x3 = x0.length
+val x4 = x2 < x3
+val x8 = if (x4) {
+val x5 = x0(x2)
+val x6 = 'a' == x5
+val x7 = false || x6
+x7
 } else {
-val x44 = x40(0)
-val x45 = 'a' == x44
-val x46 = false || x45
-val x57 = if (x46) {
-val x47 = x40.substring(1)
-val x48 = x47.length
-val x49 = x48 == 0
-val x56 = if (x49) {
 false
+}
+val x17 = if (x8) {
+val x9 = x2 + 1
+val x10 = x9 < x3
+val x14 = if (x10) {
+val x11 = x0(x9)
+val x12 = 'b' == x11
+val x13 = false || x12
+x13
 } else {
-val x51 = x47(0)
-val x52 = 'b' == x51
-val x53 = false || x52
-val x55 = if (x53) {
+false
+}
+val x16 = if (x14) {
 true
 } else {
 false
 }
-x55
-}
-x56
+x16
 } else {
 false
 }
-x57
-}
-x58: Boolean
-}
-x59 = {x60: (Int) => 
-val x61 = x60 > x37
-val x68 = if (x61) {
+var x18: Boolean = x17
+val x44 = while ({val x19 = x18
+val x24 = if (x19) {
 false
 } else {
-val x62 = x38(x60)
-val x66 = if (x62) {
+val x21 = x1
+val x22 = x21 < x3
+x22
+}
+x24}) {
+val x26 = x1 += 1
+val x27 = x1
+val x28 = x27 < x3
+val x32 = if (x28) {
+val x29 = x0(x27)
+val x30 = 'a' == x29
+val x31 = false || x30
+x31
+} else {
+false
+}
+val x41 = if (x32) {
+val x33 = x27 + 1
+val x34 = x33 < x3
+val x38 = if (x34) {
+val x35 = x0(x33)
+val x36 = 'b' == x35
+val x37 = false || x36
+x37
+} else {
+false
+}
+val x40 = if (x38) {
 true
 } else {
-val x63 = x60 + 1
-val x64 = x59(x63)
-x64
+false
 }
-x66
+x40
+} else {
+false
 }
-x68: Boolean
+x18 = x41
+()
 }
-val x70 = x59(0)
-x70
+val x45 = x18
+x45
 }
 }
 /*****************************************

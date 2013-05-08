@@ -2,95 +2,145 @@
   Emitting Generated Code                  
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Boolean)) {
-def apply(x54:java.lang.String): Boolean = {
-var x95 = null.asInstanceOf[scala.Function1[Int, Boolean]]
-val x55 = x54.length
-val x56 = {x57: (Int) => 
-val x58 = x54.substring(x57)
-val x59 = x58.length
-val x60 = x59 == 0
-val x94 = if (x60) {
-false
+def apply(x0:java.lang.String): Boolean = {
+var x1: Int = 0
+val x2 = x1
+val x3 = x0.length
+val x4 = x2 < x3
+val x8 = if (x4) {
+val x5 = x0(x2)
+val x6 = 'h' == x5
+val x7 = false || x6
+x7
 } else {
-val x62 = x58(0)
-val x63 = 'h' == x62
-val x64 = false || x63
-val x93 = if (x64) {
-val x65 = x58.substring(1)
-val x66 = x65.length
-val x67 = x66 == 0
-val x92 = if (x67) {
 false
+}
+val x31 = if (x8) {
+val x9 = x2 + 1
+val x10 = x9 < x3
+val x14 = if (x10) {
+val x11 = x0(x9)
+val x12 = 'e' == x11
+val x13 = false || x12
+x13
 } else {
-val x69 = x65(0)
-val x70 = 'e' == x69
-val x71 = false || x70
-val x91 = if (x71) {
-val x72 = x65.substring(1)
-val x73 = x72.length
-val x74 = x73 == 0
-val x90 = if (x74) {
 false
+}
+val x30 = if (x14) {
+val x15 = x9 + 1
+val x16 = x15 < x3
+val x20 = if (x16) {
+val x17 = x0(x15)
+val x18 = 'l' == x17
+val x19 = false || x18
+x19
 } else {
-val x76 = x72(0)
-val x77 = 'l' == x76
-val x78 = false || x77
-val x89 = if (x78) {
-val x79 = x72.substring(1)
-val x80 = x79.length
-val x81 = x80 == 0
-val x88 = if (x81) {
 false
+}
+val x29 = if (x20) {
+val x21 = x15 + 1
+val x22 = x21 < x3
+val x26 = if (x22) {
+val x23 = x0(x21)
+val x24 = 'l' == x23
+val x25 = false || x24
+x25
 } else {
-val x83 = x79(0)
-val x84 = 'l' == x83
-val x85 = false || x84
-val x87 = if (x85) {
+false
+}
+val x28 = if (x26) {
 true
 } else {
 false
 }
-x87
-}
-x88
+x28
 } else {
 false
 }
-x89
-}
-x90
+x29
 } else {
 false
 }
-x91
-}
-x92
+x30
 } else {
 false
 }
-x93
-}
-x94: Boolean
-}
-x95 = {x96: (Int) => 
-val x97 = x96 > x55
-val x104 = if (x97) {
+var x32: Boolean = x31
+val x72 = while ({val x33 = x32
+val x38 = if (x33) {
 false
 } else {
-val x98 = x56(x96)
-val x102 = if (x98) {
+val x35 = x1
+val x36 = x35 < x3
+x36
+}
+x38}) {
+val x40 = x1 += 1
+val x41 = x1
+val x42 = x41 < x3
+val x46 = if (x42) {
+val x43 = x0(x41)
+val x44 = 'h' == x43
+val x45 = false || x44
+x45
+} else {
+false
+}
+val x69 = if (x46) {
+val x47 = x41 + 1
+val x48 = x47 < x3
+val x52 = if (x48) {
+val x49 = x0(x47)
+val x50 = 'e' == x49
+val x51 = false || x50
+x51
+} else {
+false
+}
+val x68 = if (x52) {
+val x53 = x47 + 1
+val x54 = x53 < x3
+val x58 = if (x54) {
+val x55 = x0(x53)
+val x56 = 'l' == x55
+val x57 = false || x56
+x57
+} else {
+false
+}
+val x67 = if (x58) {
+val x59 = x53 + 1
+val x60 = x59 < x3
+val x64 = if (x60) {
+val x61 = x0(x59)
+val x62 = 'l' == x61
+val x63 = false || x62
+x63
+} else {
+false
+}
+val x66 = if (x64) {
 true
 } else {
-val x99 = x96 + 1
-val x100 = x95(x99)
-x100
+false
 }
-x102
+x66
+} else {
+false
 }
-x104: Boolean
+x67
+} else {
+false
 }
-val x106 = x95(0)
-x106
+x68
+} else {
+false
+}
+x32 = x69
+()
+}
+val x73 = x32
+x73
 }
 }
 /*****************************************

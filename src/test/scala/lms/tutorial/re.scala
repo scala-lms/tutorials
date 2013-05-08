@@ -8,35 +8,42 @@ trait RegexpMatcher {
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {
     if (regexp(0) == '^')
-      return matchhere(regexp.substring(1), text)
-    for (i <- 0 to text.length)
-      if (matchhere(regexp, text.substring(i)))
-        return true
-    return false
-  }
-
-  /* search for regexp at beginning of text */
-  def matchhere(regexp: String, text: String): Boolean = {
-    if (regexp.isEmpty)
-      return true
-    if (regexp == "$")
-      return text.isEmpty
-    if (regexp.length>1 && regexp(1)=='*')
-      return matchstar(regexp(0), regexp.substring(2), text)
-    if (!text.isEmpty && matchchar(regexp(0), text(0)))
-      return matchhere(regexp.substring(1), text.substring(1))
-    return false
-  }
-
-  /* search for c*regexp at the beginning of text */
-  def matchstar(c: Char, regexp: String, text: String): Boolean = {
-    for (i <- 0 to text.length) {
-      if (matchhere(regexp, text.substring(i)))
-        return true
-      if (i < text.length && !matchchar(c, text(i)))
-        return false
+      matchhere(regexp, 1, text, 0)
+    else {
+      var start = 0
+      var found = matchhere(regexp, 0, text, start)
+      while (!found && start<text.length) {
+        start += 1
+        found = matchhere(regexp, 0, text, start)
+      }
+      found
     }
-    return false
+  }
+
+  /* search for restart of regexp at start of text */
+  def matchhere(regexp: String, restart: Int, text: String, start: Int): Boolean = {
+    if (restart==regexp.length)
+      true
+    else if (regexp(restart)=='$' && restart+1==regexp.length)
+      start==text.length
+    else if (restart+1<regexp.length && regexp(restart+1)=='*')
+      matchstar(regexp(restart), regexp, restart+2, text, start)
+    else if (start<text.length && matchchar(regexp(restart), text(start)))
+      matchhere(regexp, restart+1, text, start+1)
+    else false
+  }
+
+  /* search for c* followed by restart of regexp at start of text */
+  def matchstar(c: Char, regexp: String, restart: Int, text: String, start: Int): Boolean = {
+    var sstart = start
+    var found = matchhere(regexp, restart, text, sstart)
+    var failed = false
+    while (!failed && !found && sstart<text.length) {
+      failed = matchchar(c, text(sstart))
+      sstart += 1
+      found = matchhere(regexp, restart, text, sstart)
+    }
+    !failed && found
   }
 
   def matchchar(c: Char, t: Char): Boolean = {
@@ -58,4 +65,5 @@ class RegexpMatcherTest extends RegexpMatcher with FunSuite {
   testmatch("hel*", "he", true);
   testmatch("hel*$", "hello", false);
   testmatch("hel*", "yo hello", true);
+  testmatch("a*b", "hello aab hello", true);
 }
