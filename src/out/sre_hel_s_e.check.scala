@@ -7,160 +7,154 @@ var x1: Int = 0
 val x2 = x1
 val x3 = x0.length
 val x4 = x2 < x3
-val x8 = if (x4) {
+val x7 = if (x4) {
 val x5 = x0(x2)
 val x6 = 'h' == x5
-val x7 = false || x6
-x7
+x6
 } else {
 false
 }
-val x9 = x2 + 1
-val x15 = x9 + 1
-val x50 = if (x8) {
-val x10 = x9 < x3
-val x14 = if (x10) {
-val x11 = x0(x9)
-val x12 = 'e' == x11
-val x13 = false || x12
-x13
+val x8 = x2 + 1
+val x13 = x8 + 1
+val x47 = if (x7) {
+val x9 = x8 < x3
+val x12 = if (x9) {
+val x10 = x0(x8)
+val x11 = 'e' == x10
+x11
 } else {
 false
 }
-val x49 = if (x14) {
-var x16: Int = x15
-val x17 = x16
-val x18 = x17 == x3
-var x19: Boolean = x18
-var x20: Boolean = false
-val x42 = while ({val x21 = x20
-val x26 = if (x21) {
+val x46 = if (x12) {
+var x14: Int = x13
+val x15 = x14
+val x16 = x15 == x3
+var x17: Boolean = x16
+var x18: Boolean = false
+val x39 = while ({val x19 = x18
+val x24 = if (x19) {
 false
 } else {
-val x23 = x19
-val x24 = !x23
-x24
+val x21 = x17
+val x22 = !x21
+x22
 }
-val x30 = if (x26) {
-val x27 = x16
-val x28 = x27 < x3
-x28
+val x28 = if (x24) {
+val x25 = x14
+val x26 = x25 < x3
+x26
 } else {
 false
 }
-x30}) {
-val x32 = x16
-val x33 = x0(x32)
-val x34 = 'l' == x33
-val x35 = false || x34
-x20 = x35
-val x37 = x16 += 1
-val x38 = x16
-val x39 = x38 == x3
-x19 = x39
+x28}) {
+val x30 = x14
+val x31 = x0(x30)
+val x32 = 'l' == x31
+x18 = x32
+val x34 = x14 += 1
+val x35 = x14
+val x36 = x35 == x3
+x17 = x36
 ()
 }
-val x43 = x20
-val x47 = if (x43) {
+val x40 = x18
+val x44 = if (x40) {
 false
 } else {
-val x45 = x19
-x45
+val x42 = x17
+x42
 }
-x47
-} else {
-false
-}
-x49
+x44
 } else {
 false
 }
-var x51: Boolean = x50
-val x110 = while ({val x52 = x51
-val x57 = if (x52) {
-false
-} else {
-val x54 = x1
-val x55 = x54 < x3
-x55
-}
-x57}) {
-val x59 = x1 += 1
-val x60 = x1
-val x61 = x60 < x3
-val x65 = if (x61) {
-val x62 = x0(x60)
-val x63 = 'h' == x62
-val x64 = false || x63
-x64
+x46
 } else {
 false
 }
-val x107 = if (x65) {
-val x66 = x60 + 1
-val x67 = x66 < x3
-val x71 = if (x67) {
-val x68 = x0(x66)
-val x69 = 'e' == x68
-val x70 = false || x69
-x70
+var x48: Boolean = x47
+val x104 = while ({val x49 = x48
+val x54 = if (x49) {
+false
+} else {
+val x51 = x1
+val x52 = x51 < x3
+x52
+}
+x54}) {
+val x56 = x1 += 1
+val x57 = x1
+val x58 = x57 < x3
+val x61 = if (x58) {
+val x59 = x0(x57)
+val x60 = 'h' == x59
+x60
 } else {
 false
 }
-val x106 = if (x71) {
-val x72 = x66 + 1
-var x73: Int = x72
-val x74 = x73
-val x75 = x74 == x3
-var x76: Boolean = x75
-var x77: Boolean = false
-val x99 = while ({val x78 = x77
-val x83 = if (x78) {
-false
-} else {
-val x80 = x76
-val x81 = !x80
-x81
-}
-val x87 = if (x83) {
-val x84 = x73
-val x85 = x84 < x3
-x85
+val x101 = if (x61) {
+val x62 = x57 + 1
+val x63 = x62 < x3
+val x66 = if (x63) {
+val x64 = x0(x62)
+val x65 = 'e' == x64
+x65
 } else {
 false
 }
-x87}) {
-val x89 = x73
-val x90 = x0(x89)
-val x91 = 'l' == x90
-val x92 = false || x91
-x77 = x92
-val x94 = x73 += 1
-val x95 = x73
-val x96 = x95 == x3
-x76 = x96
+val x100 = if (x66) {
+val x67 = x62 + 1
+var x68: Int = x67
+val x69 = x68
+val x70 = x69 == x3
+var x71: Boolean = x70
+var x72: Boolean = false
+val x93 = while ({val x73 = x72
+val x78 = if (x73) {
+false
+} else {
+val x75 = x71
+val x76 = !x75
+x76
+}
+val x82 = if (x78) {
+val x79 = x68
+val x80 = x79 < x3
+x80
+} else {
+false
+}
+x82}) {
+val x84 = x68
+val x85 = x0(x84)
+val x86 = 'l' == x85
+x72 = x86
+val x88 = x68 += 1
+val x89 = x68
+val x90 = x89 == x3
+x71 = x90
 ()
 }
-val x100 = x77
-val x104 = if (x100) {
+val x94 = x72
+val x98 = if (x94) {
 false
 } else {
-val x102 = x76
-x102
+val x96 = x71
+x96
 }
-x104
-} else {
-false
-}
-x106
+x98
 } else {
 false
 }
-x51 = x107
+x100
+} else {
+false
+}
+x48 = x101
 ()
 }
-val x111 = x51
-x111
+val x105 = x48
+x105
 }
 }
 /*****************************************

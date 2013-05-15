@@ -10,6 +10,11 @@ trait Dsl extends NumericOps with BooleanOps with LiftNumeric with LiftBoolean w
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A])
 }
 trait DslExp extends Dsl with NumericOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
+  override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
+    case Const(false) => rhs
+    case _ => super.boolean_or(lhs, rhs)
+  }
+
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
   def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]) = {
     val br = reifyEffects(b)
@@ -32,6 +37,8 @@ trait DslGen extends ScalaGenNumericOps with ScalaGenBooleanOps with ScalaGenIfT
   import IR._
   
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
+      emitValDef(sym, quote(c))
     case Comment(s, verbose, b) =>
       stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)

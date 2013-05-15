@@ -31,6 +31,6 @@ trait TutorialFunSuite extends FunSuite {
       println("writing " + aname)
       writeFile(aname, code)
     }
-    assert(expected === code)
+    assert(expected == code, name)
   }
 }
