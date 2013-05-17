@@ -3,6 +3,7 @@ package scala.lms.tutorial
 import org.scalatest.FunSuite
 
 trait StagedRegexpMatcher extends Dsl {
+  //#matchsearch
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: Rep[String]): Rep[Boolean] = {
     if (regexp(0) == '^')
@@ -17,7 +18,9 @@ trait StagedRegexpMatcher extends Dsl {
       found
     }
   }
+  //#matchsearch
 
+  //#matchhere
   /* search for restart of regexp at start of text */
   def matchhere(regexp: String, restart: Int, text: Rep[String], start: Rep[Int]): Rep[Boolean] = {
     if (restart==regexp.length)
@@ -30,7 +33,9 @@ trait StagedRegexpMatcher extends Dsl {
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
+  //#matchhere
 
+  //#matchstar
   /* search for c* followed by restart of regexp at start of text */
   def matchstar(c: Char, regexp: String, restart: Int, text: Rep[String], start: Rep[Int]): Rep[Boolean] = {
     val sstart = var_new(start)
@@ -43,10 +48,13 @@ trait StagedRegexpMatcher extends Dsl {
     }
     !failed &&& found
   }
+  //#matchstar
 
+  //#matchchar
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
     c == '.' || c == t
   }
+  //#matchchar
 }
 
 class StagedRegexpMatcherTest extends TutorialFunSuite {

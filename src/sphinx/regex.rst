@@ -34,6 +34,9 @@ We start with a small regular expression matcher, ported to Scala from
 `a C version, written by Rob Pike and Brian Kernighan
 <http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html>`_.
 
+Vanilla Interpreter
+```````````````````
+
 .. includecode:: ../test/scala/lms/tutorial/re.scala
    :include: matchsearch
 
@@ -45,3 +48,29 @@ We start with a small regular expression matcher, ported to Scala from
 
 .. includecode:: ../test/scala/lms/tutorial/re.scala
    :include: matchchar
+
+Staged Interpreter
+``````````````````
+
+The staged interpreter simply consist in wrapping the variable
+parameters in ``Rep[_]`` types. Otherwise, the code is the same.
+
+.. includecode:: ../test/scala/lms/tutorial/sre.scala
+   :include: matchsearch
+
+.. includecode:: ../test/scala/lms/tutorial/sre.scala
+   :include: matchhere
+
+.. includecode:: ../test/scala/lms/tutorial/sre.scala
+   :include: matchstar
+
+.. includecode:: ../test/scala/lms/tutorial/sre.scala
+   :include: matchchar
+
+Generated Code
+``````````````
+
+As an example, here is the code generated for `^ab`.
+
+.. includecode:: ../out/sre__bab.check.scala
+   :language: guess
