@@ -11,3 +11,4 @@ using a runtime code generation approach.
    :maxdepth: 4
 
    dslapi
+   regex
