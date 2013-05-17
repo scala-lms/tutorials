@@ -30,7 +30,9 @@ a bytecode compiler.
 Regular Expression Matcher
 --------------------------
 
+We start with a small regular expression matcher, ported to Scala from
+`a C version, written by Rob Pike and Brian Kernighan
+<http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html>`_.
 
-
-
-
+.. includecode:: ../test/scala/lms/tutorial/re.scala
+   :include: code

@@ -253,19 +253,17 @@ lms_examples_version = version
 
 # e.g. :issue:`36` :ticket:`8`
 extlinks = {
-  'issue': ('https://github.com/slick/slick/issues/%s', 'issue #'),
-  'ticket': ('https://www.assembla.com/spaces/typesafe-slick/tickets/%s', 'ticket #'),
-  'ex': ('https://github.com/slick/slick-examples/blob/'+lms_examples_version+'/src/main/scala/com/typesafe/slick/examples/%s.scala', 'Slick example ')
+#  'issue': ('https://github.com/slick/slick/issues/%s', 'issue #'),
+#  'ticket': ('https://www.assembla.com/spaces/typesafe-slick/tickets/%s', 'ticket #'),
+#  'ex': ('https://github.com/slick/slick-examples/blob/'+lms_examples_version+'/src/main/scala/com/typesafe/slick/examples/%s.scala', 'Slick example ')
 }
 
 apilinks = {
-  'api': 'http://slick.typesafe.com/doc/'+version+'/api/#%s'
+#  'api': 'http://slick.typesafe.com/doc/'+version+'/api/#%s'
 }
 
 rst_epilog = '''
 .. include:: %(links)s
-.. _Slick Examples: https://github.com/slick/slick-examples/tree/%(examples-version)s
-.. _Slick TestKit Example: https://github.com/slick/slick-testkit-example/tree/%(examples-version)s
 ''' % {
   'links': os.path.abspath('links.txt'),
   'examples-version': lms_examples_version
