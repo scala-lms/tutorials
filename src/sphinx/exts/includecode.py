@@ -123,6 +123,10 @@ class IncludeCode(Directive):
            lines.append(append + '\n')
 
         text = ''.join(lines)
+
+        # work-around '$' causing highlighting to fail
+        text = text.replace('$', u"\uFF04")
+
         retnode = nodes.literal_block(text, text, source=fn)
         retnode.line = 1
         retnode.attributes['line_number'] = self.lineno

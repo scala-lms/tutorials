@@ -5,7 +5,7 @@ import org.scalatest.FunSuite
 // translated to Scala from
 // http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html
 trait RegexpMatcher {
-  //#code
+  //#matchsearch
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {
     if (regexp(0) == '^')
@@ -20,7 +20,9 @@ trait RegexpMatcher {
       found
     }
   }
+  //#matchsearch
 
+  //#matchhere
   /* search for restart of regexp at start of text */
   def matchhere(regexp: String, restart: Int, text: String, start: Int): Boolean = {
     if (restart==regexp.length)
@@ -33,7 +35,9 @@ trait RegexpMatcher {
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
+  //#matchhere
 
+  //#matchstar
   /* search for c* followed by restart of regexp at start of text */
   def matchstar(c: Char, regexp: String, restart: Int, text: String, start: Int): Boolean = {
     var sstart = start
@@ -46,11 +50,13 @@ trait RegexpMatcher {
     }
     !failed && found
   }
+  //#matchstar
 
+  //#matchchar
   def matchchar(c: Char, t: Char): Boolean = {
     c == '.' || c == t
   }
-  //#code
+  //#matchchar
 }
 
 class RegexpMatcherTest extends RegexpMatcher with FunSuite {

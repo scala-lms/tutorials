@@ -35,4 +35,13 @@ We start with a small regular expression matcher, ported to Scala from
 <http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html>`_.
 
 .. includecode:: ../test/scala/lms/tutorial/re.scala
-   :include: code
+   :include: matchsearch
+
+.. includecode:: ../test/scala/lms/tutorial/re.scala
+   :include: matchhere
+
+.. includecode:: ../test/scala/lms/tutorial/re.scala
+   :include: matchstar
+
+.. includecode:: ../test/scala/lms/tutorial/re.scala
+   :include: matchchar
