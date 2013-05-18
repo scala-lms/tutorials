@@ -5,6 +5,8 @@ from os import path
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
 
+import re
+
 class IncludeCode(Directive):
     """
     Include a code example from a file with sections delimited with special comments.
@@ -124,8 +126,8 @@ class IncludeCode(Directive):
 
         text = ''.join(lines)
 
-        # work-around '$' causing highlighting to fail
-        text = text.replace('$', u"\uFF04")
+        # work-around syntax highlighting issues for single-quotes
+        text = re.sub(r"'(.)'", r'`\1`', text)
 
         retnode = nodes.literal_block(text, text, source=fn)
         retnode.line = 1
