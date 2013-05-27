@@ -29,6 +29,10 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
+tt {
+  font-family:Menlo,Monaco,"Courier New",monospace;
+}
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
