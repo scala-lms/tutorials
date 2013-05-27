@@ -10,5 +10,5 @@ using a runtime code generation approach.
 .. toctree::
    :maxdepth: 4
 
-   dslapi
+   staging
    regex
