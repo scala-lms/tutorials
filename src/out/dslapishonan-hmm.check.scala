@@ -16,7 +16,6 @@ val x7 = x0(x3)
 val x8 = x6 * x7
 val x9 = x4 + x8
 val x10 = x1(0) = x9
-x10
 x3 = x3 + 1
 }
 x12
