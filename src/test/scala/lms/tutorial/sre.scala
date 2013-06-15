@@ -90,4 +90,8 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
   testmatch("ab", "hello ab hello", true);
   testmatch("^ab", "hello ab hello", false);
   testmatch("a*b", "hello aab hello", true);
+  testmatch("^ab*", "abcd", true);
+  testmatch("^ab*", "a", true);
+  testmatch("^ab*", "ac", false);
+  testmatch("^ab*", "bac", false);
 }
