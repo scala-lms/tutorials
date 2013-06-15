@@ -11,7 +11,7 @@ trait StagedRegexpMatcher extends Dsl {
     else {
       val start = var_new(unit(-1))
       val found = var_new(unit(false))
-      while (!found &&& start<text.length) {
+      while (!found &&& start < text.length) {
         start += 1
         found = matchhere(regexp, 0, text, start)
       }
@@ -27,9 +27,9 @@ trait StagedRegexpMatcher extends Dsl {
       true
     else if (regexp(restart)=='$' && restart+1==regexp.length)
       start==text.length
-    else if (restart+1<regexp.length && regexp(restart+1)=='*')
+    else if (restart+1 < regexp.length && regexp(restart+1)=='*')
       matchstar(regexp(restart), regexp, restart+2, text, start)
-    else if (start<text.length &&& matchchar(regexp(restart), text(start)))
+    else if (start < text.length &&& matchchar(regexp(restart), text(start)))
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
@@ -41,7 +41,7 @@ trait StagedRegexpMatcher extends Dsl {
     val sstart = var_new(start)
     val found = var_new(matchhere(regexp, restart, text, sstart))
     val failed = var_new(unit(false))
-    while (!failed &&& !found &&& sstart<text.length) {
+    while (!failed &&& !found &&& sstart < text.length) {
       failed = matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
