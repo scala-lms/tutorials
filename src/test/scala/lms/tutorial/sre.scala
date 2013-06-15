@@ -9,8 +9,8 @@ trait StagedRegexpMatcher extends Dsl {
     if (regexp(0) == '^')
       matchhere(regexp, 1, text, 0)
     else {
-      val start = var_new(unit(0))
-      val found = var_new(matchhere(regexp, 0, text, start))
+      val start = var_new(unit(-1))
+      val found = var_new(unit(false))
       while (!found &&& start<text.length) {
         start += 1
         found = matchhere(regexp, 0, text, start)

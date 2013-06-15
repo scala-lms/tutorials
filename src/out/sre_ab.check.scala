@@ -3,72 +3,48 @@
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Boolean)) {
 def apply(x0:java.lang.String): Boolean = {
-var x1: Int = 0
-val x2 = x1
-val x3 = x0.length
-val x4 = x2 < x3
-val x7 = if (x4) {
-val x5 = x0(x2)
-val x6 = 'a' == x5
-x6
+var x1: Int = -1
+var x2: Boolean = false
+val x6 = x0.length
+val x27 = while ({val x3 = x2
+val x9 = if (x3) {
+false
+} else {
+val x5 = x1
+val x7 = x5 < x6
+x7
+}
+x9}) {
+val x11 = x1 += 1
+val x12 = x1
+val x13 = x12 < x6
+val x16 = if (x13) {
+val x14 = x0(x12)
+val x15 = 'a' == x14
+x15
 } else {
 false
 }
-val x15 = if (x7) {
-val x8 = x2 + 1
-val x9 = x8 < x3
-val x12 = if (x9) {
-val x10 = x0(x8)
-val x11 = 'b' == x10
-x11
-} else {
-false
-}
-val x14 = x12
-x14
-} else {
-false
-}
-var x16: Boolean = x15
-val x40 = while ({val x17 = x16
-val x22 = if (x17) {
-false
-} else {
-val x19 = x1
-val x20 = x19 < x3
+val x24 = if (x16) {
+val x17 = x12 + 1
+val x18 = x17 < x6
+val x21 = if (x18) {
+val x19 = x0(x17)
+val x20 = 'b' == x19
 x20
-}
-x22}) {
-val x24 = x1 += 1
-val x25 = x1
-val x26 = x25 < x3
-val x29 = if (x26) {
-val x27 = x0(x25)
-val x28 = 'a' == x27
-x28
 } else {
 false
 }
-val x37 = if (x29) {
-val x30 = x25 + 1
-val x31 = x30 < x3
-val x34 = if (x31) {
-val x32 = x0(x30)
-val x33 = 'b' == x32
-x33
+val x23 = x21
+x23
 } else {
 false
 }
-val x36 = x34
-x36
-} else {
-false
-}
-x16 = x37
+x2 = x24
 ()
 }
-val x41 = x16
-x41
+val x28 = x2
+x28
 }
 }
 /*****************************************

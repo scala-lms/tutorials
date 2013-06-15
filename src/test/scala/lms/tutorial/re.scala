@@ -11,8 +11,8 @@ trait RegexpMatcher {
     if (regexp(0) == '^')
       matchhere(regexp, 1, text, 0)
     else {
-      var start = 0
-      var found = matchhere(regexp, 0, text, start)
+      var start = -1
+      var found = false
       while (!found && start<text.length) {
         start += 1
         found = matchhere(regexp, 0, text, start)

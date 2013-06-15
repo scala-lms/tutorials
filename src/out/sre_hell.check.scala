@@ -3,128 +3,76 @@
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Boolean)) {
 def apply(x0:java.lang.String): Boolean = {
-var x1: Int = 0
-val x2 = x1
-val x3 = x0.length
-val x4 = x2 < x3
-val x7 = if (x4) {
-val x5 = x0(x2)
-val x6 = 'h' == x5
-x6
+var x1: Int = -1
+var x2: Boolean = false
+val x6 = x0.length
+val x39 = while ({val x3 = x2
+val x9 = if (x3) {
+false
+} else {
+val x5 = x1
+val x7 = x5 < x6
+x7
+}
+x9}) {
+val x11 = x1 += 1
+val x12 = x1
+val x13 = x12 < x6
+val x16 = if (x13) {
+val x14 = x0(x12)
+val x15 = 'h' == x14
+x15
 } else {
 false
 }
-val x27 = if (x7) {
-val x8 = x2 + 1
-val x9 = x8 < x3
-val x12 = if (x9) {
-val x10 = x0(x8)
-val x11 = 'e' == x10
-x11
+val x36 = if (x16) {
+val x17 = x12 + 1
+val x18 = x17 < x6
+val x21 = if (x18) {
+val x19 = x0(x17)
+val x20 = 'e' == x19
+x20
 } else {
 false
 }
-val x26 = if (x12) {
-val x13 = x8 + 1
-val x14 = x13 < x3
-val x17 = if (x14) {
-val x15 = x0(x13)
-val x16 = 'l' == x15
-x16
-} else {
-false
-}
-val x25 = if (x17) {
-val x18 = x13 + 1
-val x19 = x18 < x3
-val x22 = if (x19) {
-val x20 = x0(x18)
-val x21 = 'l' == x20
-x21
-} else {
-false
-}
-val x24 = x22
-x24
-} else {
-false
-}
+val x35 = if (x21) {
+val x22 = x17 + 1
+val x23 = x22 < x6
+val x26 = if (x23) {
+val x24 = x0(x22)
+val x25 = 'l' == x24
 x25
 } else {
 false
 }
-x26
+val x34 = if (x26) {
+val x27 = x22 + 1
+val x28 = x27 < x6
+val x31 = if (x28) {
+val x29 = x0(x27)
+val x30 = 'l' == x29
+x30
 } else {
 false
 }
-var x28: Boolean = x27
-val x64 = while ({val x29 = x28
-val x34 = if (x29) {
-false
-} else {
-val x31 = x1
-val x32 = x31 < x3
-x32
-}
-x34}) {
-val x36 = x1 += 1
-val x37 = x1
-val x38 = x37 < x3
-val x41 = if (x38) {
-val x39 = x0(x37)
-val x40 = 'h' == x39
-x40
+val x33 = x31
+x33
 } else {
 false
 }
-val x61 = if (x41) {
-val x42 = x37 + 1
-val x43 = x42 < x3
-val x46 = if (x43) {
-val x44 = x0(x42)
-val x45 = 'e' == x44
-x45
+x34
 } else {
 false
 }
-val x60 = if (x46) {
-val x47 = x42 + 1
-val x48 = x47 < x3
-val x51 = if (x48) {
-val x49 = x0(x47)
-val x50 = 'l' == x49
-x50
+x35
 } else {
 false
 }
-val x59 = if (x51) {
-val x52 = x47 + 1
-val x53 = x52 < x3
-val x56 = if (x53) {
-val x54 = x0(x52)
-val x55 = 'l' == x54
-x55
-} else {
-false
-}
-val x58 = x56
-x58
-} else {
-false
-}
-x59
-} else {
-false
-}
-x60
-} else {
-false
-}
-x28 = x61
+x2 = x36
 ()
 }
-val x65 = x28
-x65
+val x40 = x2
+x40
 }
 }
 /*****************************************
