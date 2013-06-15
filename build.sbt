@@ -24,6 +24,8 @@ site.settings
 
 site.sphinxSupport()
 
+SiteKeys.previewLaunchBrowser := false
+
 ghpages.settings
 
 git.remoteRepo := "git@github.com:scala-lms/tutorials.git"
