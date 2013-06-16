@@ -172,15 +172,14 @@ class DslApiTest extends TutorialFunSuite {
 
     val v = A(1,1,1,1,1)
 
-
     def matrix_vector_prod(a: Array[Array[Int]], v: Array[Int]) = {
       val n = a.length
       val v1 = new Array[Int](n)
 
       for (i <- (0 until n)) {
-          for (j <- (0 until n)) {
-            v1(i) = v1(i) + a(i)(j) * v(j)
-          }
+        for (j <- (0 until n)) {
+          v1(i) = v1(i) + a(i)(j) * v(j)
+        }
       }
       v1
     }
@@ -206,7 +205,7 @@ class DslApiTest extends TutorialFunSuite {
         val x = 100 - 5 //* v0.length
 
         if (x > 10) {
-          println("yep")
+          println("hello")
         }
 
         v
@@ -262,16 +261,16 @@ class DslApiTest extends TutorialFunSuite {
           val v1 = NewArray[Int](n)
 
           for (i <- (0 until n):Range) {
-              val sparse = a0(i).count(_ != 0) < 3
-                if (sparse) {
-                  for (j <- (0 until n):Range) {
-                    v1(i) = v1(i) + a(i).apply(j) * v(j)
-                  }
-                } else {                  
-                  for (j <- (0 until n):Rep[Range]) {
-                    v1(i) = v1(i) + a(i).apply(j) * v(j)
-                  }
+            val sparse = a0(i).count(_ != 0) < 3
+            if (sparse) {
+              for (j <- (0 until n):Range) {
+                v1(i) = v1(i) + a(i).apply(j) * v(j)
               }
+            } else {                  
+              for (j <- (0 until n):Rep[Range]) {
+                v1(i) = v1(i) + a(i).apply(j) * v(j)
+              }
+          }
           }
           v1
         }
@@ -289,7 +288,7 @@ class DslApiTest extends TutorialFunSuite {
 
   the code duplication of the loop body above is not very nice.
   fortunately, we can create arbitrary staging-time abstractions.
-  we create an auxiliary method unrollIf that capture the
+  we create an auxiliary method unrollIf that captures the
   conditional unrolling pattern in a general way.
   the mv prod function no longer needs to express the loop
   body twice.
@@ -334,10 +333,10 @@ class DslApiTest extends TutorialFunSuite {
           val v1 = NewArray[Int](n)
 
           for (i <- (0 until n):Range) {
-              val sparse = a0(i).count(_ != 0) < 3
-              for (j <- unrollIf(sparse, 0 until n)) {
-                v1(i) = v1(i) + a(i).apply(j) * v(j)
-              }
+            val sparse = a0(i).count(_ != 0) < 3
+            for (j <- unrollIf(sparse, 0 until n)) {
+              v1(i) = v1(i) + a(i).apply(j) * v(j)
+            }
           }
           v1
         }
@@ -351,9 +350,7 @@ class DslApiTest extends TutorialFunSuite {
   }
 
 
-  test("shonan-hmm-live") {
-
-    // playground for live demo
+  test("shonan-hmm-live") { // playground for live demo
 
     val A = scala.Array
 
@@ -372,9 +369,9 @@ class DslApiTest extends TutorialFunSuite {
       val v1 = new Array[Int](n)
 
       for (i <- (0 until n)) {
-          for (j <- (0 until n)) {
-            v1(i) = v1(i) + a(i)(j) * v(j)
-          }
+        for (j <- (0 until n)) {
+          v1(i) = v1(i) + a(i).apply(j) * v(j)
+        }
       }
       v1
     }
@@ -382,6 +379,19 @@ class DslApiTest extends TutorialFunSuite {
     val v1 = matrix_vector_prod(a, v)
 
     exec("shonan-hmm-live", v1.mkString(","))
+
+
+    /*val snippet = new DslDriver[Array[Int],Array[Int]] {
+      def snippet(v: Rep[Array[Int]]) = {
+        println("hello")
+        v
+      }
+    }
+    exec("shonan-hmm-live", snippet.code)*/
+
+
+
+
 
     /*
     val c = new Compiler
