@@ -19,7 +19,7 @@ class ShonanTest extends TutorialFunSuite {
         A(0, 0, 0, 0, 0),
         A(0, 0, 1, 0, 1))
 
-    val v = A(1,1,1,1,2)
+    val v = A(1,1,1,1,1)
 
 
     def matrix_vector_prod(a: Array[Array[Int]], v: Array[Int]) = {
@@ -59,7 +59,6 @@ class ShonanTest extends TutorialFunSuite {
   1) add compile snippet
   2) add conditional
   3) stage mv prod
-  4) Range vs Rep[Range]
   4) Range vs Rep[Range]
   5) unrollIf
 */
