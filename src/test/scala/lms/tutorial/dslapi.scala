@@ -379,6 +379,14 @@ class DslApiTest extends TutorialFunSuite {
     val v1 = matrix_vector_prod(a, v)
 
     exec("shonan-hmm-live", v1.mkString(","))
+  }
+
+
+
+
+
+
+
 
 
     /*val snippet = new DslDriver[Array[Int],Array[Int]] {
@@ -388,18 +396,6 @@ class DslApiTest extends TutorialFunSuite {
       }
     }
     exec("shonan-hmm-live", snippet.code)*/
-
-
-
-
-
-    /*
-    val c = new Compiler
-    val f = { import c._
-      compile { x => 2 * x}
-    }
-    f(8)*/
-  }
 
 
 
