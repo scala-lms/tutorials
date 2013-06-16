@@ -80,7 +80,7 @@ STEP 0: starting point
 */
 //#hmm1a_doc
   test("shonan-hmm1a") {
-    //#hmm1a
+//#hmm1a
     val A = scala.Array
 
     val a =
@@ -106,8 +106,8 @@ STEP 0: starting point
 
     val v1 = matrix_vector_prod(a, v)
     val result = v1.mkString(",")
+//#hmm1a
     check("shonan-hmm1a", result)
-    //#hmm1a
   }
 
 //#hmm1b_doc
