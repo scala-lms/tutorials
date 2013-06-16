@@ -22,6 +22,11 @@ trait TutorialFunSuite extends FunSuite {
     out.write(content)
     out.close()
   }
+  def writeFileIndented(name: String, content: String) {
+    val out = new java.io.PrintWriter(new File(name))
+    printIndented(content)(out)
+    out.close()
+  }
   def check(label: String, code: String) = {
     val fileprefix = prefix+under+label
     val name = fileprefix+".check.scala"
@@ -33,9 +38,41 @@ trait TutorialFunSuite extends FunSuite {
     }
     assert(expected == code, name)
   }
+
+  def printIndented(str: String)(out: PrintWriter): Unit = {
+    val lines = str.split("[\n\r]")
+    var indent = 0
+    for (l0 <- lines) {
+      val l = l0.trim
+      if (l.length > 0) {
+        var open = 0
+        var close = 0
+        var initClose = 0
+        var nonWsChar = false
+        l foreach {
+          case '{' | '(' | '[' => {
+            open += 1
+            if (!nonWsChar) {
+              nonWsChar = true
+              initClose = close
+            }
+          }
+          case '}' | ')' | ']' => close += 1
+          case x => if (!nonWsChar && !x.isWhitespace) {
+            nonWsChar = true
+            initClose = close
+          }
+        }
+        if (!nonWsChar) initClose = close
+        out.println("  " * (indent - initClose) + l)
+        indent += (open - close)
+      }
+    }
+  }
+
   def exec(label: String, code: String) = {
     val fileprefix = prefix+under+label
     val aname = fileprefix+".actual.scala"
-    writeFile(aname, code)
+    writeFileIndented(aname, code)
   }
 }
