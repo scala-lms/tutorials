@@ -33,4 +33,9 @@ trait TutorialFunSuite extends FunSuite {
     }
     assert(expected == code, name)
   }
+  def exec(label: String, code: String) = {
+    val fileprefix = prefix+under+label
+    val aname = fileprefix+".actual.scala"
+    writeFile(aname, code)
+  }
 }
