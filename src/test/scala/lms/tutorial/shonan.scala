@@ -9,7 +9,6 @@ class ShonanTest extends TutorialFunSuite {
 /*  playground for live demo */
 
   test("shonan-hmm-live") {
-
     val A = scala.Array
 
     val a =
@@ -65,8 +64,9 @@ class ShonanTest extends TutorialFunSuite {
 
 
 
-
-/* STEP 0: starting point
+//#hmm1a_doc
+/*
+STEP 0: starting point
 
   this is our static implementation for the HMM shonan challenge problem.
 
@@ -77,10 +77,10 @@ class ShonanTest extends TutorialFunSuite {
       https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf
 
     - https://github.com/StagedHPC/shonan-challenge
-
 */
+//#hmm1a_doc
   test("shonan-hmm1a") {
-
+    //#hmm1a
     val A = scala.Array
 
     val a =
@@ -105,10 +105,12 @@ class ShonanTest extends TutorialFunSuite {
     }
 
     val v1 = matrix_vector_prod(a, v)
-
-    check("shonan-hmm1a", v1.mkString(","))
+    val result = v1.mkString(",")
+    check("shonan-hmm1a", result)
+    //#hmm1a
   }
 
+//#hmm1b_doc
 /* STEP 0.5: static vs dynamic conditional
 
   now we're adding some basic codgen facilities and play
@@ -117,8 +119,9 @@ class ShonanTest extends TutorialFunSuite {
   condition to depend on the (dynamic) input array, an if/else
   statement will be generated.
 */
-
+//#hmm1b_doc
   test("shonan-hmm1b") {
+//#hmm1b
     val snippet = new DslDriver[Array[Int],Array[Int]] {
       def snippet(v: Rep[Array[Int]]) = {
 
@@ -132,10 +135,12 @@ class ShonanTest extends TutorialFunSuite {
  
       }
     }
+//#hmm1b
     check("shonan-hmm1b", snippet.code)
   }
 
 
+//#hmm1c_doc
 /* STEP 1: staging the matrix vector prod
 
   we want to change the mv prod function to take a dynamic vector
@@ -155,9 +160,9 @@ class ShonanTest extends TutorialFunSuite {
   we want to unroll. we just add a condition `sparse` and 
   either do a Range or Rep[Range] loop.
 */
-
+//#hmm1c_doc
   test("shonan-hmm1c") {
-
+//#hmm1c
     val A = scala.Array
 
     val a =
@@ -200,10 +205,11 @@ class ShonanTest extends TutorialFunSuite {
 
       }
     }
+//#hmm1c
     check("shonan-hmm1c", snippet.code)
   }
 
-
+//#hmm1d_doc
 /* STEP 2: unroll if
 
   the code duplication of the loop body above is not very nice.
@@ -215,9 +221,9 @@ class ShonanTest extends TutorialFunSuite {
 
   the generated code is identical. "abstraction without regret" ftw!
 */
-
+//#hmm1d_doc
   test("shonan-hmm1d") {
-
+//#hmm1d
     val A = scala.Array
 
     val a =
@@ -266,6 +272,7 @@ class ShonanTest extends TutorialFunSuite {
 
       }
     }
+//#hmm1d
     check("shonan-hmm1d", snippet.code)
   }
 
