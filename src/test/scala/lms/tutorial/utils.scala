@@ -50,14 +50,14 @@ trait TutorialFunSuite extends FunSuite {
         var initClose = 0
         var nonWsChar = false
         l foreach {
-          case '{' | '(' | '[' => {
+          case '{' => {
             open += 1
             if (!nonWsChar) {
               nonWsChar = true
               initClose = close
             }
           }
-          case '}' | ')' | ']' => close += 1
+          case '}' => close += 1
           case x => if (!nonWsChar && !x.isWhitespace) {
             nonWsChar = true
             initClose = close
