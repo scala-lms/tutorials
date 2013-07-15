@@ -42,7 +42,7 @@ trait StagedRegexpMatcher extends Dsl {
     val found = var_new(matchhere(regexp, restart, text, sstart))
     val failed = var_new(unit(false))
     while (!failed &&& !found &&& sstart < text.length) {
-      failed = matchchar(c, text(sstart))
+      failed = !failed &&& !matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
     }
@@ -74,9 +74,9 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
         new DslDriver[String,Boolean] with StagedRegexpMatcher {
           def snippet(x: Rep[String]) = matchsearch(regexp, x)
         })
-      //expectResult(expected){snippet.eval(text)}
       check("_"+regexp.replace("^", "_b").replace("*", "_s").replace("$", "_e"),
             snippet.code)
+      expectResult(expected){snippet.eval(text)}
     }
   }
 
@@ -92,6 +92,7 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
   testmatch("a*b", "hello aab hello", true);
   testmatch("^ab*", "abcd", true);
   testmatch("^ab*", "a", true);
-  testmatch("^ab*", "ac", false);
+  testmatch("^ab*", "ac", true);
   testmatch("^ab*", "bac", false);
+  testmatch("^ab*$", "ac", false);
 }

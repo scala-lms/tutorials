@@ -6,7 +6,7 @@ def apply(x0:java.lang.String): Boolean = {
 var x1: Int = -1
 var x2: Boolean = false
 val x6 = x0.length
-val x57 = while ({val x3 = x2
+val x62 = while ({val x3 = x2
 val x9 = if (x3) {
 false
 } else {
@@ -25,7 +25,7 @@ x15
 } else {
 false
 }
-val x54 = if (x16) {
+val x59 = if (x16) {
 val x17 = x12 + 1
 val x18 = x17 < x6
 val x21 = if (x18) {
@@ -35,13 +35,13 @@ x20
 } else {
 false
 }
-val x53 = if (x21) {
+val x58 = if (x21) {
 val x22 = x17 + 1
 var x23: Int = x22
 val x24 = x23
 var x25: Boolean = true
 var x26: Boolean = false
-val x46 = while ({val x27 = x26
+val x51 = while ({val x27 = x26
 val x32 = if (x27) {
 false
 } else {
@@ -57,35 +57,42 @@ x34
 false
 }
 x36}) {
-val x38 = x23
-val x39 = x0(x38)
-val x40 = 'l' == x39
-x26 = x40
-val x42 = x23 += 1
-val x43 = x23
+val x38 = x26
+val x45 = if (x38) {
+false
+} else {
+val x40 = x23
+val x41 = x0(x40)
+val x42 = 'l' == x41
+val x43 = !x42
+x43
+}
+x26 = x45
+val x47 = x23 += 1
+val x48 = x23
 x25 = true
 ()
 }
-val x47 = x26
-val x51 = if (x47) {
+val x52 = x26
+val x56 = if (x52) {
 false
 } else {
-val x49 = x25
-x49
+val x54 = x25
+x54
 }
-x51
-} else {
-false
-}
-x53
+x56
 } else {
 false
 }
-x2 = x54
+x58
+} else {
+false
+}
+x2 = x59
 ()
 }
-val x58 = x2
-x58
+val x63 = x2
+x63
 }
 }
 /*****************************************

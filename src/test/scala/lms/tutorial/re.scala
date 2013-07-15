@@ -44,7 +44,7 @@ trait RegexpMatcher {
     var found = matchhere(regexp, restart, text, sstart)
     var failed = false
     while (!failed && !found && sstart < text.length) {
-      failed = matchchar(c, text(sstart))
+      failed = !failed && !matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
     }
@@ -73,5 +73,12 @@ class RegexpMatcherTest extends RegexpMatcher with FunSuite {
   testmatch("hel*", "he", true);
   testmatch("hel*$", "hello", false);
   testmatch("hel*", "yo hello", true);
+  testmatch("ab", "hello ab hello", true);
+  testmatch("^ab", "hello ab hello", false);
   testmatch("a*b", "hello aab hello", true);
+  testmatch("^ab*", "abcd", true);
+  testmatch("^ab*", "a", true);
+  testmatch("^ab*", "ac", true);
+  testmatch("^ab*", "bac", false);
+  testmatch("^ab*$", "ac", false);
 }
