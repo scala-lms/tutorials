@@ -12,12 +12,12 @@ x4
 } else {
 false
 }
-val x41 = if (x5) {
+val x37 = if (x5) {
 var x6: Int = 1
 val x7 = x6
 var x8: Boolean = true
 var x9: Boolean = false
-val x34 = while ({val x10 = x9
+val x30 = while ({val x10 = x9
 val x15 = if (x10) {
 false
 } else {
@@ -33,34 +33,28 @@ x17
 false
 }
 x19}) {
-val x21 = x9
-val x28 = if (x21) {
-false
-} else {
-val x23 = x6
-val x24 = x0(x23)
-val x25 = 'b' == x24
-val x26 = !x25
-x26
-}
-x9 = x28
-val x30 = x6 += 1
-val x31 = x6
+val x21 = x6
+val x22 = x0(x21)
+val x23 = 'b' == x22
+val x24 = !x23
+x9 = x24
+val x26 = x6 += 1
+val x27 = x6
 x8 = true
 ()
 }
-val x35 = x9
-val x39 = if (x35) {
+val x31 = x9
+val x35 = if (x31) {
 false
 } else {
-val x37 = x8
+val x33 = x8
+x33
+}
+x35
+} else {
+false
+}
 x37
-}
-x39
-} else {
-false
-}
-x41
 }
 }
 /*****************************************

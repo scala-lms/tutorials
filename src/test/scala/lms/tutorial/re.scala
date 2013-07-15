@@ -44,7 +44,7 @@ trait RegexpMatcher {
     var found = matchhere(regexp, restart, text, sstart)
     var failed = false
     while (!failed && !found && sstart < text.length) {
-      failed = !failed && !matchchar(c, text(sstart))
+      failed = !matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
     }

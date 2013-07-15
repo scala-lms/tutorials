@@ -42,7 +42,7 @@ trait StagedRegexpMatcher extends Dsl {
     val found = var_new(matchhere(regexp, restart, text, sstart))
     val failed = var_new(unit(false))
     while (!failed &&& !found &&& sstart < text.length) {
-      failed = !failed &&& !matchchar(c, text(sstart))
+      failed = !matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
     }
