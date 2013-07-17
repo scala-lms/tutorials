@@ -3,6 +3,8 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
+// sbt ~test-only *Shonan*
+
 class ShonanTest extends TutorialFunSuite {
   val under = "dslapi"
 
@@ -58,6 +60,8 @@ class ShonanTest extends TutorialFunSuite {
   1) add compile snippet
   2) add conditional
   3) stage mv prod
+      - staticData(a)
+      - NewArray[Int](n)     
   4) Range vs Rep[Range]
   5) unrollIf
 */
@@ -113,7 +117,7 @@ STEP 0: starting point
 //#hmm1b_doc
 /* STEP 0.5: static vs dynamic conditional
 
-  now we're adding some basic codgen facilities and play
+  now we're adding some basic codegen facilities and play
   with static vs dynamic expressions. fully static expressions
   do not show up in generated code. if we change the 
   condition to depend on the (dynamic) input array, an if/else
