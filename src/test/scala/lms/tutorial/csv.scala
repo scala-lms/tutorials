@@ -76,10 +76,7 @@ B,2,yes""".split("\n").iterator
         Filter(Eq(Field("Flag"),Const("yes")),
           Scan("data.txt"))))
 
-    exec(q) { record =>
-      if (record("Flag") == "yes")
-        println(record("Name"))
-    }
+    exec(q) { _ => }
 
     this.exec("csv-live", "done")
   }
