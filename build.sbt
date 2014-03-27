@@ -2,13 +2,13 @@ name := "lms-tutorials"
 
 scalaOrganization := "org.scala-lang.virtualized"
 
-scalaVersion := "2.10.2-RC1"
+scalaVersion := "2.10.2"
 
-libraryDependencies += "org.scala-lang.virtualized" % "scala-compiler" % "2.10.2-RC1"
+libraryDependencies += "org.scala-lang.virtualized" % "scala-compiler" % "2.10.2"
 
-libraryDependencies += "org.scala-lang.virtualized" % "scala-library" % "2.10.2-RC1"
+libraryDependencies += "org.scala-lang.virtualized" % "scala-library" % "2.10.2"
 
-libraryDependencies += "org.scala-lang.virtualized" % "scala-reflect" % "2.10.2-RC1"
+libraryDependencies += "org.scala-lang.virtualized" % "scala-reflect" % "2.10.2"
 
 libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
 
