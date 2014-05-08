@@ -30,6 +30,25 @@ trait SlidingExp extends DslExp with Sliding {
   object trans extends ForwardTransformer {
     val IR: SlidingExp.this.type = SlidingExp.this
   }
+  def log(x: Any): Unit = {
+    System.out.println("sliding log: "+x)
+  }
+
+  // some arithemetic rewrites to maximize sliding sharing
+  override def numeric_plus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
+    case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
+    case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)
+    case (x: Exp[Int], Const(z:Int)) if z < 0 => numeric_minus(x, unit(-z))
+    case (x: Exp[Int], Const(0)) => x
+    case _ => super.numeric_plus(lhs,rhs)
+  }).asInstanceOf[Exp[T]]
+  override def numeric_minus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
+    case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y+z)) // (x-y)-z --> x-(y+z)
+    case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y-z)) // (x+y)-z --> x+(y-z)
+    case (x: Exp[Int], Const(z:Int)) if z < 0 => numeric_plus(x, unit(-z))
+    case (x: Exp[Int], Const(0)) => x
+    case _ => super.numeric_minus(lhs,rhs)
+  }).asInstanceOf[Exp[T]]
 
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
     val i = fresh[Int]
@@ -63,7 +82,10 @@ trait SlidingExp extends DslExp with Sliding {
     // find overlap syms: defined by f(i), used by f(i+1) and f(i+2)
     val overlap01 = stms1.flatMap { case TP(s,d) => syms(d) filter (defs contains _) }.distinct
     val overlap02 = stms2.flatMap { case TP(s,d) => syms(d) filter (defs contains _) }.distinct
-    assert(overlap02.isEmpty, "Overlap beyond a single loop iteration is not yet implemented.")
+
+    if (overlap02.nonEmpty)
+      log("Overlap beyond a single loop iteration is ignored, since not yet implemented.")
+
     val overlap0 = (overlap01++overlap02).distinct
     val overlap1 = overlap0 map subst1
     // build a variable for each overlap sym.
