@@ -112,6 +112,27 @@ trait SlidingExp extends DslExp with Sliding {
   }
 }
 
+trait SlidingWarmup extends Sliding {
+  def snippet(n: Rep[Int]): Rep[Array[Int]] = {
+    def compute(i: Rep[Int]) = 2*i+3
+    n sliding { i => compute(i) + compute(i+1) }
+  }
+}
+abstract class SlidingWarmupDriver extends DslDriver[Int,Array[Int]] with SlidingWarmup
+class SlidingWarmupTest extends TutorialFunSuite {
+  val under = "sliding"
+
+  test("warmup without sliding") {
+    val sliding0 = new SlidingWarmupDriver with NoSlidingExp
+    check("0", sliding0.code)
+  }
+
+  test("warmup with sliding") {
+    val sliding1 = new SlidingWarmupDriver with SlidingExp
+    check("1", sliding1.code)
+  }
+}
+
 trait Stencil extends Sliding {
   def snippet(v: Rep[Array[Double]]): Rep[Array[Double]] = {
     val n = v.length
@@ -129,7 +150,6 @@ trait Stencil extends Sliding {
   }
 }
 abstract class StencilDriver extends DslDriver[Array[Double],Array[Double]] with Stencil
-
 class StencilTest extends TutorialFunSuite {
   val under = "stencil"
 
@@ -142,5 +162,4 @@ class StencilTest extends TutorialFunSuite {
     val stencil1 = new StencilDriver with SlidingExp
     check("1", stencil1.code)
   }
-
 }
