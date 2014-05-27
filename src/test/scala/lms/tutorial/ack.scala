@@ -18,6 +18,15 @@ class AckermannTest extends TutorialFunSuite {
   def specialize(m: Int): DslDriver[Int,Int] = new DslDriver[Int,Int] with Ackermann {
     def snippet(n: Rep[Int]): Rep[Int] = a(m)(n)
   }
+/*
+  Example due to Neil Jones, via Oleg on LtU (http://lambda-the-ultimate.org/node/4039#comment-61431)
+
+  ack(2,n) should specialize to:
+
+  ack_2(n) =  if n=0 then ack_1(1) else  ack_1(ack_2(n-1))
+  ack_1(n) =  if n=0 then ack_0(1) else  ack_0(ack_1(n-1))
+  ack_0(n) =  n+1
+*/
   test("specialize ackermann to m=2") {
     val ack2 = specialize(2)
     check("m2", ack2.code)
