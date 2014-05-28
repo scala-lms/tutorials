@@ -1,4 +1,4 @@
-Tutorials on [LMS](http://scala-lms.github.io)
+[Tutorials](http://scala-lms.github.io/tutorials/) on [LMS](http://scala-lms.github.io)
 ======================================================================
 
 Lightweight Modular Staging (LMS) is a framework for runtime code generation and compiled DSLs.
