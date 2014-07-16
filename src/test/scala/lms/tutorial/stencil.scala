@@ -35,21 +35,32 @@ trait SlidingExp extends DslExp with Sliding {
   }
 
   // some arithemetic rewrites to maximize sliding sharing
+  override def int_plus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] = ((lhs,rhs) match {
+    case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
+    case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)
+    case (x: Exp[Int], Const(z:Int)) if z < 0 => int_minus(x, unit(-z))
+    case _ => super.int_plus(lhs,rhs)
+  }).asInstanceOf[Exp[Int]]
+
+  override def int_minus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] = ((lhs,rhs) match {
+    case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y+z)) // (x-y)-z --> x-(y+z)
+    case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y-z)) // (x+y)-z --> x+(y-z)
+    case (x: Exp[Int], Const(z:Int)) if z < 0 => int_plus(x, unit(-z))
+    case _ => super.int_minus(lhs,rhs)
+  }).asInstanceOf[Exp[Int]]
+
   override def numeric_plus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
     case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
     case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)
-    case (x: Exp[Int], Const(z:Int)) if z < 0 => numeric_minus(x, unit(-z))
-    case (x: Exp[Int], Const(0)) => x
     case _ => super.numeric_plus(lhs,rhs)
   }).asInstanceOf[Exp[T]]
+
   override def numeric_minus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
     case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y+z)) // (x-y)-z --> x-(y+z)
     case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y-z)) // (x+y)-z --> x+(y-z)
-    case (x: Exp[Int], Const(z:Int)) if z < 0 => numeric_plus(x, unit(-z))
-    case (x: Exp[Int], Const(0)) => x
     case _ => super.numeric_minus(lhs,rhs)
   }).asInstanceOf[Exp[T]]
-
+    
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
     val i = fresh[Int]
 

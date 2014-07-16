@@ -59,7 +59,7 @@ trait RegexpMatcher {
   //#matchchar
 }
 
-class RegexpMatcherTest extends RegexpMatcher with FunSuite {
+class RegexpMatcherTest extends FunSuite with RegexpMatcher {
   def testmatch(regexp: String, text: String, expected: Boolean) {
     test(s"""matchsearch("$regexp", "$text") == $expected""") {
       expectResult(expected){matchsearch(regexp, text)}
