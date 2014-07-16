@@ -10,7 +10,7 @@ libraryDependencies += "org.scala-lang.virtualized" % "scala-library" % "2.10.2"
 
 libraryDependencies += "org.scala-lang.virtualized" % "scala-reflect" % "2.10.2"
 
-libraryDependencies += "EPFL" %% "lms" % "0.3.1-SNAPSHOT"
+libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.10" % "2.0.M5b" % "test"
 
