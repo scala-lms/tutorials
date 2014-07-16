@@ -10,7 +10,7 @@ benefit is *abstraction without regret*.
 Lightweight Modular Staging (LMS)
 ---------------------------------
 
-Lighweight Modular Staging (LMS) is a staging technique driven by
+Lightweight Modular Staging (LMS) is a staging technique driven by
 types. The technique has been implemented in Scala, in a framework to
 build compilers.
 
