@@ -212,7 +212,7 @@ STEP 0: starting point
       }
     }
 //#hmm1c
-    //check("shonan-hmm1c", snippet.code)
+    check("shonan-hmm1c", snippet.code)
   }
 
 //#hmm1d_doc
@@ -279,7 +279,7 @@ STEP 0: starting point
       }
     }
 //#hmm1d
-    //check("shonan-hmm1d", snippet.code)
+    check("shonan-hmm1d", snippet.code)
   }
 
 
@@ -333,6 +333,6 @@ STEP 0: starting point
         matrix_vector_prod(a, v)
       }
     }
-    //check("shonan-hmm", snippet.code)
+    check("shonan-hmm", snippet.code)
   }
 }
