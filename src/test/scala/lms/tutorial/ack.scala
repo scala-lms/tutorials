@@ -1,3 +1,11 @@
+/**
+Ackermann's Function
+====================
+
+Turning a recursive function into an automaton, i.e. a set of mutually 
+recursive functions.
+*/
+
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
@@ -18,7 +26,7 @@ class AckermannTest extends TutorialFunSuite {
   def specialize(m: Int): DslDriver[Int,Int] = new DslDriver[Int,Int] with Ackermann {
     def snippet(n: Rep[Int]): Rep[Int] = a(m)(n)
   }
-/*
+/**
   Example due to Neil Jones, via Oleg on LtU (http://lambda-the-ultimate.org/node/4039#comment-61431)
 
   ack(2,n) should specialize to:

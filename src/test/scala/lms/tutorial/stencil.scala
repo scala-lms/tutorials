@@ -1,3 +1,11 @@
+/**
+Sliding Stencil
+===============
+
+Shonan Challenge 3.3 Stencil
+https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
+*/
+
 package scala.lms.tutorial
 
 import scala.virtualization.lms.common.ForwardTransformer

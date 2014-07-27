@@ -1,3 +1,10 @@
+/**
+A SQL Query Compiler
+====================
+
+Abstraction without regret for efficient data processing.
+*/
+
 package scala.lms.tutorial
 
 import scala.virtualization.lms.common._
