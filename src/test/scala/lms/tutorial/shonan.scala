@@ -143,7 +143,7 @@ either do a Range or Rep[Range] loop.
         v1
       }
     }
-    //check("shonan-hmm1c", snippet.code)
+    check("shonan-hmm1c", snippet.code)
   }
 
 /**
@@ -194,6 +194,60 @@ The generated code is identical. "abstraction without regret" ftw!
         v1
       }
     }
-    //check("shonan-hmm1d", snippet.code)
+    check("shonan-hmm1d", snippet.code)
+  }
+
+
+/*  sphinx-instrumented code for website */
+
+  test("shonan-hmm") {
+    val snippet = new DslDriver[Array[Int],Array[Int]] {
+      //#unrollIf
+      def unrollIf(range: Range)(cond: Boolean) = new {
+        def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
+          if (cond) for (i <- range) f(i)
+          else for (i <- (range.start until range.end): Rep[Range]) f(i)
+        }
+      }
+      //#unrollIf
+      val A = scala.Array
+
+      val a =
+        //#ex-a
+        A(A(1, 1, 1, 1, 1), // dense
+          A(0, 0, 0, 0, 0), // null
+          A(0, 0, 1, 0, 0), // sparse
+          A(0, 0, 0, 0, 0),
+          A(0, 0, 1, 0, 1))
+        //#ex-a
+
+      def infix_at(a: Array[Array[Int]], i: Int, j: Rep[Int]): Rep[Int] = {
+        (staticData(a(i)) apply j)
+      }
+
+      def sparse(ai: Array[Int]): Boolean = {
+        ai.filter(_ != 0).length < 3
+      }
+
+      //#matrix_vector_prod
+      def matrix_vector_prod(a: Array[Array[Int]], v: Rep[Array[Int]]) = {
+        val n = a.length
+        val v1 = NewArray[Int](n)
+        for (i <- 0 until n: Range) {
+          comment("row_" + i) {
+            for (j <- unrollIf(0 until n)(sparse(a(i)))) {
+              v1(i) = v1(i) + a.at(i, j) * v(j)
+            }
+          }
+        }
+        v1
+      }
+      //#matrix_vector_prod
+
+      def snippet(v: Rep[Array[Int]]) = {
+        matrix_vector_prod(a, v)
+      }
+    }
+    check("shonan-hmm", snippet.code)
   }
 }
