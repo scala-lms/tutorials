@@ -72,7 +72,7 @@ is unclear in which order
 and how often to execute these phases, and since each optimization pass 
 has to make pessimistic assumptions about the outcome of all other passes 
 the global result is often suboptimal compared to a dedicated, combined 
-optimization phase \cite{veldhuizen:combiningoptimizations,click95combineanalysis}. 
+optimization phase [(*)](veldhuizen:combiningoptimizations,click95combineanalysis). 
 There are also implementation challenges as each optimization needs to be 
 designed to treat unknown IR nodes in a sensible way.
 
@@ -109,7 +109,7 @@ We turn to advanced optimizations in Chapter~\ref{chap:330opt}.
 For combining analyses and optimizations, it is crucial to maintain optimistic assumptions for
 all analyses. The key challenge is that one analysis has to anticipate the effects of the other
 transformations. The solution is
-speculative rewriting \cite{lerner02composingdataflow}: transform a program fragment 
+speculative rewriting [(*)](lerner02composingdataflow): transform a program fragment 
 in the presence of partial and possibly
 unsound analysis results and re-run the analyses on the transformed code until a fixpoint
 is reached. This way, different analyses can communicate through the transformed code and 
@@ -158,19 +158,19 @@ representation.
 \label{sec:301}
 
 Our starting point is an object language \emph{interface} derived from Part~\ref{part:P1}:
-\begin{listing}
-trait Base {
-  type Rep[T]
-}
-trait Arith extends Base {
-  def infix_+(x: Rep[Double], y: Rep[Double]): Rep[Double]
-  def infix_*(x: Rep[Double], y: Rep[Double]): Rep[Double]
-  ...
-}
-trait IfThenElse extends Base  {
-  def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T]
-}
-\end{listing}
+
+    trait Base {
+      type Rep[T]
+    }
+    trait Arith extends Base {
+      def infix_+(x: Rep[Double], y: Rep[Double]): Rep[Double]
+      def infix_*(x: Rep[Double], y: Rep[Double]): Rep[Double]
+      ...
+    }
+    trait IfThenElse extends Base  {
+      def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T]
+    }
+
 The goal will be to build a corresponding \emph{implementation} hierarchy that supports
 optimizing compilation.
 
@@ -178,59 +178,58 @@ Splitting interface and implementation has many advantages, most importantly a c
 separation between the user program world and the compiler implementation world. 
 For the sake of completeness, let us briefly recast the string representation 
 from Part~\ref{part:P1} in this model:
-\begin{listing}
-trait BaseStr extends Base {
-  type Rep[T] = String
-}
-trait ArithStr extends BaseStr with Arith {
-  def infix_+(x: Rep[Double], y: Rep[Double]) = perform(x + " + " + y)
-  def infix_*(x: Rep[Double], y: Rep[Double]) = perform(x + " * " + y)
-  ...
-}
-trait IfThenElseStr extends BaseStr with IfThenElse  {
-  def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]) =
-    perform("if (" + c + ") " + accumulate(a) + " else " + accumulate(b))
-}
-\end{listing}
+
+    trait BaseStr extends Base {
+      type Rep[T] = String
+    }
+    trait ArithStr extends BaseStr with Arith {
+      def infix_+(x: Rep[Double], y: Rep[Double]) = perform(x + " + " + y)
+      def infix_*(x: Rep[Double], y: Rep[Double]) = perform(x + " * " + y)
+      ...
+    }
+    trait IfThenElseStr extends BaseStr with IfThenElse  {
+      def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]) =
+        perform("if (" + c + ") " + accumulate(a) + " else " + accumulate(b))
+    }
 
 
 In this chapter, we will use an IR that is based on expression trees, closely resembling
 the abstract syntax tree (AST) of a staged program. This representation enables separate analysis, 
 optimization and code generation passes. We will use the following types:
-\begin{listing}
-type Exp[T]     // atomic:     Sym, Const
-type Def[T]     // composite:  Exp + Exp, Exp * Exp, ...
-type Stm[T]     // statement:  val x = Def
-type Block[T]   // blocks:     { Stm; ...; Stm; Exp }
-\end{listing}
+
+    type Exp[T]     // atomic:     Sym, Const
+    type Def[T]     // composite:  Exp + Exp, Exp * Exp, ...
+    type Stm[T]     // statement:  val x = Def
+    type Block[T]   // blocks:     { Stm; ...; Stm; Exp }
+
 They are defined as follows in a separate trait:
-\begin{listing}
-trait Expressions {
-  // expressions (atomic)
-  abstract class Exp[T]
-  case class Const[T](x: T) extends Exp[T]
-  case class Sym[T](n: Int) extends Exp[T]
-  def fresh[T]: Sym[T]
 
-  // definitions (composite, subclasses provided by other traits)
-  abstract class Def[T]
-  
-  // statements
-  case class Stm[T](sym: Sym[T], rhs: Def[T])
+    trait Expressions {
+      // expressions (atomic)
+      abstract class Exp[T]
+      case class Const[T](x: T) extends Exp[T]
+      case class Sym[T](n: Int) extends Exp[T]
+      def fresh[T]: Sym[T]
 
-  // blocks
-  case class Block[T](stms: Stm[_], res: Exp[T])
-  
-  // perform and accumulate
-  def reflectStm[T](d: Stm[T]): Exp[T]
-  def reifyBlock[T](b: =>Exp[T]): Block[T]
+      // definitions (composite, subclasses provided by other traits)
+      abstract class Def[T]
+      
+      // statements
+      case class Stm[T](sym: Sym[T], rhs: Def[T])
 
-  // bind definitions to symbols automatically
-  // by creating a statement
-  implicit def toAtom[T](d: Def[T]): Exp[T] = 
-    reflectStm(Stm(fresh[T], d))
-}
-\end{listing}
+      // blocks
+      case class Block[T](stms: Stm[_], res: Exp[T])
+      
+      // perform and accumulate
+      def reflectStm[T](d: Stm[T]): Exp[T]
+      def reifyBlock[T](b: =>Exp[T]): Block[T]
+
+      // bind definitions to symbols automatically
+      // by creating a statement
+      implicit def toAtom[T](d: Def[T]): Exp[T] = 
+        reflectStm(Stm(fresh[T], d))
+    }
+
 This trait \code{Expressions} will be mixed in at the root of the object language 
 implementation hierarchy. The guiding principle 
 is that each definition has an
@@ -251,11 +250,11 @@ interfaces defined previously (\code{Base} and its descendents).
 Trait \code{BaseExp} forms the root of the implementation hierarchy and installs 
 atomic expressions as the representation of staged
 values by defining \code{Rep[T] = Exp[T]}: 
-\begin{listing}
-trait BaseExp extends Base with Expressions {
-  type Rep[T] = Exp[T]
-}
-\end{listing}
+
+    trait BaseExp extends Base with Expressions {
+      type Rep[T] = Exp[T]
+    }
+
 For each interface trait, there is one corresponding core implementation trait.
 Shown below, we have traits \code{ArithExp}
 and \code{IfThenElseExp} as the running example. 
@@ -263,20 +262,19 @@ Both traits define one definition class for each
 operation defined by \code{Arith} and \code{IfThenElse}, respectively, and
 implement the corresponding interface methods to create instances of
 those classes.
-\begin{listing}
-trait ArithExp extends BaseExp with Arith {
-  case class Plus(x: Exp[Double], y: Exp[Double]) extends Def[Double]
-  case class Times(x: Exp[Double], y: Exp[Double]) extends Def[Double]
-  def infix_+(x: Rep[Double], y: Rep[Double]) = Plus(x, y)
-  def infix_*(x: Rep[Double], y: Rep[Double]) = Times(x, y)
-  ...
-}
-trait IfThenElseExp extends BaseExp with IfThenElse {
-  case class IfThenElse(c: Exp[Boolean], a: Block[T], b: Block[T]) extends Def[T]
-  def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T] =
-    IfThenElse(c, reifyBlock(a), reifyBlock(b))
-}
-\end{listing}
+
+    trait ArithExp extends BaseExp with Arith {
+      case class Plus(x: Exp[Double], y: Exp[Double]) extends Def[Double]
+      case class Times(x: Exp[Double], y: Exp[Double]) extends Def[Double]
+      def infix_+(x: Rep[Double], y: Rep[Double]) = Plus(x, y)
+      def infix_*(x: Rep[Double], y: Rep[Double]) = Times(x, y)
+      ...
+    }
+    trait IfThenElseExp extends BaseExp with IfThenElse {
+      case class IfThenElse(c: Exp[Boolean], a: Block[T], b: Block[T]) extends Def[T]
+      def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T] =
+        IfThenElse(c, reifyBlock(a), reifyBlock(b))
+    }
 
 The framework ensures that code that contains staging operations will
 always be executed within the dynamic scope of at least one invocation 
@@ -317,9 +315,9 @@ and transformations.
 All that is needed to define a generic in-order traversal
 is a way to access all blocks immediately contained in a
 definition:
-\begin{listing}
-def blocks(x: Any): List[Block[Any]]
-\end{listing}
+
+    def blocks(x: Any): List[Block[Any]]
+
 For example, applying \code{blocks} to an \code{IfThenElse}
 node will return the then and else blocks.
 Since definitions are case classes, this method is easy 
@@ -327,49 +325,48 @@ to implement by using the \code{Product} interface that
 all case classes implement.
 
 The basic structural in-order traversal is then defined like this:
-\begin{listing}
-trait ForwardTraversal {
-  val IR: Expressions
-  import IR._
-  def traverseBlock[T](b: Block[T]): Unit = b.stms.foreach(traverseStm)
-  def traverseStm[T](s: Stm[T]): Unit = blocks(s).foreach(traverseBlock)
-}
-\end{listing}
+
+    trait ForwardTraversal {
+      val IR: Expressions
+      import IR._
+      def traverseBlock[T](b: Block[T]): Unit = b.stms.foreach(traverseStm)
+      def traverseStm[T](s: Stm[T]): Unit = blocks(s).foreach(traverseBlock)
+    }
+
 
 Custom traversals can be implemented in a modular way by extending
 the \code{ForwardTraversal} trait:
-\begin{listing}
-trait MyTraversalBase extends ForwardTraversal {
-  val IR: BaseExp
-  import IR._
-  override def traverseStm[T](s: Stm[T]) = s match {
-    // custom base case or delegate to super
-    case _ => super.traverseStm(s)
-  }
-}
-trait MyTraversalArith extends MyTraversalBase {
-  val IR: ArithExp
-  import IR._
-  override def traverseStm[T](s: Stm[T]) = s match {
-    case Plus(x,y) => ... // handle specific nodes
-    case _ => super.traverseStm(s)
-  }
-}
-\end{listing}
+
+    trait MyTraversalBase extends ForwardTraversal {
+      val IR: BaseExp
+      import IR._
+      override def traverseStm[T](s: Stm[T]) = s match {
+        // custom base case or delegate to super
+        case _ => super.traverseStm(s)
+      }
+    }
+    trait MyTraversalArith extends MyTraversalBase {
+      val IR: ArithExp
+      import IR._
+      override def traverseStm[T](s: Stm[T]) = s match {
+        case Plus(x,y) => ... // handle specific nodes
+        case _ => super.traverseStm(s)
+      }
+    }
+
 For each unit of functionality such as \code{Arith} or \code{IfThenElse}
 the traversal actions can be defined separately as \code{MyTraversalArith}
 and \code{MyTraversalIfThenElse}.
 
 Finally, we can use our traversal as follows:
-\begin{listing}
-trait Prog extends Arith {
-  def main = ... // program code here
-}
-val impl = new Prog with ArithExp
-val res = impl.reifyBlock(impl.main)  
-val inspect = MyTraversalArith { val IR: impl.type = impl }
-inspect.traverseBlock(res)
-\end{listing}
+
+    trait Prog extends Arith {
+      def main = ... // program code here
+    }
+    val impl = new Prog with ArithExp
+    val res = impl.reifyBlock(impl.main)  
+    val inspect = MyTraversalArith { val IR: impl.type = impl }
+    inspect.traverseBlock(res)
 
 
 
@@ -379,7 +376,7 @@ inspect.traverseBlock(res)
 
 In essence, traversals confront us with the classic ''expression problem''
 of independently extending a data model with new data variants and 
-new operations \citep{wadlerExprProblem}.
+new operations [(*)](wadlerExprProblem).
 There are many solutions to this problem but most of them
 are rather heavyweight.
 More lightweight implementations are possible in languages that support 
@@ -388,7 +385,7 @@ dispatch method calls dynamically based on the actual types of
 all the arguments. 
 We can achieve essentially the same using pattern
 matching and mixin composition, making use of the fact 
-that composing traits is subject to linearization \citep{DBLP:conf/oopsla/OderskyZ05}.
+that composing traits is subject to linearization [(*)](DBLP:conf/oopsla/OderskyZ05).
 We package each set of specific traversal rules into its own
 trait, e.g.\ \code{MyTraversalArith} that inherits from \code{MyTraversalBase}
 and overrides \code{traverseStm}.
@@ -398,7 +395,7 @@ When several such traits are combined, the super calls
 will traverse the overridden method implementations according to
 the linearization order of their containing traits. 
 The use of pattern matching and super calls is similar to earlier
-work on extensible algebraic data types with defaults~\cite{DBLP:conf/icfp/ZengerO01},
+work on extensible algebraic data types with defaults [(*)](DBLP:conf/icfp/ZengerO01),
 which supported linear extensions but not composition of independent extensions.
 
 Implementing multi-methods in a statically typed setting usually poses three problems:
@@ -422,32 +419,31 @@ and executing code can use the same mechanism as described in Section~\ref{sec:2
 Transformations work very similar to traversals. One option
 is to traverse and transform an existing program more or less in place, not actually modifying data 
 but attaching new Defs to existing Syms:
-\begin{listing}
-trait SimpleTransformer {
-  val IR: Expressions
-  import IR._
-  def transformBlock[T](b: Block[T]): Block[T] = 
-    Block(b.stms.flatMap(transformStm), transformExp(b.res))
-  def transformStm[T](s: Stm[T]): List[Stm] = 
-    List(Stm(s.lhs, transformDef(s.rhs)))   // preserve existing symbol s
-  def transformDef[T](d: Def[T]): Def[T]    // default: use reflection 
-                                            // to map over case classes
-}
-\end{listing}
+
+    trait SimpleTransformer {
+      val IR: Expressions
+      import IR._
+      def transformBlock[T](b: Block[T]): Block[T] = 
+        Block(b.stms.flatMap(transformStm), transformExp(b.res))
+      def transformStm[T](s: Stm[T]): List[Stm] = 
+        List(Stm(s.lhs, transformDef(s.rhs)))   // preserve existing symbol s
+      def transformDef[T](d: Def[T]): Def[T]    // default: use reflection 
+                                                // to map over case classes
+    }
+
 
 An implementation is straightforward:
-\begin{listing}
-trait MySimpleTransformer extends SimpleTransformer {
-  val IR: IfThenElseExp
-  import IR._
-  // override transformDef for each Def subclass
-  def transformDef[T](d: Def[T]): Def[T] = d match {
-    case IfThenElse(c,a,b) => 
-      IfThenElse(transformExp(c), transformBlock(a), transformBlock(b))
-    case _ => super.transformDef(d)
-  }
-}
-\end{listing}
+
+    trait MySimpleTransformer extends SimpleTransformer {
+      val IR: IfThenElseExp
+      import IR._
+      // override transformDef for each Def subclass
+      def transformDef[T](d: Def[T]): Def[T] = d match {
+        case IfThenElse(c,a,b) => 
+          IfThenElse(transformExp(c), transformBlock(a), transformBlock(b))
+        case _ => super.transformDef(d)
+      }
+    }
 
 
 ## Transformation by Iterated Staging
@@ -463,66 +459,66 @@ removes the need for low-level IR manipulation.
 In the implementation, we will create new symbols instead of reusing existing
 ones so we need to maintain a substitution that maps old to new Syms.
 The core implementation is given below:
-\begin{listing}
-trait ForwardTransformer extends ForwardTraversal {
-  val IR: Expressions
-  import IR._
-  var subst: Map[Exp[_],Exp[_]]
-  def transformExp[T](s: Exp[T]): Exp[T] = ... // lookup s in subst
-  def transformDef[T](d: Def[T]): Exp[T]       // default
-  def transformStm[T](s: Stm[T]): Exp[T] = { 
-    val e = transformDef(s.rhs); subst += (s.sym -> e); e
-  }
-  override def traverseStm[T](s: Stm[T]): Unit = { 
-    transformStm(s)
-  }
-  def reflectBlock[T](b: Block[T]): Exp[T] = withSubstScope { 
-    traverseBlock(b); transformExp(b.res)
-  }
-  def transformBlock[T](b: Block[T]): Block[T] = {
-    reifyBlock(reflectBlock(b))  
-  }  
-}
-\end{listing}
+
+    trait ForwardTransformer extends ForwardTraversal {
+      val IR: Expressions
+      import IR._
+      var subst: Map[Exp[_],Exp[_]]
+      def transformExp[T](s: Exp[T]): Exp[T] = ... // lookup s in subst
+      def transformDef[T](d: Def[T]): Exp[T]       // default
+      def transformStm[T](s: Stm[T]): Exp[T] = { 
+        val e = transformDef(s.rhs); subst += (s.sym -> e); e
+      }
+      override def traverseStm[T](s: Stm[T]): Unit = { 
+        transformStm(s)
+      }
+      def reflectBlock[T](b: Block[T]): Exp[T] = withSubstScope { 
+        traverseBlock(b); transformExp(b.res)
+      }
+      def transformBlock[T](b: Block[T]): Block[T] = {
+        reifyBlock(reflectBlock(b))  
+      }  
+    }
+
 
 Here is a simple identity transformer implementation for conditionals
 and array construction:
-\begin{listing}
-trait MyTransformer extends ForwardTransformer {
-  val IR: IfThenElseExp with ArraysExp
-  import IR._
-  def transformDef[T](d: Def[T]): Exp[T] = d match {
-    case IfThenElse(c,a,b) => 
-      __ifThenElse(transformExp(c), reflectBlock(a), reflectBlock(b))
-    case ArrayFill(n,i,y) => 
-      arrayFill(transformExp(n), { j => withSubstScope(i -> j) { reflectBlock(y) }})
-    case _ => ...
-  }
-}
-\end{listing}
+
+    trait MyTransformer extends ForwardTransformer {
+      val IR: IfThenElseExp with ArraysExp
+      import IR._
+      def transformDef[T](d: Def[T]): Exp[T] = d match {
+        case IfThenElse(c,a,b) => 
+          __ifThenElse(transformExp(c), reflectBlock(a), reflectBlock(b))
+        case ArrayFill(n,i,y) => 
+          arrayFill(transformExp(n), { j => withSubstScope(i -> j) { reflectBlock(y) }})
+        case _ => ...
+      }
+    }
+
 
 The staged transformer facility can be extended slightly to translate not only within a single 
 language but also between two languages:
-\begin{listing}
-trait FlexTransformer {
-  val SRC: Expressions
-  val DST: Base
-  trait TypeTransform[A,B]
-  var subst: Map[SRC.Exp[_],DST.Rep[_]]
-  def transformExp[A,B](s: SRC.Exp[A])(implicit t: TypeTransform[A,B]): DST.Rep[B]
-}
-\end{listing}
+
+    trait FlexTransformer {
+      val SRC: Expressions
+      val DST: Base
+      trait TypeTransform[A,B]
+      var subst: Map[SRC.Exp[_],DST.Rep[_]]
+      def transformExp[A,B](s: SRC.Exp[A])(implicit t: TypeTransform[A,B]): DST.Rep[B]
+    }
+
 
 It is also possible to add more abstraction on top of the base transforms to build 
-combinators for rewriting strategies in the style of Stratego \cite{spoofax} or 
-Kiama \cite{DBLP:conf/gttse/Sloane09}.
+combinators for rewriting strategies in the style of Stratego [(*)](spoofax) or 
+Kiama [(*)](DBLP:conf/gttse/Sloane09).
 
 
 # Problem: Phase Ordering
 
 This all works but is not completely satisfactory. 
 With fine grained separate transformations
-we immediately run into phase ordering problems \cite{veldhuizen:combiningoptimizations,click95combineanalysis}. 
+we immediately run into phase ordering problems [(*)](veldhuizen:combiningoptimizations,click95combineanalysis). 
 We could execute optimization passes in a loop until we reach a fixpoint but even then
 we may miss opportunities if the program contains loops. For best
 results, optimizations need to be tightly integrated. Optimizations need a different
@@ -555,36 +551,35 @@ Thus, optimizations do not need to check availability or lifetimes of expression
 Global common subexpression elimination (CSE), pattern rewrites, dead code elimination (DCE) and code motion
 are considerably simpler than the usual implementations for imperative programs.
 
-We switch to a ''sea of nodes''-like \cite{DBLP:conf/irep/ClickP95} representation that is a directed 
+We switch to a ''sea of nodes''-like [(*)](DBLP:conf/irep/ClickP95) representation that is a directed 
 (and for the moment, acyclic) graph:
-\begin{listing}
-trait Expressions {
-  // expressions (atomic)
-  abstract class Exp[T]
-  case class Const[T](x: T) extends Exp[T]
-  case class Sym[T](n: Int) extends Exp[T]
-  def fresh[T]: Sym[T]
 
-  // definitions (composite, subclasses provided by other traits)
-  abstract class Def[T]
-  
-  // blocks -- no direct links to statements
-  case class Block[T](res: Exp[T])
-  
-  // bind definitions to symbols automatically
-  // by creating a statement
-  implicit def toAtom[T](d: Def[T]): Exp[T] = 
-    reflectPure(d)
+    trait Expressions {
+      // expressions (atomic)
+      abstract class Exp[T]
+      case class Const[T](x: T) extends Exp[T]
+      case class Sym[T](n: Int) extends Exp[T]
+      def fresh[T]: Sym[T]
 
-  def reifyBlock[T](b: =>Exp[T]): Block[T]
-  def reflectPure[T](d: Def[T]): Sym[T] =
-    findOrCreateDefinition(d)
-  
-  def findDefinition[T](s: Sym[T]): Option[Def[T]]
-  def findDefinition[T](d: Def[T]): Option[Sym[T]]
-  def findOrCreateDefinition[T](d: Def[T]): Sym[T]
-}
-\end{listing}
+      // definitions (composite, subclasses provided by other traits)
+      abstract class Def[T]
+      
+      // blocks -- no direct links to statements
+      case class Block[T](res: Exp[T])
+      
+      // bind definitions to symbols automatically
+      // by creating a statement
+      implicit def toAtom[T](d: Def[T]): Exp[T] = 
+        reflectPure(d)
+
+      def reifyBlock[T](b: =>Exp[T]): Block[T]
+      def reflectPure[T](d: Def[T]): Sym[T] =
+        findOrCreateDefinition(d)
+      
+      def findDefinition[T](s: Sym[T]): Option[Def[T]]
+      def findDefinition[T](d: Def[T]): Option[Sym[T]]
+      def findOrCreateDefinition[T](d: Def[T]): Sym[T]
+    }
 
 It is instructive to compare the definition of trait \code{Expressions}
 with the one from the previous Chapter~\ref{chap:310trees}. 
@@ -616,43 +611,43 @@ execution anywhere.
 # Modularity: Adding IR Node Types
 
 The object language implementation code is the same compared to the tree representation:
-\begin{listing}
-trait BaseExp extends Base with Expressions {
-  type Rep[T] = Exp[T]
-}
-\end{listing}
+
+    trait BaseExp extends Base with Expressions {
+      type Rep[T] = Exp[T]
+    }
+
 Again, we have separate traits, one for each unit of functionality:
-\begin{listing}
-trait ArithExp extends BaseExp with Arith {
-  case class Plus(x: Exp[Double], y: Exp[Double]) extends Def[Double]
-  case class Times(x: Exp[Double], y: Exp[Double]) extends Def[Double]
-  def infix_+(x: Rep[Double], y: Rep[Double]) = Plus(x, y)
-  def infix_*(x: Rep[Double], y: Rep[Double]) = Times(x, y)
-  ...
-}
-trait IfThenElseExp extends BaseExp with IfThenElse {
-  case class IfThenElse(c: Exp[Boolean], a: Block[T], b: Block[T]) extends Def[T]
-  def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T] =
-    IfThenElse(c, reifyBlock(a), reifyBlock(b))
-}
-\end{listing}
+
+    trait ArithExp extends BaseExp with Arith {
+      case class Plus(x: Exp[Double], y: Exp[Double]) extends Def[Double]
+      case class Times(x: Exp[Double], y: Exp[Double]) extends Def[Double]
+      def infix_+(x: Rep[Double], y: Rep[Double]) = Plus(x, y)
+      def infix_*(x: Rep[Double], y: Rep[Double]) = Times(x, y)
+      ...
+    }
+    trait IfThenElseExp extends BaseExp with IfThenElse {
+      case class IfThenElse(c: Exp[Boolean], a: Block[T], b: Block[T]) extends Def[T]
+      def __ifThenElse[T](c: Rep[Boolean], a: =>Rep[T], b: =>Rep[T]): Rep[T] =
+        IfThenElse(c, reifyBlock(a), reifyBlock(b))
+    }
+
 
 
 # Simpler Analysis and More Flexible Transformations
 
 Several optimizations are very simple to implement on 
 this purely functional graph IR. The implementation draws inspiration
-from previous work on compiling embedded DSLs \cite{DBLP:conf/saig/ElliottFM00,DBLP:conf/dsl/LeijenM99}
-as well as staged FFT kernels \cite{DBLP:conf/emsoft/KiselyovST04}.
+from previous work on compiling embedded DSLs [(*)](DBLP:conf/saig/ElliottFM00,DBLP:conf/dsl/LeijenM99)
+as well as staged FFT kernels [(*)](DBLP:conf/emsoft/KiselyovST04).
 
 ## Common Subexpression Elimination/Global Value Numbering
 \label{sec:320cse}
 
 Common subexpressions are eliminated during IR construction using
 hash consing:
-\begin{listing}
-def findOrCreateDefinition[T](d: Def[T]): Sym[T]
-\end{listing}
+
+    def findOrCreateDefinition[T](d: Def[T]): Sym[T]
+
 
 Invoked by \code{reflectPure} through the implicit conversion 
 method \code{toAtom}, this method converts
@@ -669,33 +664,31 @@ for the first time,
 it will be associated with a fresh symbol and saved
 for future reference. 
 This simple scheme provides a powerful
-global value numbering optimization \cite{DBLP:conf/pldi/Click95} 
+global value numbering optimization [(*)](DBLP:conf/pldi/Click95) 
 that effectively prevents generating duplicate code.
 
 
 ## Pattern Rewrites
 
-Using \code{findDefinition}, we can implement an extractor object \citep{DBLP:conf/ecoop/EmirOW07}
+Using \code{findDefinition}, we can implement an extractor object [(*)](DBLP:conf/ecoop/EmirOW07)
 that enables pattern matching on a symbol to lookup
 the underlying definition associated to the symbol:
-\begin{listing}
-object Def {
-  def unapply[T](s: Exp[T]): Option[Def[T]] = s match {
-    case s: Sym[T] => findDefinition(s)
-    case _ => None
-  }
-}
-\end{listing}
+
+    object Def {
+      def unapply[T](s: Exp[T]): Option[Def[T]] = s match {
+        case s: Sym[T] => findDefinition(s)
+        case _ => None
+      }
+    }
 
 This extractor object can be used to implement smart 
 constructors for IR nodes that deeply inspect their arguments:
-\begin{listing}
-def infix_*(x: Exp[Double], y: Exp[Double]) = (x,y) match {
-  case (Const(x), Const(y)) => Const(x * y)
-  case (Const(k), Def(Times(Const(l), y))) => Const(k * l) * y
-  case _ => Times(x,y)
-}
-\end{listing}
+
+    def infix_*(x: Exp[Double], y: Exp[Double]) = (x,y) match {
+      case (Const(x), Const(y)) => Const(x * y)
+      case (Const(k), Def(Times(Const(l), y))) => Const(k * l) * y
+      case _ => Times(x,y)
+    }
 
 Smart constructors are a simple yet powerful rewriting facility.
 If the smart constructor is the only way to construct \code{Times}
@@ -713,7 +706,7 @@ for example particular implementations of constant folding (or more generally
 symbolic rewritings) such as replacing computations like
 \code{x * 1.0} with \code{x}.
 Yet other optimizations are specific to the actual program being staged.
-Kiselyov et al.\ \cite{DBLP:conf/emsoft/KiselyovST04} describe 
+Kiselyov et al.\ [(*)](DBLP:conf/emsoft/KiselyovST04) describe 
 a number of rewritings that are particularly
 effective for the patterns of code generated by a staged FFT algorithm
 but not as much for other programs. The FFT example is discussed 
@@ -734,26 +727,26 @@ the body of \code{infix_*} will apply the optimization recursively.
 The appropriate pattern is to override the smart constructor in a separate 
 trait and call the super implementation if no rewrite matches. This decouples 
 optimizations from node type definitions.
-\begin{listing}
-trait ArithExpOpt extends ArithExp {
-  override def infix_*(x:Exp[Double],y:Exp[Double]) = (x,y) match {
-    case (Const(x), Const(y)) => Const(x * y)
-    case (x, Const(1)) => x
-    case (Const(1), y) => x
-    case _ => super.infix_*(x, y)
-  }
-}
-trait ArithExpOptFFT extends ArithExp {
-  override def infix_*(x:Exp[Double],y:Exp[Double]) = (x,y) match {
-    case (Const(k), Def(Times(Const(l), y))) => Const(k * l) * y
-    case (x, Def(Times(Const(k), y))) => Const(k) * (x * y))
-    case (Def(Times(Const(k), x)), y) => Const(k) * (x * y))
-    ...
-    case (x, Const(y)) => Const(y) * x
-    case _ => super.infix_*(x, y)
-  }
-}
-\end{listing}
+
+    trait ArithExpOpt extends ArithExp {
+      override def infix_*(x:Exp[Double],y:Exp[Double]) = (x,y) match {
+        case (Const(x), Const(y)) => Const(x * y)
+        case (x, Const(1)) => x
+        case (Const(1), y) => x
+        case _ => super.infix_*(x, y)
+      }
+    }
+    trait ArithExpOptFFT extends ArithExp {
+      override def infix_*(x:Exp[Double],y:Exp[Double]) = (x,y) match {
+        case (Const(k), Def(Times(Const(l), y))) => Const(k * l) * y
+        case (x, Def(Times(Const(k), y))) => Const(k) * (x * y))
+        case (Def(Times(Const(k), x)), y) => Const(k) * (x * y))
+        ...
+        case (x, Const(y)) => Const(y) * x
+        case _ => super.infix_*(x, y)
+      }
+    }
+
 Note that the trait linearization order defines the rewriting strategy.
 We still maintain our guarantee that no \code{Times} node could be rewritten further.
 
@@ -773,9 +766,9 @@ corresponding optimizations.
 Context and flow sensitive transformation become very important
 once we introduce effects. But even pure functional programs can profit 
 from context information:
-\begin{listing}
-if (c) { if (c) a else b } else ...
-\end{listing}
+
+    if (c) { if (c) a else b } else ...
+
 The inner test on the same condition is redundant and will
 always succeed. How do we detect this situation?
 In other cases we can use the Def extractor to lookup the definition
@@ -816,13 +809,13 @@ apply a substitution (or generally, a \code{Transformer}) to the arguments and
 call the appropriate smart constructor again.
 For every IR node type we require a default \code{mirror} implementation 
 that calls back its smart constructor:
-\begin{listing}
-override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
-  case Plus(a,b) => f(a) + f(b) // calls infix_+
-  case Times(a,b) => f(a) * f(b)
-  case _ => super.mirror(e,f)
-}
-\end{listing}
+
+    override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
+      case Plus(a,b) => f(a) + f(b) // calls infix_+
+      case Times(a,b) => f(a) * f(b)
+      case _ => super.mirror(e,f)
+    }
+
 
 There are some restrictions if we are working directly on the graph level: In
 general we have no (or only limited) context information because a single
@@ -838,16 +831,16 @@ convergence of an iterative transformation easily.
 The \code{Transfomer} argument to \code{mirror} can be 
 queried to find out whether \code{mirror} is allowed to call context
 dependent methods:
-\begin{listing}
-override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
-  case IfThenElse(c,a,b) => 
-    if (f.hasContext)
-      __ifThenElse(f(c),f.reflectBlock(a),f.reflectBlock(b))
-    else
-      ifThenElse(f(c),f(a),f(b)) // context-free version
-  case _ => super.mirror(e,f)
-}
-\end{listing}
+
+    override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
+      case IfThenElse(c,a,b) => 
+        if (f.hasContext)
+          __ifThenElse(f(c),f.reflectBlock(a),f.reflectBlock(b))
+        else
+          ifThenElse(f(c),f(a),f(b)) // context-free version
+      case _ => super.mirror(e,f)
+    }
+
 If the context is guaranteed to be set up correctly, we
 call the regular smart constructor and use \code{f.reflectBlock} to
 call mirror recursively on the contents of blocks \code{a} and \code{b}. 
@@ -864,9 +857,9 @@ Dead code elimination can be performed purely on the graph level, simply by find
 reachable from the final result and discarding everything else.
 
 We define a method to find all symbols a given object references directly:
-\begin{listing}
-def syms(x: Any): List[Sym[Any]]
-\end{listing}
+
+    def syms(x: Any): List[Sym[Any]]
+
 If \code{x} is a Sym itself, \code{syms(x)} will return \code{List(x)}. For a case class instance 
 that implements the \code{Product} interface such as \code{Times(a,b)}, it will return \code{List(a,b)} if both
 \code{a} and \code{b} are Syms. Since the argument type is \code{Any}, we can apply \code{syms} not 
@@ -874,9 +867,9 @@ only to Def objects directly but also to lists of Defs, for example.
 
 Then, assuming \code{R} is the final program result, the set of remaining symbols in the 
 graph \code{G} is the least fixpoint of: 
-\begin{listing}
-G = R $\cup$ syms(G map findDefinition)
-\end{listing}
+
+    G = R $\cup$ syms(G map findDefinition)
+
 Dead code elimination will discard all other nodes.
 
 # From Graphs Back to Trees
@@ -895,18 +888,18 @@ out of loops. Code motion depends on dependency and frequency information but no
 data-flow information. Thus it can treat functions or other user defined compound statements
 in the same way as loops. This makes 
 our algorithm different from code motion algorithms based on data flow 
-analysis such as Lazy Code Motion (LCM, \cite{DBLP:conf/pldi/KnoopRS92}) or Partial Redundancy Elimination (PRE, \cite{DBLP:journals/toplas/KennedyCLLTC99}).
+analysis such as Lazy Code Motion (LCM, [(*)](DBLP:conf/pldi/KnoopRS92)) or Partial Redundancy Elimination (PRE, [(*)](DBLP:journals/toplas/KennedyCLLTC99)).
 
 The graph IR reflects ''must before'' (ordering) and ''must inside'' (containment) relations,
 as well as anti-dependence and frequency. These relations are implemented by the
 following methods, which can be overridden for new definition classes:
-\begin{listing}
-def syms(e: Any): List[Sym[Any]]        // value dependence (must before)
-def softSyms(e: Any): List[Sym[Any]]    // anti dependence (must not after)
-def boundSyms(e: Any): List[Sym[Any]]   // nesting dependence (must not outside)
-def symsFreq(e: Any): List[(Sym[Any],   // frequency information (classify
-  Double)]                              // sym as 'hot', 'normal', 'cold')
-\end{listing}
+
+    def syms(e: Any): List[Sym[Any]]        // value dependence (must before)
+    def softSyms(e: Any): List[Sym[Any]]    // anti dependence (must not after)
+    def boundSyms(e: Any): List[Sym[Any]]   // nesting dependence (must not outside)
+    def symsFreq(e: Any): List[(Sym[Any],   // frequency information (classify
+      Double)]                              // sym as 'hot', 'normal', 'cold')
+
 To give an example, \code{boundSyms} applied to a loop node \code{RangeForeach(range,idx,body)}
 with index variable \code{idx} would return \code{List(idx)} to denote that
 \code{idx} is fixed ''inside'' the loop expression. 
@@ -938,45 +931,36 @@ until we reach one that can become top-level again.
 used for code motion.}
 \end{figure}
 
-%% ALGO begins here:
-\begin{figure}
-\begin{center}\begin{minipage}{10cm}
+
 Code Motion Algorithm: Compute the set $L$ of top level statements for the current block, from a set of available statements $E$, a set of forced-inside statements $G \subseteq E$ and a block result $R$.
-\begin{enumerate}
-\item Start with $L$ containing the known top level statements, initially the (available) block result $R \cap E$.
 
-\item Add to $L$ all nodes reachable from $L$ via normal links (neither hot nor cold) through $E-G$ (not forced inside).
+1. Start with $L$ containing the known top level statements, initially the (available) block result $R \cap E$.
 
-\item For each hot ref from $L$ to a statement in $E-L$, follow any links through $G$, i.e.\ the nodes that are forced inside, if there are any. The first non-forced-inside nodes (the ''hot fringe'') become top level as well (add to $L$). 
+2. Add to $L$ all nodes reachable from $L$ via normal links (neither hot nor cold) through $E-G$ (not forced inside).
 
-\item Continue with 2 until a fixpoint is reached.
-\end{enumerate}
-\end{minipage}
-\end{center}
-\caption{\label{fig:codemotion2}Code Motion algorithm.}
-\end{figure}
+3. For each hot ref from $L$ to a statement in $E-L$, follow any links through $G$, i.e.\ the nodes that are forced inside, if there are any. The first non-forced-inside nodes (the ''hot fringe'') become top level as well (add to $L$). 
+
+4. Continue with 2 until a fixpoint is reached.
 
 To implement this algorithm, we need to determine the set \code{G} of nodes that are
 forced inside and may not be part of the top level. 
 We start with the block result \code{R} and a graph \code{E} that has all unnecessary 
 nodes removed (DCE already performed):
-\begin{listing}
-E = R $\cup$ syms(E map findDefinition)
-\end{listing}
+
+    E = R $\cup$ syms(E map findDefinition)
 
 We then need a way to find all uses of a given symbol \code{s}, 
 up to but not including the node where the symbol is bound:
-\begin{listing}
-U(s) = {s} $\cup$ { g $\in$ E | syms(findDefinition(g)) $\cap$ U(s) $\ne\emptyset$ 
+
+    U(s) = {s} $\cup$ { g $\in$ E | syms(findDefinition(g)) $\cap$ U(s) $\ne\emptyset$ 
                       && s $\notin$ boundSyms(findDefinition(g))) }
-\end{listing}
 
 We collect all bound symbols and their dependencies. These cannot live on the current level, they
 are forced inside:
-\begin{listing}
-B = boundSyms (E map findDefinition)
-G = union (B map U)    // must inside
-\end{listing}
+
+    B = boundSyms (E map findDefinition)
+    G = union (B map U)    // must inside
+
 Computing \code{U(s)} for many symbols \code{s} individually is costly but
 implementations can exploit considerable sharing to optimize the computation of
 \code{G}.
@@ -989,34 +973,31 @@ Let us consider a few examples to build some intuition about the code motion beh
 In the code below, the starred conditional is on the fringe (first statement that
 can be outside) and on a hot path (through the loop). Thus it will be hoisted.
 Statement \code{foo} will be moved inside:
-\begin{listing}
-loop { i =>                z = *if (x) foo
-  if (i > 0)               loop { i =>
-    *if (x)                  if (i > 0)
-      foo                      z
-}                          }
-\end{listing}
+
+    loop { i =>                z = if* (x) foo
+      if (i > 0)               loop { i =>
+        if* (x)                  if (i > 0)
+          foo                      z
+    }                          }
 
 The situation changes if the inner conditional is forced inside by a value dependency. 
 Now statement \code{foo} is on the hot fringe and becomes top level.
-\begin{listing}
-loop { i =>                z = *foo
-  if (x)                   loop { i =>
-    if (i > 0)               if (x)
-      *foo                     if (i > 0)
-}                                z
-                           }
-\end{listing}
+
+    loop { i =>                z = foo*
+      if (x)                   loop { i =>
+        if (i > 0)               if (x)
+          foo*                     if (i > 0)
+    }                                z
+                               }
 
 For loops inside conditionals, the containing statements will be moved inside (relative
 to the current level).
-\begin{listing}
-if (x)                     if (x)
-  loop { i =>                z = foo
-    foo                      loop { i =>
-  }                            z
-                             }
-\end{listing}
+
+    if (x)                     if (x)
+      loop { i =>                z = foo
+        foo                      loop { i =>
+      }                            z
+                                 }
 
 
 ### Pathological Cases
@@ -1026,13 +1007,13 @@ Being a heuristic, it cannot be optimal in all cases. Future versions
 could employ more elaborate cost models instead of
 the simple hot/cold distinction. One case worth mentioning is when a 
 statement is used only in conditionals but in different conditionals:
-\begin{listing}
-z = foo                    if (x)
-if (x)                       foo
-  z                        if (y)
-if (y)                       foo
-  z
-\end{listing}
+
+    z = foo                    if (x)
+    if (x)                       foo
+      z                        if (y)
+    if (y)                       foo
+      z
+
 In this situation \code{foo} will be duplicated. Often this duplication is
 beneficial because \code{foo} can be optimized together with other 
 statements inside 
@@ -1064,19 +1045,19 @@ To generate code or to perform transformation by iterated staging (see Section~\
 we need to turn our graph back into a tree.
 The interface to code motion allows us to build a generic tree-like traversal
 over our graph structure: 
-\begin{listing}
-trait Traversal {
-  val IR: Expressions; import IR._
-  // perform code motion, maintaining current scope
-  def focusExactScope(r: Exp[Any])(body: List[Stm[Any]] => A): A    
-  // client interface
-  def traverseBlock[T](b: Block[T]): Unit =
-    focusExactScope(b.res) { levelScope =>
-      levelScope.foreach(traverseStm)
+
+    trait Traversal {
+      val IR: Expressions; import IR._
+      // perform code motion, maintaining current scope
+      def focusExactScope(r: Exp[Any])(body: List[Stm[Any]] => A): A    
+      // client interface
+      def traverseBlock[T](b: Block[T]): Unit =
+        focusExactScope(b.res) { levelScope =>
+          levelScope.foreach(traverseStm)
+        }
+      def traverseStm[T](s: Stm[T]): Unit = blocks(s).foreach(traverseBlock)
     }
-  def traverseStm[T](s: Stm[T]): Unit = blocks(s).foreach(traverseBlock)
-}
-\end{listing}
+
 This is useful for other analyses as well, but in particular for
 building transformers that traverse one graph
 in a tree like fashion and create another graph analogous to
@@ -1112,9 +1093,8 @@ By default, we assume operations to be pure (i.e.\ side-effect free).
 Programmers can designate effectful operations by using \code{reflectEffect} instead of
 the implicit conversion \code{toAtom} which internally delegates to \code{reflectPure}.
 Console output, for example, is implemented like this:
-\begin{listing}
-def print(x: Exp[String]): Exp[Unit] = reflectEffect(Print(x))
-\end{listing}
+
+    def print(x: Exp[String]): Exp[Unit] = reflectEffect(Print(x))
 
 The call to \code{reflectEffect} adds the passed IR node to a list of effects for the 
 current block. Effectful expressions will attract dependency edges between them to 
@@ -1124,11 +1104,11 @@ which attaches nesting edges to the effectful nodes contained in the block.
 
 Internally, \code{reflectEffect} creates \code{Reflect} nodes that keep track
 of the context dependencies:
-\begin{listing}
-var context: List[Exp[Any]]
-case class Reflect[T](d: Def[T], es: List[Sym[Any]]) extends Def[T]
-def reflectEffect[T](d: Def[T]): Exp[T] = createDefinition(Reflect(d, context)).sym
-\end{listing}
+
+    var context: List[Exp[Any]]
+    case class Reflect[T](d: Def[T], es: List[Sym[Any]]) extends Def[T]
+    def reflectEffect[T](d: Def[T]): Exp[T] = createDefinition(Reflect(d, context)).sym
+
 The context denotes the ''current state''. Since state can be seen as an abstraction of effect
 history, we just define context as a list of the previous effects.
 
@@ -1153,52 +1133,49 @@ there are some operations on summaries (like \code{orElse}, \code{andThen}) to
 combine effects.
 As an example consider the definition of conditionals, which computes the
 compound effect from the effects of the two branches:
-\begin{listing}
-def __ifThenElse[T](cond: Exp[Boolean], thenp: => Rep[T], elsep: => Rep[T]) {
-  val a = reifyBlock(thenp)
-  val b = reifyBlock(elsep)
-  val ae = summarizeEffects(a) // get summaries of the branches
-  val be = summarizeEffects(b) 
-  val summary = ae orElse be   // compute summary for whole expression
-  reflectEffect(IfThenElse(cond, a, b), summary)  // reflect compound expression
-                                                  // (effect might be none, i.e. pure)
-}
-\end{listing}
+
+    def __ifThenElse[T](cond: Exp[Boolean], thenp: => Rep[T], elsep: => Rep[T]) {
+      val a = reifyBlock(thenp)
+      val b = reifyBlock(elsep)
+      val ae = summarizeEffects(a) // get summaries of the branches
+      val be = summarizeEffects(b) 
+      val summary = ae orElse be   // compute summary for whole expression
+      reflectEffect(IfThenElse(cond, a, b), summary)  // reflect compound expression
+                                                      // (effect might be none, i.e. pure)
+    }
 
 To specify effects more precisely for different kinds of IR nodes, we add 
 further \code{reflect} methods:
-\begin{listing}
-reflectSimple     // a 'simple' effect: serialized with other simple effects
-reflectMutable    // an allocation of a mutable object; result guaranteed unique
-reflectWrite(v)   // a write to v: must refer to a mutable allocation 
-                  // (reflectMutable IR node)
-reflectRead(v)    // a read of allocation v (not used by programmer, 
-                  // inserted implicitly)
-reflectEffect(s)  // provide explicit summary s, specify may/must info for 
-                  // multiple reads/writes
-\end{listing}
+
+    reflectSimple     // a 'simple' effect: serialized with other simple effects
+    reflectMutable    // an allocation of a mutable object; result guaranteed unique
+    reflectWrite(v)   // a write to v: must refer to a mutable allocation 
+                      // (reflectMutable IR node)
+    reflectRead(v)    // a read of allocation v (not used by programmer, 
+                      // inserted implicitly)
+    reflectEffect(s)  // provide explicit summary s, specify may/must info for 
+                      // multiple reads/writes
 
 The framework will serialize reads and writes so to respect data and anti-dependency with respect 
 to the referenced allocations. To make this work we also need to keep track of sharing and 
 aliasing. Programmers can provide for their IR nodes 
 a list of input expressions which the result of the IR node may 
 alias, contain, extract from or copy from. 
-\begin{listing}
-def aliasSyms(e: Any): List[Sym[Any]]
-def containSyms(e: Any): List[Sym[Any]]
-def extractSyms(e: Any): List[Sym[Any]]
-def copySyms(e: Any): List[Sym[Any]]
-\end{listing}
+
+    def aliasSyms(e: Any): List[Sym[Any]]
+    def containSyms(e: Any): List[Sym[Any]]
+    def extractSyms(e: Any): List[Sym[Any]]
+    def copySyms(e: Any): List[Sym[Any]]
 
 These four pieces of information correspond to the possible pointer 
 operations \code{x = y}, \code{*x = y}, \code{x = *y} and \code{*x = *y}. 
 Assuming an operation \code{y = Foo(x)}, \code{x} should be returned in the following cases:
-\begin{listing}
-x $\in$ aliasSyms(y)      if y = x      // if then else
-x $\in$ containSyms(y)    if *y = x     // array update
-x $\in$ extractSyms(y)    if y = *x     // array apply
-x $\in$ copySyms(y)       if *y = *x    // array clone
-\end{listing}
+
+    x $\in$ aliasSyms(y)      if y = x      // if then else
+    x $\in$ containSyms(y)    if *y = x     // array update
+    x $\in$ extractSyms(y)    if y = *x     // array apply
+    x $\in$ copySyms(y)       if *y = *x    // array clone
+
 Here, \code{y = x} is understood as ''y may be equal to x'', 
 \code{*y = x} as ''dereferencing y (at some index) may return x'' etc.
 
@@ -1254,11 +1231,11 @@ Smart constructors in our graph IR can be context sensitive. For example,
 reads of local variables examine the current effect context
 to find the last assignment, implementing
 a form of copy propagation (middle):
-\begin{listing}
-var x = 7     var x = 7    println(5)
-x = 5         x = 5
-println(x)    println(5)
-\end{listing}
+
+    var x = 7     var x = 7    println(5)
+    x = 5         x = 5
+    println(x)    println(5)
+
 This renders the stores dead, and they will be removed
 by dead code elimination later (right).
 
@@ -1271,7 +1248,7 @@ effectively makes pessimistic assumptions about the outcome of all others.
 Combined analyses avoid the phase ordering problem by solving everything at the
 same time. Lerner, Grove, and Chambers showed a method of composing
 optimizations by interleaving analyses and transformations
-\cite{lerner02composingdataflow}.  We use a modified version of their algorithm that
+[(*)](lerner02composingdataflow).  We use a modified version of their algorithm that
 works on structured loops instead of CFGs and using dependency information and
 rewriting instead of explicit data flow lattices. Usually, rewriting is
 semantics preserving, i.e.\ pessimistic. The idea is to drop that assumption.
@@ -1286,17 +1263,17 @@ reached a fixpoint and keep the last transformation as result.
 
 Here is an example of speculative rewriting, showing the initial optimistic 
 iteration (middle), with the fixpoint (right) reached after the second iteration:
-\begin{listing}
-var x = 7                 var x = 7          var x = 7 //dead
-var c = 0                 var c = 0          var c = 0
-while (c < 10) {          while (true) {     while (c < 10) {
-  if (x < 10) print("!")    print("!")         print("!")
-  else x = c                print(7)           print(7)
-  print(x)                  print(0)           print(c)
-  print(c)                  c = 1              c += 1
-  c += 1                  }                  }
-}
-\end{listing}
+
+    var x = 7                 var x = 7          var x = 7 //dead
+    var c = 0                 var c = 0          var c = 0
+    while (c < 10) {          while (true) {     while (c < 10) {
+      if (x < 10) print("!")    print("!")         print("!")
+      else x = c                print(7)           print(7)
+      print(x)                  print(0)           print(c)
+      print(c)                  c = 1              c += 1
+      c += 1                  }                  }
+    }
+
 This algorithm allows us to do all forward data flow analyses and transforms in
 one uniform, combined pass driven by rewriting. In the example above, during the initial 
 iteration (middle), separately
@@ -1317,7 +1294,7 @@ rewrites a change to match on the current expression before
 it is rewritten. This is a simple form of prioritizing different
 rewrites, in this case optimizations over lowerings. It also
 happens to be a central idea behind telescoping 
-languages \cite{kennedy05telescoping}.
+languages [(*)](kennedy05telescoping).
 
 We perform simplifications eagerly, after each transform phase.
 Thus we guarantee that CSE, DCE etc. have been applied on
@@ -1328,14 +1305,14 @@ be much harder to apply.
 We call the mechanism to express this form of rewrites
 \emph{delayed} rewriting. Here is an example that delayedly 
 transforms a plus operation on Vectors into an operation on arrays:
-\begin{listing}
-def infix_plus(a: Rep[Vector[Double]], b: Rep[Vector[Double]]) = {
-  VectorPlus(a,b) atPhase(lowering) {
-    val data = Array.fill(a.length) { i => a(i) + b(i) }
-    vector_with_backing_array(data)
-  }
-}
-\end{listing}
+
+    def infix_plus(a: Rep[Vector[Double]], b: Rep[Vector[Double]]) = {
+      VectorPlus(a,b) atPhase(lowering) {
+        val data = Array.fill(a.length) { i => a(i) + b(i) }
+        vector_with_backing_array(data)
+      }
+    }
+
 The transformation is only carried out at phase \code{lowering}.
 Before that, the IR node remains a \code{VectorPlus} node, which
 allows other smart constructor rewrites to kick in that  
@@ -1365,16 +1342,16 @@ Afterwards we reassemble the remaining pieces.
 ## Effectful Statements
 
 A good example of statement splitting are effectful conditionals:
-\begin{listing}
-var a, b, c = ...      var a, b, c = ...      var a, c = ...
-if (cond) {            if (cond)              if (cond)
-  a = 9                  a = 9                  a = 9
-  b = 1                if (cond)              else
-} else                   b = 1                  c = 3
-  c = 3                if (!cond)             println(a+c)
-println(a+c)             c = 3
-                       println(a+c)     
-\end{listing}
+
+    var a, b, c = ...      var a, b, c = ...      var a, c = ...
+    if (cond) {            if (cond)              if (cond)
+      a = 9                  a = 9                  a = 9
+      b = 1                if (cond)              else
+    } else                   b = 1                  c = 3
+      c = 3                if (!cond)             println(a+c)
+    println(a+c)             c = 3
+                           println(a+c)     
+
 From the conditional in the initial program (left), splitting creates
 three separate expressions, one for each referenced variable (middle).
 Pattern rewrites are executed when building the split nodes but
@@ -1396,19 +1373,19 @@ of how expressions have been split.
 Splitting is also very effective for data structures, as often only parts of
 a data structure are used or modified.
 We can define a generic framework for data structures:
-\begin{listing}
-trait StructExp extends BaseExp {
-  abstract class StructTag
-  case class Struct[T](tag: StructTag, elems: Map[String,Rep[Any]]) extends Def[T]
-  case class Field[T](struct: Rep[Any], key: String) extends Def[T]
 
-  def struct[T](tag: StructTag, elems: Map[String,Rep[Any]]) = Struct(tag, elems)
-  def field[T](struct: Rep[Any], key: String): Rep[T] = struct match {
-    case Def(Struct(tag, elems)) => elems(index).asInstanceOf[Rep[T]]
-    case _ => Field[T](struct, index)
-  }
-}
-\end{listing}
+    trait StructExp extends BaseExp {
+      abstract class StructTag
+      case class Struct[T](tag: StructTag, elems: Map[String,Rep[Any]]) extends Def[T]
+      case class Field[T](struct: Rep[Any], key: String) extends Def[T]
+
+      def struct[T](tag: StructTag, elems: Map[String,Rep[Any]]) = Struct(tag, elems)
+      def field[T](struct: Rep[Any], key: String): Rep[T] = struct match {
+        case Def(Struct(tag, elems)) => elems(index).asInstanceOf[Rep[T]]
+        case _ => Field[T](struct, index)
+      }
+    }
+
 There are two IR node types, one for structure creation and one for field access.
 The structure creation node contains a hash map that holds (static) field identifiers
 and (dynamic) field values. It also contains a \code{tag} that can be used to
@@ -1420,16 +1397,16 @@ from the embedded hash map.
 
 We continue by adding a rule that makes the result 
 of a conditional a \code{Struct} if the branches return \code{Struct}:
-\begin{listing}
-override def ifThenElse[T](cond: Rep[Boolean], a: Rep[T], b: Rep[T]) = 
-(a,b) match {
-  case (Def(Struct(tagA,elemsA)), Def(Struct(tagB, elemsB))) => 
-    assert(tagA == tagB)
-    assert(elemsA.keySet == elemsB.keySet)
-    Struct(tagA, elemsA.keySet map (k => ifThenElse(cond, elemsA(k), elemsB(k))))
-  case _ => super.ifThenElse(cond,a,b)
-}
-\end{listing}
+
+    override def ifThenElse[T](cond: Rep[Boolean], a: Rep[T], b: Rep[T]) = 
+    (a,b) match {
+      case (Def(Struct(tagA,elemsA)), Def(Struct(tagB, elemsB))) => 
+        assert(tagA == tagB)
+        assert(elemsA.keySet == elemsB.keySet)
+        Struct(tagA, elemsA.keySet map (k => ifThenElse(cond, elemsA(k), elemsB(k))))
+      case _ => super.ifThenElse(cond,a,b)
+    }
+
 Similar rules are added for many of the other core IR node types.
 DCE can remove individual elements of the data structure that are never used.
 During code generation and tree traversals, the remaining parts of the 
@@ -1446,34 +1423,33 @@ The definition is analogous to that of conditionals. We override the array const
 that represents expressions of the form \c|Array.fill(n) { i => body }|
 to create a struct with an array for each component of the body if the body itself
 is a Struct: 
-\begin{listing}
-override def arrayFill[T](size: Exp[Int], v: Sym[Int], body: Def[T]) = body match {
-  case Block(Def(Struct(tag, elems))) => 
-    struct[T](ArraySoaTag(tag,size), 
-      elems.map(p => (p._1, arrayFill(size, v, Block(p._2)))))
-  case _ => super.arrayFill(size, v, body)
-}
-\end{listing}
+
+    override def arrayFill[T](size: Exp[Int], v: Sym[Int], body: Def[T]) = body match {
+      case Block(Def(Struct(tag, elems))) => 
+        struct[T](ArraySoaTag(tag,size), 
+          elems.map(p => (p._1, arrayFill(size, v, Block(p._2)))))
+      case _ => super.arrayFill(size, v, body)
+    }
+
 Note that we tag the result struct with an \code{ArraySoaTag} to keep track
 of the transformation. This class is defined as follows:
-\begin{listing}
-case class ArraySoaTag(base: StructTag, len: Exp[Int]) extends StructTag
-\end{listing}
+
+    case class ArraySoaTag(base: StructTag, len: Exp[Int]) extends StructTag
+
 
 We also override the methods that are used to access array elements
 and return the length of an array to do the right thing for transformed
 arrays:
-\begin{listing}
-override def infix_apply[T](a: Rep[Array[T]], i: Rep[Int]) = a match {
-  case Def(Struct(ArraySoaTag(tag,len),elems)) =>
-    struct[T](tag, elems.map(p => (p._1, infix_apply(p._2, i))))
-  case _ => super.infix_at(a,i)
-}
-override def infix_length[T](a: Rep[Array[T]]): Rep[Int] = a match {
-  case Def(Struct(ArraySoaTag(tag, len), elems)) => len
-  case _ => super.infix_length(a)
-}
-\end{listing}
+
+    override def infix_apply[T](a: Rep[Array[T]], i: Rep[Int]) = a match {
+      case Def(Struct(ArraySoaTag(tag,len),elems)) =>
+        struct[T](tag, elems.map(p => (p._1, infix_apply(p._2, i))))
+      case _ => super.infix_at(a,i)
+    }
+    override def infix_length[T](a: Rep[Array[T]]): Rep[Int] = a match {
+      case Def(Struct(ArraySoaTag(tag, len), elems)) => len
+      case _ => super.infix_length(a)
+    }
 
 Examples for this struct of array transformation are shown in 
 Section~\ref{sec:455structUse} and Chapter~\ref{chap:460fusionUse}. 
@@ -1491,9 +1467,9 @@ implementations of these operations would be expensive and entail lots of
 intermediate data structures.  We provide a novel loop fusion algorithm for
 data parallel loops and traversals (see Chapter~\ref{chap:460fusionUse}
 for examples of use). The core loop abstraction is
-\begin{listing}
-loop(s) $\overline{\mathtt{{x=}}\G}$ { i => $\overline{E[ \mathtt{x} \yield \mathtt{f(i)} ]}$ }
-\end{listing}
+
+    loop(s) $\overline{\mathtt{{x=}}\G}$ { i => $\overline{E[ \mathtt{x} \yield \mathtt{f(i)} ]}$ }
+
 where \code{s} is the size of the loop and \code{i} the loop
 variable ranging over $[0,\mathtt{s})$. A loop can compute
 multiple results $\overline{\mathtt{x}}$, each of which is associated
@@ -1510,82 +1486,60 @@ or conditionals. For \code{Bucket} generators yield takes
 
 
 
-\begin{figure}
-\begin{center}
-\begin{minipage}{10cm}
-Generator kinds: $\mathcal{G} ::= $ \code{Collect} $|$ \code{Reduce($\oplus$)} $|$ \code{Bucket($\mathcal{G}$)} \\
-Yield statement: xs $\yield$ x \\
-Contexts: $E[.] ::= $ loops and conditionals \\[2em]
+    Generator kinds: $\mathcal{G} ::= $ \code{Collect} $|$ \code{Reduce($\oplus$)} $|$ \code{Bucket($\mathcal{G}$)} \\
+    Yield statement: xs $\yield$ x \\
+    Contexts: $E[.] ::= $ loops and conditionals
 
-\emph{Horizontal case (for all types of generators):}
-~\\
-\begin{mlisting}
+    Horizontal case (for all types of generators):
+
        loop(s) x1=$\G_1$ { i1 => $E_1[$ x1 $\yield$ f1(i1) $]$ }
        loop(s) y1=$\G_2$ { i2 => $E_2[$ x2 $\yield$ f2(i2) $]$ }
-\end{mlisting}
-\vspace{-5pt}{\hspace{6mm}\rule{9cm}{0.25pt}}
-\begin{mlisting}
+    ---------------------------------------------------------------------   
      loop(s) x1=$\G_1$, x2=$\G_2$ { i => 
               $E_1[$ x1 $\yield$ f1(i) $]$; $E_2[$ x2 $\yield$ f2(i) $]$ }
-\end{mlisting}
-~\\
-\emph{Vertical case (consume collect):}
-~\\
-\begin{mlisting}
+
+    Vertical case (consume collect):
+
       loop(s) x1=Collect { i1 => $E_1[$ x1 $\yield$ f1(i1) $]$ }
     loop(x1.size) x2=$\G$ { i2 => $E_2[$ x2 $\yield$ f2(x1(i2)) $]$ }
-\end{mlisting}
-\vspace{-5pt}{\hspace{3mm}\rule{10cm}{0.25pt}}
-\begin{mlisting}
+    ---------------------------------------------------------------------   
    loop(s) x1=Collect, x2=$\G$ { i => 
                 $E_1[$ x1 $\yield$ f1(i); $E_2[$ x2 $\yield$ f2(f1(i)) $]]$ }
-\end{mlisting}
-~\\
-\emph{Vertical case (consume bucket collect):}
-~\\
-\begin{mlisting}
+
+    Vertical case (consume bucket collect):
+
             loop(s) x1=Bucket(Collect) { i1 => 
                 $E_1[$ x1 $\yield$ (k1(i1), f1(i1)) $]$ }
       loop(x1.size) x2=Collect { i2 =>  
         loop(x1(i2).size) y=$\G$ { j => 
           $E_2[$ y $\yield$ f2(x1(i2)(j)) $]$ }; x2 $\yield$ y }
-\end{mlisting}
-\vspace{-5pt}{\hspace{3mm}\rule{10cm}{0.25pt}}
-\begin{mlisting}
+    ---------------------------------------------------------------------   
     loop(s) x1=Bucket(Collect), x2=Bucket($\G$) { i => 
         $E_1[$ x1 $\yield$ (k1(i), f1(i));
             $E_2[$ x2 $\yield$ (k1(i), f2(f1(i))) $]]$ }
-\end{mlisting}
-\end{minipage}
-\end{center}
-
-\caption{\label{fig-fusion} Loop fusion}
-\end{figure}
-
 
 
 The fusion rules are summarized in Figure~\ref{fig-fusion}.
 This model is expressive enough to model many common collection
 operations:
-\begin{mlisting}
-x=v.map(f)     loop(v.size) x=Collect { i => x $\yield$ f(v(i)) }
-x=v.sum        loop(v.size) x=Reduce(+) { i =>  x $\yield$ v(i) }
-x=v.filter(p)  loop(v.size) x=Collect { i => if (p(v(i))) 
-                                                x $\yield$ v(i) }
-x=v.flatMap(f) loop(v.size) x=Collect { i => val w = f(v(i))
-                         loop(w.size) { j => x $\yield$ w(j) }}
-x=v.distinct   loop(v.size) x=Bucket(Reduce(rhs)) { i => 
-                                        x $\yield$ (v(i), v(i)) }
-\end{mlisting}
+
+    x=v.map(f)     loop(v.size) x=Collect { i => x $\yield$ f(v(i)) }
+    x=v.sum        loop(v.size) x=Reduce(+) { i =>  x $\yield$ v(i) }
+    x=v.filter(p)  loop(v.size) x=Collect { i => if (p(v(i))) 
+                                                    x $\yield$ v(i) }
+    x=v.flatMap(f) loop(v.size) x=Collect { i => val w = f(v(i))
+                             loop(w.size) { j => x $\yield$ w(j) }}
+    x=v.distinct   loop(v.size) x=Bucket(Reduce(rhs)) { i => 
+                                            x $\yield$ (v(i), v(i)) }
+
 Other operations are accommodated by generalizing slightly. Instead of
 implementing a \code{groupBy} operation that returns a sequence of
 (Key, Seq[Value]) pairs we can return the keys and
 values in separate data structures. The equivalent of \code{(ks,vs)=v.groupBy(k).unzip}
 is:
-\begin{mlisting}
-loop(v.size) ks=Bucket(Reduce(rhs)),vs=Bucket(Collect) { i => 
-  ks $\yield$ (v(i), v(i)); vs $\yield$ (v(i), v(i)) }
-\end{mlisting}
+
+    loop(v.size) ks=Bucket(Reduce(rhs)),vs=Bucket(Collect) { i => 
+      ks $\yield$ (v(i), v(i)); vs $\yield$ (v(i), v(i)) }
 
 In Figure~\ref{fig-fusion},
 multiple instances of \code{f1(i)} are subject to CSE and not evaluated twice.
@@ -1598,15 +1552,15 @@ additional optimization opportunities inside fused loop bodies
 (including fusion of nested loops).
 
 Fixed size array construction \code{Array(a,b,c)} can be expressed as
-\begin{listing}
-loop(3) x=Collect { case 0 => x $\yield$ a 
-                    case 1 => x $\yield$ b case 2 => x $\yield$ c }
-\end{listing}
+
+    loop(3) x=Collect { case 0 => x $\yield$ a 
+                        case 1 => x $\yield$ b case 2 => x $\yield$ c }
+
 and concatenation \code{xs ++ ys} as \code{Array(xs,ys).flatMap(i=>i)}:
-\begin{listing}
-loop(2) x=Collect { case 0 => loop(xs.size) { i => x $\yield$ xs(i) } 
-                    case 1 => loop(ys.size) { i => x $\yield$ ys(i) }}
-\end{listing}
+
+    loop(2) x=Collect { case 0 => loop(xs.size) { i => x $\yield$ xs(i) } 
+                        case 1 => loop(ys.size) { i => x $\yield$ ys(i) }}
+
 Fusing these patterns with a consumer will duplicate the consumer code into each match 
 case. Implementations should have some kind of cutoff value to prevent code explosion.
 Code generation does not need to emit actual loops for fixed array constructions

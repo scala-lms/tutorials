@@ -106,14 +106,14 @@ correctness.
 However the multi-stage language compiler must know about the syntax
 of the object language. This is trivial if meta-language and
 object language are the same. Otherwise it is slightly more difficult
-\citep{mainland07quasiquoting}.
+[(*)](mainland07quasiquoting).
 
 The \code{Tree} type can be left abstract. Some implementations 
 hide the exact data structures to guarantee safety of optimizations
 on object code. Silently modifying trees with rewrites that 
 maintain semantic but not structural equality (e.g.\ beta reduction)
 can change the behavior of programs that inspect the
-tree structure~\citep{DBLP:conf/pepm/Taha00}. In general, optimizations should
+tree structure [(*)](DBLP:conf/pepm/Taha00). In general, optimizations should
 not change the result of a program.
 
 ## Scope Correctness through Deep Reuse of Scope
@@ -129,7 +129,7 @@ a variable bound in quoted code escapes through a hole:
     $[[$ val y = 7; $\$${ x = y }$]]$
 
 Scope extrusion can be prevented by appropriate type systems 
-\citep{DBLP:conf/pldi/WestbrookRIYAT10,DBLP:conf/pepm/KameyamaKS09},
+[(*)](DBLP:conf/pldi/WestbrookRIYAT10,DBLP:conf/pepm/KameyamaKS09),
 which are beyond the scope of this thesis.
 Scope extrusion is a real problem for code generators
 that imperatively manage staged program fragments.
@@ -152,7 +152,7 @@ in the next stage.
 
 Note that the use of parametric types alone does not prevent scope
 extrusion, which can also be seen as a type error in the sense of
-a well-typed multi-stage program ''going wrong'' \cite{DBLP:conf/icalp/TahaBS98,DBLP:conf/popl/TahaN03}. 
+a well-typed multi-stage program ''going wrong'' [(*)](DBLP:conf/icalp/TahaBS98,DBLP:conf/popl/TahaN03). 
 Thus we do not obtain a guarantee that \emph{all} 
 generated programs type check, but the slightly weaker assurance 
 that all generated programs that are well-formed are also type 
@@ -169,8 +169,8 @@ adding staging annotations?
 We cannot expect a strong guarantee in all cases for reasons of 
 nontermination but what is troubling is that there are many practical cases 
 where staging annotations change a program's behavior quite drastically.
-This fact is well documented in the literature \citep{techreport/EckhardtKSTK04,DBLP:journals/scp/CohenDGHKP06,
-DBLP:conf/gpce/CaretteK05,DBLP:conf/pepm/SwadiTKP06,DBLP:conf/esop/InoueT12}.
+This fact is well documented in the literature [(*)](techreport/EckhardtKSTK04,DBLP:journals/scp/CohenDGHKP06,
+DBLP:conf/gpce/CaretteK05,DBLP:conf/pepm/SwadiTKP06,DBLP:conf/esop/InoueT12).
 
 The problem manifests itself both with strings and with trees.
 The root cause is that both approaches are based on syntactic
@@ -232,7 +232,7 @@ Result:
 
 Staging has turned the more efficient algorithm into a less
 efficient one. This effect of staging undoing binding and memoization
-is widely known \cite{DBLP:conf/pepm/SwadiTKP06,techreport/EckhardtKSTK04}.
+is widely known [(*)](DBLP:conf/pepm/SwadiTKP06,techreport/EckhardtKSTK04).
 
 
 ## Let Insertion as a Remedy
@@ -245,27 +245,27 @@ The front end can assemble pieces of generated code using
 explicit side effects, or the code generators are written
 in monadic style or continuation passing style (CPS), in
 which case the monadic bind operation will insert let-bindings
-to maintain the desired evaluation order \cite{DBLP:conf/pepm/SwadiTKP06}.
+to maintain the desired evaluation order [(*)](DBLP:conf/pepm/SwadiTKP06).
 Effectful code generators are much more likely to cause
 scope extrusion. Explicit monadic style or CPS complicate
 code generators a lot. This dilemma is described as an ''agonizing trade-off'', due to which one
-''cannot achieve clarity, safety, and efficiency at the same time'' \citep{DBLP:conf/pepm/KameyamaKS09}.
+''cannot achieve clarity, safety, and efficiency at the same time'' [(*)](DBLP:conf/pepm/KameyamaKS09).
 Only very recently have type-systems been devised to handle both staging and
-effects \citep{DBLP:conf/pepm/KameyamaKS08,DBLP:conf/pepm/KameyamaKS09,DBLP:conf/pldi/WestbrookRIYAT10}.
+effects [(*)](DBLP:conf/pepm/KameyamaKS08,DBLP:conf/pepm/KameyamaKS09,DBLP:conf/pldi/WestbrookRIYAT10).
 They are not excessively restrictive but not without restrictions either.
-Mint~\citep{DBLP:conf/pldi/WestbrookRIYAT10},
+Mint [(*)](DBLP:conf/pldi/WestbrookRIYAT10),
 a multi-stage extension of Java, restricts non-local operations within escapes 
 to final classes which excludes much of the standard Java library.
 Languages that support both staging 
 and first class delimited continuations can mitigate this
 overhead but front ends that encapsulate the staging 
-primitives are still needed \cite{DBLP:conf/pepm/KameyamaKS09}.
+primitives are still needed [(*)](DBLP:conf/pepm/KameyamaKS09).
 
 In the partial evaluation community, specialization of effectful programs
 has been achieved by inserting let-bindings eagerly for each effectful 
-statement \cite{thiemann1999partial,DBLP:conf/tacs/LawallT97},
+statement [(*)](thiemann1999partial,DBLP:conf/tacs/LawallT97),
 achieving on-the-fly conversion to administrative normal form 
-(ANF, \cite{DBLP:conf/pldi/FlanaganSDF93}).
+(ANF, [(*)](DBLP:conf/pldi/FlanaganSDF93).
 As we will show below, a simplified variant of this approach naturally 
 extends to staging with and without quasiquotes.
 
@@ -276,7 +276,7 @@ extends to staging with and without quasiquotes.
 
 We first show how to maintain value correctness through deep reuse
 of evaluation order. The key idea is similar to that employed in
-partial evaluation \cite{thiemann1999partial,DBLP:conf/tacs/LawallT97}
+partial evaluation [(*)](thiemann1999partial,DBLP:conf/tacs/LawallT97)
 and applies to both quasiquoting and
 LMS. Our presentation differs from the partial evaluation literature in
 that it is independent of any partial evaluation mechanics such as CPS 
@@ -354,7 +354,7 @@ a syntactic and a semantic layer. Alternatively, perform could be
 called reflectEffects, accumulate reifyEffects. This hints at the view
 that we are embedding perform and accumulate in the (invisible) computation 
 monad of the meta language using Filinski's notion
-of monadic reflection \cite{DBLP:conf/popl/Filinski94,DBLP:conf/popl/Filinski10}. 
+of monadic reflection [(*)](DBLP:conf/popl/Filinski94,DBLP:conf/popl/Filinski10). 
 Accumulate is a left inverse of perform with respect to extensional equality ($\equiv$) 
 of the generated code:
 
@@ -528,7 +528,7 @@ extent by providing libraries of reusable components that
 contain sets of lifted operations from which different
 flavors of object languages can be assembled.
 It is also possible to lift whole traits or classes
-using reflection \cite{DBLP:conf/ecoop/KossakowskiARO12}.
+using reflection [(*)](DBLP:conf/ecoop/KossakowskiARO12).
 
 
 We can define a simple object language \code{MyStagedLanguage} as follows, 
@@ -606,7 +606,7 @@ is translated away.
 
 As for scope correctness, we have not encountered any binders in object code so far.
 Below in Section~\ref{sec:220functions} we will introduce staged functions 
-using higher order abstract syntax (HOAS) \citep{DBLP:conf/pldi/PfenningE88}:
+using higher order abstract syntax (HOAS) [(*)](DBLP:conf/pldi/PfenningE88):
 
     def lambda[A,B](f: Rep[A] => Rep[B]): Rep[A=>B]
     lambda { (x:Rep[Int]) => ... }  // a staged function object
@@ -641,9 +641,9 @@ what we have seen above but some require a bit more thought. In this section
 we will take a closer look at
 staged functions.
 Basic support for staged function definitions and function applications
-can be defined in terms of a simple higher-order abstract syntax (HOAS) \citep{DBLP:conf/pldi/PfenningE88}
-representation, similar to those of Carette et al.\ \cite{DBLP:journals/jfp/CaretteKS09} 
-and Hofer et al.\ \cite{DBLP:conf/gpce/HoferORM08}.
+can be defined in terms of a simple higher-order abstract syntax (HOAS) [(*)](DBLP:conf/pldi/PfenningE88)
+representation, similar to those of Carette et al.\ [(*)](DBLP:journals/jfp/CaretteKS09) 
+and Hofer et al. [(*)](DBLP:conf/gpce/HoferORM08).
 
 The idea is to provide a \code{lambda} operation that transforms present-stage 
 functions over staged values (type \code{Rep[A] => Rep[B]}) to staged
