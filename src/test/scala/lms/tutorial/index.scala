@@ -20,7 +20,7 @@ The following tutorials are available:
 	Sparse matrix vector multiplication
 	Selective unrolling and precomputation
 
-- [Regular Expressions](sre.html)
+- [Regular Expressions](regex.html)
 	From interpreters to compilers using staging
 
 - [Ackermann's Function](ack.html)
