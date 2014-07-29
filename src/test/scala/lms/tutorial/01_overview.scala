@@ -10,15 +10,13 @@ Overview
         1. Generative Programming Patterns
         1. Staging and Extensible Compilers
         1. Domain-Specific Languages
-    2. A Short History of LMS
     3. LMS Basics
-		1. Rep Types
-		2. Staging as a Scala library
-		3. Comparing LMS to other systems
-	4. Installing LMS
+        1. Rep Types
+        2. Staging as a Scala library
+        3. Comparing LMS to other systems
+    4. Installing LMS
     5. Getting Help
     6. Summary
-2. LMS Basics
 
 
 
@@ -45,11 +43,11 @@ Third, with a shift towards ``Big Data'' workloads in the cloud and a proliferat
 These trends cause software development teams to invest large efforts into carefully optimizing their code. From a software engineering perspective, this is disconcerting because manual optimization requires programmers to essentially abandon all best practices and benefits of high-level programming, such as abstraction, generality and modularity. Hand-optimized programs are hard to read, hard to maintain, hard to verify and thus likely to attract bugs and security vulnerabilities.
 
 
-### About Generative Programming
+### Programming Generation and Meta-Programming
 
 As an alternative to counting on a ``sufficiently smart'' compiler to optimize a program, programmers can write a program generator -- a program that when run, produces the code of the target program as its output. A program generator can perform all kinds of computation while composing the target program, and thus emit highly efficient code. 
 
-Generative programming or multi-stage programming (_staging_ for short) describes the practice of writing programs that generate other programs as part of their execution. Generative programming makes a pattern explicit that is found in many programs, namely a division into computational _stages_, separated by frequency of execution or availability of information.
+Generative programming, as a subdomain of meta-programming, describes the practice of writing programs that generate other programs as part of their execution. Generative programming makes a pattern explicit that is found in many programs, namely a division into computational _stages_, separated by frequency of execution or availability of information. Therefore, we also speak of multi-stage programming or _staging_ for short.
 
 Generative programming can overcome the performance and productivity gap by leveraging productivity where performance does not matter and vice versa: Generating and compiling a piece of code is not performance critical but productivity is paramount to make the development of the multi-stage program affordable. The generated code needs to run fast but since it is generated programmatically and not written by humans, programmer productivity is not a concern. 
 
@@ -75,11 +73,6 @@ Again, expressing transformations as interpretations is often simpler than imple
 A key use for such multi-pass compiler pipelines is in implementing highly efficient domain-specific languages (DSLs). DSLs can outperform general purpose languages because they offer more optimization opportunities. But to be effective, DSL compilers need to perform optimizations on multiple abstraction levels.
 
 With compilers based on staging, it is easy to first perform purely domain-specific optimizations, say, on the level of linear algebra operations, before lowering the domain-specific operations and data structures to a more generic representation (say, as arrays and loops) on which a different set of optimizations apply.
-
-
-
-A Short History of LMS
-----------------------
 
 
 
@@ -116,21 +109,3 @@ You should have a basic understanding of what LMS is and how it’s different fr
 
 */
 
-
-
-
-/**
-LMS Basics
-==========
-
-
-Two angles: use LMS vs how LMS works. Discuss use cases along with self-contained micro-LMS implementation?
-
-When to come with first
-
-### Rep[T] vs T
-
-
-
-
-*/
