@@ -230,36 +230,36 @@ They are defined as follows in a separate trait:
         reflectStm(Stm(fresh[T], d))
     }
 
-This trait \code{Expressions} will be mixed in at the root of the object language 
+This trait `Expressions` will be mixed in at the root of the object language 
 implementation hierarchy. The guiding principle 
 is that each definition has an
 associated symbol and refers to other definitions
 only via their symbols. This means that every 
 composite value will be named, similar to administrative
 normal form (ANF).
-Methods \code{reflectStm} and \code{reifyBlock}
-take over the responsibility of \code{perform} 
-and \code{accumulate}.
+Methods `reflectStm` and `reifyBlock`
+take over the responsibility of `perform` 
+and `accumulate`.
 
 ## Modularity: Adding IR Node Types
 
-We observe that there are no concrete definition classes provided by trait \code{Expressions}.
+We observe that there are no concrete definition classes provided by trait `Expressions`.
 Providing meaningful data types is the responsibility of other traits that implement the
-interfaces defined previously (\code{Base} and its descendents).
+interfaces defined previously (`Base` and its descendents).
 
-Trait \code{BaseExp} forms the root of the implementation hierarchy and installs 
+Trait `BaseExp` forms the root of the implementation hierarchy and installs 
 atomic expressions as the representation of staged
-values by defining \code{Rep[T] = Exp[T]}: 
+values by defining `Rep[T] = Exp[T]`: 
 
     trait BaseExp extends Base with Expressions {
       type Rep[T] = Exp[T]
     }
 
 For each interface trait, there is one corresponding core implementation trait.
-Shown below, we have traits \code{ArithExp}
-and \code{IfThenElseExp} as the running example. 
+Shown below, we have traits `ArithExp`
+and `IfThenElseExp` as the running example. 
 Both traits define one definition class for each
-operation defined by \code{Arith} and \code{IfThenElse}, respectively, and
+operation defined by `Arith` and `IfThenElse`, respectively, and
 implement the corresponding interface methods to create instances of
 those classes.
 
@@ -278,27 +278,27 @@ those classes.
 
 The framework ensures that code that contains staging operations will
 always be executed within the dynamic scope of at least one invocation 
-of \code{reifyBlock}, which returns a block object
+of `reifyBlock`, which returns a block object
 and takes as call-by-name argument the present-stage expression 
 that will compute the staged block result.
 Block objects can be part of definitions, e.g.\ for
 loops or conditionals.
 
 Since all operations in interface traits such as
-\code{Arith} return \code{Rep} types, 
-equating \code{Rep[T]} and \code{Exp[T]} in trait
-\code{BaseExp} means
+`Arith` return `Rep` types, 
+equating `Rep[T]` and `Exp[T]` in trait
+`BaseExp` means
 that conversion to symbols will take place already 
 within those methods. This fact is important
 because it establishes our correspondence between
 the evaluation order of the program generator
 and the evaluation order of the generated program:
-at the point where the generator calls \code{toAtom},
+at the point where the generator calls `toAtom`,
 the composite definition is turned into an atomic
-value via \code{reflectStm}, i.e.\ its evaluation will be recorded
+value via `reflectStm`, i.e.\ its evaluation will be recorded
 now and played back later in the same
 relative order with respect to others
-within the closest \code{reifyBlock} 
+within the closest `reifyBlock` 
 invocation.
 
 
@@ -318,10 +318,10 @@ definition:
 
     def blocks(x: Any): List[Block[Any]]
 
-For example, applying \code{blocks} to an \code{IfThenElse}
+For example, applying `blocks` to an `IfThenElse`
 node will return the then and else blocks.
 Since definitions are case classes, this method is easy 
-to implement by using the \code{Product} interface that
+to implement by using the `Product` interface that
 all case classes implement.
 
 The basic structural in-order traversal is then defined like this:
@@ -335,7 +335,7 @@ The basic structural in-order traversal is then defined like this:
 
 
 Custom traversals can be implemented in a modular way by extending
-the \code{ForwardTraversal} trait:
+the `ForwardTraversal` trait:
 
     trait MyTraversalBase extends ForwardTraversal {
       val IR: BaseExp
@@ -354,9 +354,9 @@ the \code{ForwardTraversal} trait:
       }
     }
 
-For each unit of functionality such as \code{Arith} or \code{IfThenElse}
-the traversal actions can be defined separately as \code{MyTraversalArith}
-and \code{MyTraversalIfThenElse}.
+For each unit of functionality such as `Arith` or `IfThenElse`
+the traversal actions can be defined separately as `MyTraversalArith`
+and `MyTraversalIfThenElse`.
 
 Finally, we can use our traversal as follows:
 
@@ -387,10 +387,10 @@ We can achieve essentially the same using pattern
 matching and mixin composition, making use of the fact 
 that composing traits is subject to linearization [(*)](DBLP:conf/oopsla/OderskyZ05).
 We package each set of specific traversal rules into its own
-trait, e.g.\ \code{MyTraversalArith} that inherits from \code{MyTraversalBase}
-and overrides \code{traverseStm}.
+trait, e.g.\ `MyTraversalArith` that inherits from `MyTraversalBase`
+and overrides `traverseStm`.
 When the arguments do not match the rewriting pattern,
-the overridden method will invoke the ''parent'' implementation using \code{super}.
+the overridden method will invoke the ''parent'' implementation using `super`.
 When several such traits are combined, the super calls
 will traverse the overridden method implementations according to
 the linearization order of their containing traits. 
@@ -581,22 +581,22 @@ We switch to a ''sea of nodes''-like [(*)](DBLP:conf/irep/ClickP95) representati
       def findOrCreateDefinition[T](d: Def[T]): Sym[T]
     }
 
-It is instructive to compare the definition of trait \code{Expressions}
+It is instructive to compare the definition of trait `Expressions`
 with the one from the previous Chapter~\ref{chap:310trees}. 
 Again there are three categories of objects involved: expressions, 
-which are atomic (subclasses of \code{Exp}: constants and symbols; with
-a ''gensym'' operator \code{fresh} to create fresh symbols),
+which are atomic (subclasses of `Exp`: constants and symbols; with
+a ''gensym'' operator `fresh` to create fresh symbols),
 definitions, which represent composite operations (subclasses of 
-\code{Def}, to be provided by other components), and blocks, which
+`Def`, to be provided by other components), and blocks, which
 model nested scopes.
 
-Trait \code{Expressions} now provides methods to 
+Trait `Expressions` now provides methods to 
 find a definition given a symbol or vice versa. 
 Direct links between blocks and statements are removed.
-The actual graph nodes are \code{(Sym[T], Def[T])} pairs. 
+The actual graph nodes are `(Sym[T], Def[T])` pairs. 
 They need not be accessible to clients at this level.
-Thus method \code{reflectStm} from the previous chapter is
-replaced by \code{reflectPure}.
+Thus method `reflectStm` from the previous chapter is
+replaced by `reflectPure`.
 
 Graphs also carry nesting information (boundSyms, see below). 
 This enables code motion for different kinds of nested expressions such as lambdas, 
@@ -649,11 +649,11 @@ hash consing:
     def findOrCreateDefinition[T](d: Def[T]): Sym[T]
 
 
-Invoked by \code{reflectPure} through the implicit conversion 
-method \code{toAtom}, this method converts
+Invoked by `reflectPure` through the implicit conversion 
+method `toAtom`, this method converts
 a definition to an atomic expression and links it to
 the scope being built up by the innermost enclosing
-\code{reifyBlock} call. When the definition is known to be
+`reifyBlock` call. When the definition is known to be
 side-effect free, it will search the already 
 encountered definitions for a structurally equivalent one. 
 If a matching previous definition is found, its symbol
@@ -670,7 +670,7 @@ that effectively prevents generating duplicate code.
 
 ## Pattern Rewrites
 
-Using \code{findDefinition}, we can implement an extractor object [(*)](DBLP:conf/ecoop/EmirOW07)
+Using `findDefinition`, we can implement an extractor object [(*)](DBLP:conf/ecoop/EmirOW07)
 that enables pattern matching on a symbol to lookup
 the underlying definition associated to the symbol:
 
@@ -691,8 +691,8 @@ constructors for IR nodes that deeply inspect their arguments:
     }
 
 Smart constructors are a simple yet powerful rewriting facility.
-If the smart constructor is the only way to construct \code{Times}
-nodes we obtain a strong guarantee: No \code{Times} node is ever
+If the smart constructor is the only way to construct `Times`
+nodes we obtain a strong guarantee: No `Times` node is ever
 created without applying all possible rewrites first.
 
 
@@ -704,7 +704,7 @@ described above, are very generic.
 Other optimizations apply only to specific aspects of functionality,
 for example particular implementations of constant folding (or more generally
 symbolic rewritings) such as replacing computations like
-\code{x * 1.0} with \code{x}.
+`x * 1.0` with `x`.
 Yet other optimizations are specific to the actual program being staged.
 Kiselyov et al.\ [(*)](DBLP:conf/emsoft/KiselyovST04) describe 
 a number of rewritings that are particularly
@@ -715,14 +715,14 @@ in more detail in Section~\ref{sec:Afft}.
 What we want to achieve again is modularity, so that
 optimizations can be combined in a way that is most useful for a given task. 
 To implement a particular rewriting rule (whether specific or generic),
-say, \code{x * 1.0} $\rightarrow$ \code{x}, we can provide
-a specialized implementation of \code{infix_*} (overriding the one in trait \code{ArithExp})
+say, `x * 1.0` $\rightarrow$ `x`, we can provide
+a specialized implementation of `infix_*` (overriding the one in trait `ArithExp`)
 that will test its arguments for a particular pattern.
 How this can be done in a modular way is shown by the
-traits \code{ArithExpOpt} and \code{ArithExpOptFFT},
+traits `ArithExpOpt` and `ArithExpOptFFT`,
 which implement some generic and program specific optimizations.
-Note that the use of \code{x*y} within
-the body of \code{infix_*} will apply the optimization recursively.
+Note that the use of `x*y` within
+the body of `infix_*` will apply the optimization recursively.
 
 The appropriate pattern is to override the smart constructor in a separate 
 trait and call the super implementation if no rewrite matches. This decouples 
@@ -748,7 +748,7 @@ optimizations from node type definitions.
     }
 
 Note that the trait linearization order defines the rewriting strategy.
-We still maintain our guarantee that no \code{Times} node could be rewritten further.
+We still maintain our guarantee that no `Times` node could be rewritten further.
 
 \begin{figure*}\centering
   \includegraphics[width=\textwidth]{papers/cacm2012/figoverview.pdf}
@@ -774,22 +774,22 @@ always succeed. How do we detect this situation?
 In other cases we can use the Def extractor to lookup the definition
 of a symbol. This will not work here, because Def works on Exp input and
 produces a Def object as output. 
-We however need to work on the level of Exps, turning a Sym into \code{Const(true)}
+We however need to work on the level of Exps, turning a Sym into `Const(true)`
 based on context information.
 
 We need to adapt the way we construct IR nodes. 
-When we enter the then branch, we add \code{c$\rightarrow$Const(true)} to
+When we enter the then branch, we add `c$\rightarrow$Const(true)` to
 a substitution. This substitution needs to be applied 
 to arguments of IR nodes constructed within the then branch. 
 
-One possible solution would be add yet another type constructor, \code{Ref}, 
+One possible solution would be add yet another type constructor, `Ref`, 
 with an implicit conversion from Exp to Ref that applies the substitution.
-A signature like \code{IfThenElse(c: Exp, ...)} would become \code{IfThenElse(c: Ref, ...)}.
-A simpler solution is to implement \code{toAtom} in such a way that it 
+A signature like `IfThenElse(c: Exp, ...)` would become `IfThenElse(c: Ref, ...)`.
+A simpler solution is to implement `toAtom` in such a way that it 
 checks the resulting Def if any of its
-inputs need substitution and if so invoke \code{mirror} (see below) on the result 
+inputs need substitution and if so invoke `mirror` (see below) on the result 
 Def, which will apply the substitution, call the appropriate smart constructor
-and finally call \code{toAtom} again with the transformed result.
+and finally call `toAtom` again with the transformed result.
 
 
 ## Graph Transformations
@@ -798,16 +798,16 @@ In addition to optimizations performed during graph constructions, we
 can also implement transformation that work directly on the graph
 structure. This is useful if 
 we need to do analysis on a larger portion of the program first and only
-then apply the transformation. An example would be to find all \code{FooBar} 
-statements in a graph, and replace them uniformly with \code{BarBaz}.
+then apply the transformation. An example would be to find all `FooBar` 
+statements in a graph, and replace them uniformly with `BarBaz`.
 All dependent statements should re-execute
-their pattern rewrites, which might trigger on the new \code{BarBaz}
+their pattern rewrites, which might trigger on the new `BarBaz`
 input. 
 
 We introduce the concept of \emph{mirroring}: Given an IR node, we want to
-apply a substitution (or generally, a \code{Transformer}) to the arguments and 
+apply a substitution (or generally, a `Transformer`) to the arguments and 
 call the appropriate smart constructor again.
-For every IR node type we require a default \code{mirror} implementation 
+For every IR node type we require a default `mirror` implementation 
 that calls back its smart constructor:
 
     override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
@@ -822,14 +822,14 @@ general we have no (or only limited) context information because a single
 IR node may occur multiple times in the final program. Thus, attempting to simplify
 effectful or otherwise context-dependent expressions will produce wrong results 
 without an appropriate context.
-For pure expressions, a smart constructor called from \code{mirror} should not 
+For pure expressions, a smart constructor called from `mirror` should not 
 create new symbols apart from the result and it should not call reifyBlock. 
 Otherwise, if we were creating new symbols when 
 nothing changes, the returned symbol could not be used to check 
 convergence of an iterative transformation easily. 
 
-The \code{Transfomer} argument to \code{mirror} can be 
-queried to find out whether \code{mirror} is allowed to call context
+The `Transfomer` argument to `mirror` can be 
+queried to find out whether `mirror` is allowed to call context
 dependent methods:
 
     override def mirror[A](e: Def[A], f: Transformer): Exp[A] = e match {
@@ -842,8 +842,8 @@ dependent methods:
     }
 
 If the context is guaranteed to be set up correctly, we
-call the regular smart constructor and use \code{f.reflectBlock} to
-call mirror recursively on the contents of blocks \code{a} and \code{b}. 
+call the regular smart constructor and use `f.reflectBlock` to
+call mirror recursively on the contents of blocks `a` and `b`. 
 Otherwise, we call a more restricted context free method.
 
 
@@ -860,13 +860,13 @@ We define a method to find all symbols a given object references directly:
 
     def syms(x: Any): List[Sym[Any]]
 
-If \code{x} is a Sym itself, \code{syms(x)} will return \code{List(x)}. For a case class instance 
-that implements the \code{Product} interface such as \code{Times(a,b)}, it will return \code{List(a,b)} if both
-\code{a} and \code{b} are Syms. Since the argument type is \code{Any}, we can apply \code{syms} not 
+If `x` is a Sym itself, `syms(x)` will return `List(x)`. For a case class instance 
+that implements the `Product` interface such as `Times(a,b)`, it will return `List(a,b)` if both
+`a` and `b` are Syms. Since the argument type is `Any`, we can apply `syms` not 
 only to Def objects directly but also to lists of Defs, for example.
 
-Then, assuming \code{R} is the final program result, the set of remaining symbols in the 
-graph \code{G} is the least fixpoint of: 
+Then, assuming `R` is the final program result, the set of remaining symbols in the 
+graph `G` is the least fixpoint of: 
 
     G = R $\cup$ syms(G map findDefinition)
 
@@ -900,9 +900,9 @@ following methods, which can be overridden for new definition classes:
     def symsFreq(e: Any): List[(Sym[Any],   // frequency information (classify
       Double)]                              // sym as 'hot', 'normal', 'cold')
 
-To give an example, \code{boundSyms} applied to a loop node \code{RangeForeach(range,idx,body)}
-with index variable \code{idx} would return \code{List(idx)} to denote that
-\code{idx} is fixed ''inside'' the loop expression. 
+To give an example, `boundSyms` applied to a loop node `RangeForeach(range,idx,body)`
+with index variable `idx` would return `List(idx)` to denote that
+`idx` is fixed ''inside'' the loop expression. 
 
 Given a subgraph and a list of result nodes, the goal is to identify the graph 
 nodes that should form the ''current'' level, as opposed to those that should 
@@ -942,14 +942,14 @@ Code Motion Algorithm: Compute the set $L$ of top level statements for the curre
 
 4. Continue with 2 until a fixpoint is reached.
 
-To implement this algorithm, we need to determine the set \code{G} of nodes that are
+To implement this algorithm, we need to determine the set `G` of nodes that are
 forced inside and may not be part of the top level. 
-We start with the block result \code{R} and a graph \code{E} that has all unnecessary 
+We start with the block result `R` and a graph `E` that has all unnecessary 
 nodes removed (DCE already performed):
 
     E = R $\cup$ syms(E map findDefinition)
 
-We then need a way to find all uses of a given symbol \code{s}, 
+We then need a way to find all uses of a given symbol `s`, 
 up to but not including the node where the symbol is bound:
 
     U(s) = {s} $\cup$ { g $\in$ E | syms(findDefinition(g)) $\cap$ U(s) $\ne\emptyset$ 
@@ -961,18 +961,18 @@ are forced inside:
     B = boundSyms (E map findDefinition)
     G = union (B map U)    // must inside
 
-Computing \code{U(s)} for many symbols \code{s} individually is costly but
+Computing `U(s)` for many symbols `s` individually is costly but
 implementations can exploit considerable sharing to optimize the computation of
-\code{G}.
+`G`.
 
-The iteration in Figure~\ref{fig:codemotion2} uses \code{G} to follow forced-inside 
+The iteration in Figure~\ref{fig:codemotion2} uses `G` to follow forced-inside 
 nodes after a hot ref until a node is found that can be moved to the top level.
 
 
 Let us consider a few examples to build some intuition about the code motion behavior.
 In the code below, the starred conditional is on the fringe (first statement that
 can be outside) and on a hot path (through the loop). Thus it will be hoisted.
-Statement \code{foo} will be moved inside:
+Statement `foo` will be moved inside:
 
     loop { i =>                z = if* (x) foo
       if (i > 0)               loop { i =>
@@ -981,7 +981,7 @@ Statement \code{foo} will be moved inside:
     }                          }
 
 The situation changes if the inner conditional is forced inside by a value dependency. 
-Now statement \code{foo} is on the hot fringe and becomes top level.
+Now statement `foo` is on the hot fringe and becomes top level.
 
     loop { i =>                z = foo*
       if (x)                   loop { i =>
@@ -1014,8 +1014,8 @@ statement is used only in conditionals but in different conditionals:
     if (y)                       foo
       z
 
-In this situation \code{foo} will be duplicated. Often this duplication is
-beneficial because \code{foo} can be optimized together with other 
+In this situation `foo` will be duplicated. Often this duplication is
+beneficial because `foo` can be optimized together with other 
 statements inside 
 the branches.
 In general of course there is a danger of slowing down the program
@@ -1062,7 +1062,7 @@ This is useful for other analyses as well, but in particular for
 building transformers that traverse one graph
 in a tree like fashion and create another graph analogous to
 Section~\ref{sec:310treeTrans}. The implementation of
-trait \code{ForwardTransformer} carries over almost
+trait `ForwardTransformer` carries over almost
 unmodified.
 
 
@@ -1085,24 +1085,24 @@ in spirit but not identical to SSA conversion).
 
 ## Simple Effect Domain
 
-We first consider global effects like console output via \code{println}. Distinguishing only between
+We first consider global effects like console output via `println`. Distinguishing only between
 ''has no effect'' and ''may have effect'' means that all operations on mutable data structures, 
 including reads, have to be serialized along with all other side effects.
 
 By default, we assume operations to be pure (i.e.\ side-effect free).
-Programmers can designate effectful operations by using \code{reflectEffect} instead of
-the implicit conversion \code{toAtom} which internally delegates to \code{reflectPure}.
+Programmers can designate effectful operations by using `reflectEffect` instead of
+the implicit conversion `toAtom` which internally delegates to `reflectPure`.
 Console output, for example, is implemented like this:
 
     def print(x: Exp[String]): Exp[Unit] = reflectEffect(Print(x))
 
-The call to \code{reflectEffect} adds the passed IR node to a list of effects for the 
+The call to `reflectEffect` adds the passed IR node to a list of effects for the 
 current block. Effectful expressions will attract dependency edges between them to 
 ensure serialization. 
-A compound expression such as a loop or a conditional will internally use \code{reifyBlock},
+A compound expression such as a loop or a conditional will internally use `reifyBlock`,
 which attaches nesting edges to the effectful nodes contained in the block.
 
-Internally, \code{reflectEffect} creates \code{Reflect} nodes that keep track
+Internally, `reflectEffect` creates `Reflect` nodes that keep track
 of the context dependencies:
 
     var context: List[Exp[Any]]
@@ -1120,7 +1120,7 @@ fine grained for mutable data.
 
 ## Fine Grained Effects: Tracking Mutations per Allocation Site
 
-We can add other, more fine grained, variants of \code{reflectEffect} which
+We can add other, more fine grained, variants of `reflectEffect` which
 allow tracking mutations per allocation site or other, more general abstractions
 of the heap that provide a partitioning into regions. Aliasing and sharing of
 heap objects such as arrays can be tracked via optional annotations on IR
@@ -1128,8 +1128,8 @@ nodes. Reads and writes of mutable objects are automatically serialized and
 appropriate dependencies inserted to guarantee a legal execution schedule.
 
 Effectful statements are tagged with an effect summary that further describes the effect.
-The summary can be extracted via \code{summarizeEffects}, and 
-there are some operations on summaries (like \code{orElse}, \code{andThen}) to 
+The summary can be extracted via `summarizeEffects`, and 
+there are some operations on summaries (like `orElse`, `andThen`) to 
 combine effects.
 As an example consider the definition of conditionals, which computes the
 compound effect from the effects of the two branches:
@@ -1145,7 +1145,7 @@ compound effect from the effects of the two branches:
     }
 
 To specify effects more precisely for different kinds of IR nodes, we add 
-further \code{reflect} methods:
+further `reflect` methods:
 
     reflectSimple     // a 'simple' effect: serialized with other simple effects
     reflectMutable    // an allocation of a mutable object; result guaranteed unique
@@ -1168,16 +1168,16 @@ alias, contain, extract from or copy from.
     def copySyms(e: Any): List[Sym[Any]]
 
 These four pieces of information correspond to the possible pointer 
-operations \code{x = y}, \code{*x = y}, \code{x = *y} and \code{*x = *y}. 
-Assuming an operation \code{y = Foo(x)}, \code{x} should be returned in the following cases:
+operations `x = y`, `*x = y`, `x = *y` and `*x = *y`. 
+Assuming an operation `y = Foo(x)`, `x` should be returned in the following cases:
 
     x $\in$ aliasSyms(y)      if y = x      // if then else
     x $\in$ containSyms(y)    if *y = x     // array update
     x $\in$ extractSyms(y)    if y = *x     // array apply
     x $\in$ copySyms(y)       if *y = *x    // array clone
 
-Here, \code{y = x} is understood as ''y may be equal to x'', 
-\code{*y = x} as ''dereferencing y (at some index) may return x'' etc.
+Here, `y = x` is understood as ''y may be equal to x'', 
+`*y = x` as ''dereferencing y (at some index) may return x'' etc.
 
 
 
@@ -1195,7 +1195,7 @@ accessed.
 The framework uses the aliasing and points-to information to
 enforce these rules and to keep track of immutable objects that 
 point to mutable data. This is to make sure the right serialization 
-dependencies and \code{reflectRead} calls are inserted for
+dependencies and `reflectRead` calls are inserted for
 operations that may reference mutable state in an
 indirect way.
 
@@ -1278,9 +1278,9 @@ This algorithm allows us to do all forward data flow analyses and transforms in
 one uniform, combined pass driven by rewriting. In the example above, during the initial 
 iteration (middle), separately
 specified rewrites for variables and conditionals work together to 
-determine that \code{x=c} is never executed. At the end of the loop body we
-discover the write to \code{c}, which invalidates our initial optimistic
-assumption \code{c=0}.  We rewrite the original body again with the augmented
+determine that `x=c` is never executed. At the end of the loop body we
+discover the write to `c`, which invalidates our initial optimistic
+assumption `c=0`.  We rewrite the original body again with the augmented
 information (right).  This time there is no additional knowledge discovered so
 the last speculative rewrite becomes the final one.  
 
@@ -1313,10 +1313,10 @@ transforms a plus operation on Vectors into an operation on arrays:
       }
     }
 
-The transformation is only carried out at phase \code{lowering}.
-Before that, the IR node remains a \code{VectorPlus} node, which
+The transformation is only carried out at phase `lowering`.
+Before that, the IR node remains a `VectorPlus` node, which
 allows other smart constructor rewrites to kick in that  
-match their arguments against \code{VectorPlus}.
+match their arguments against `VectorPlus`.
 
 Technically, delayed rewriting is implemented using a worklist
 transformer that keeps track of the rewrites to be
@@ -1388,15 +1388,15 @@ We can define a generic framework for data structures:
 
 There are two IR node types, one for structure creation and one for field access.
 The structure creation node contains a hash map that holds (static) field identifiers
-and (dynamic) field values. It also contains a \code{tag} that can be used to
+and (dynamic) field values. It also contains a `tag` that can be used to
 hold further information about the nature of the data structure.
-The interface for field accesses is method \code{field}, which pattern matches
-on its argument and, if that is a \code{Struct} creation, looks up the desired value
+The interface for field accesses is method `field`, which pattern matches
+on its argument and, if that is a `Struct` creation, looks up the desired value
 from the embedded hash map.
 
 
 We continue by adding a rule that makes the result 
-of a conditional a \code{Struct} if the branches return \code{Struct}:
+of a conditional a `Struct` if the branches return `Struct`:
 
     override def ifThenElse[T](cond: Rep[Boolean], a: Rep[T], b: Rep[T]) = 
     (a,b) match {
@@ -1419,7 +1419,7 @@ an extension to unions and inheritance in Section~\ref{sec:455inherit}.
 \label{sec:360soa}
 
 A natural extension of this mechanism is a generic array-of-struct to struct-of-array transform. 
-The definition is analogous to that of conditionals. We override the array constructor \code{arrayFill} 
+The definition is analogous to that of conditionals. We override the array constructor `arrayFill` 
 that represents expressions of the form \c|Array.fill(n) { i => body }|
 to create a struct with an array for each component of the body if the body itself
 is a Struct: 
@@ -1431,7 +1431,7 @@ is a Struct:
       case _ => super.arrayFill(size, v, body)
     }
 
-Note that we tag the result struct with an \code{ArraySoaTag} to keep track
+Note that we tag the result struct with an `ArraySoaTag` to keep track
 of the transformation. This class is defined as follows:
 
     case class ArraySoaTag(base: StructTag, len: Exp[Int]) extends StructTag
@@ -1462,7 +1462,7 @@ Section~\ref{sec:455structUse} and Chapter~\ref{chap:460fusionUse}.
 \newcommand{\G}[0]{\mathcal{G}}
 
 The use of independent and freely composable traversal operations such as
-\code{v.map(..).sum} is preferable to explicitly coded loops. However, naive
+`v.map(..).sum` is preferable to explicitly coded loops. However, naive
 implementations of these operations would be expensive and entail lots of
 intermediate data structures.  We provide a novel loop fusion algorithm for
 data parallel loops and traversals (see Chapter~\ref{chap:460fusionUse}
@@ -1470,23 +1470,23 @@ for examples of use). The core loop abstraction is
 
     loop(s) $\overline{\mathtt{{x=}}\G}$ { i => $\overline{E[ \mathtt{x} \yield \mathtt{f(i)} ]}$ }
 
-where \code{s} is the size of the loop and \code{i} the loop
+where `s` is the size of the loop and `i` the loop
 variable ranging over $[0,\mathtt{s})$. A loop can compute
 multiple results $\overline{\mathtt{x}}$, each of which is associated
-with a generator $\G$, one of \code{Collect}, which creates a flat array-like
-data structure, \code{Reduce($\oplus$)}, which reduces values with
-the associative operation $\oplus$, or \code{Bucket($\G$)}, which
+with a generator $\G$, one of `Collect`, which creates a flat array-like
+data structure, `Reduce($\oplus$)`, which reduces values with
+the associative operation $\oplus$, or `Bucket($\G$)`, which
 creates a nested data structure, grouping generated values by key
 and applying $\G$ to those with matching key. Loop bodies consist
-of yield statements \code{x $\yield$ f(i)} that define values
+of yield statements `x $\yield$ f(i)` that define values
 passed to generators (of this loop or an outer loop), embedded
 in some outer context $E[.]$ that might consist of other loops
-or conditionals. For \code{Bucket} generators yield takes
+or conditionals. For `Bucket` generators yield takes
 (key,value) pairs.
 
 
 
-    Generator kinds: $\mathcal{G} ::= $ \code{Collect} $|$ \code{Reduce($\oplus$)} $|$ \code{Bucket($\mathcal{G}$)} \\
+    Generator kinds: $\mathcal{G} ::= $ `Collect` $|$ `Reduce($\oplus$)` $|$ `Bucket($\mathcal{G`$)} \\
     Yield statement: xs $\yield$ x \\
     Contexts: $E[.] ::= $ loops and conditionals
 
@@ -1533,30 +1533,30 @@ operations:
                                             x $\yield$ (v(i), v(i)) }
 
 Other operations are accommodated by generalizing slightly. Instead of
-implementing a \code{groupBy} operation that returns a sequence of
+implementing a `groupBy` operation that returns a sequence of
 (Key, Seq[Value]) pairs we can return the keys and
-values in separate data structures. The equivalent of \code{(ks,vs)=v.groupBy(k).unzip}
+values in separate data structures. The equivalent of `(ks,vs)=v.groupBy(k).unzip`
 is:
 
     loop(v.size) ks=Bucket(Reduce(rhs)),vs=Bucket(Collect) { i => 
       ks $\yield$ (v(i), v(i)); vs $\yield$ (v(i), v(i)) }
 
 In Figure~\ref{fig-fusion},
-multiple instances of \code{f1(i)} are subject to CSE and not evaluated twice.
-Substituting \code{x1(i2)} with \code{f1(i)} will remove a reference to \code{x1}.
-If \code{x1} is not used anywhere else, it will also be subject to DCE.
-Within fused loop bodies, unifying index variable \code{i} and substituting
+multiple instances of `f1(i)` are subject to CSE and not evaluated twice.
+Substituting `x1(i2)` with `f1(i)` will remove a reference to `x1`.
+If `x1` is not used anywhere else, it will also be subject to DCE.
+Within fused loop bodies, unifying index variable `i` and substituting
 references will trigger the uniform forward transformation pass.
 Thus, fusion not only removes intermediate data structures but also provides
 additional optimization opportunities inside fused loop bodies
 (including fusion of nested loops).
 
-Fixed size array construction \code{Array(a,b,c)} can be expressed as
+Fixed size array construction `Array(a,b,c)` can be expressed as
 
     loop(3) x=Collect { case 0 => x $\yield$ a 
                         case 1 => x $\yield$ b case 2 => x $\yield$ c }
 
-and concatenation \code{xs ++ ys} as \code{Array(xs,ys).flatMap(i=>i)}:
+and concatenation `xs ++ ys` as `Array(xs,ys).flatMap(i=>i)`:
 
     loop(2) x=Collect { case 0 => loop(xs.size) { i => x $\yield$ xs(i) } 
                         case 1 => loop(ys.size) { i => x $\yield$ ys(i) }}

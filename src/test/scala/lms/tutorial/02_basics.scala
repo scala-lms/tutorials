@@ -57,7 +57,7 @@ It is very easy to make subtle mistakes:
       if (n == 0) "1.0" else "b * " + power(b, n - 1) + ")"
 
 We have accidentally omitted a parenthesis, so the result is not syntactically well
-formed code. Furthermore, the literal identifier \code{b} is part of the output:
+formed code. Furthermore, the literal identifier `b` is part of the output:
 
     power("x",4) // "b * b * b * b * 1.0)))"
 
@@ -108,7 +108,7 @@ of the object language. This is trivial if meta-language and
 object language are the same. Otherwise it is slightly more difficult
 [(*)](mainland07quasiquoting).
 
-The \code{Tree} type can be left abstract. Some implementations 
+The `Tree` type can be left abstract. Some implementations 
 hide the exact data structures to guarantee safety of optimizations
 on object code. Silently modifying trees with rewrites that 
 maintain semantic but not structural equality (e.g.\ beta reduction)
@@ -142,12 +142,12 @@ object program uses effects or not.
 With syntax and scoping out of the way, we turn our attention
 to type correctness. Fortunately, type correctness falls out
 naturally if parametric types are available. We just replace
-type \code{Tree} with \code{Tree[T]}:
+type `Tree` with `Tree[T]`:
 
     def power(b: Tree[Double], n: Int): Tree[Double] = 
 
-Now the type system ensures that \code{power} is only
-applied to AST nodes that compute \code{Double} values
+Now the type system ensures that `power` is only
+applied to AST nodes that compute `Double` values
 in the next stage. 
 
 Note that the use of parametric types alone does not prevent scope
@@ -283,17 +283,17 @@ that it is independent of any partial evaluation mechanics such as CPS
 conversion and expressed in a simple, purely operational way.
 Continuing with quasiquoting, we show how we can remove
 syntactic overhead and arrive at a more restricted object language
-by providing a typed API over staged \code{Rep[T]} values
+by providing a typed API over staged `Rep[T]` values
 that hides the internal implementation.
 At this point, quasiquoting becomes an implementation detail
 that is no longer strictly needed because the higher level
 object language interface has taken over most of the staging
 guarantees. Staging can be implemented as a library, without 
 specific language support. Linguistic reuse is
-enabled by lifting operations from type \code{T} to \code{Rep[T]}.
+enabled by lifting operations from type `T` to `Rep[T]`.
 The object language can be
 divided into reusable components. Since there is only a single
-shared \code{Rep[T]} type, no layerings or translations
+shared `Rep[T]` type, no layerings or translations
 between components are necessary. 
 Deep reuse of type inference enables a form of semi-automatic local BTA
 since method overloading will select either staged or unstaged operations
@@ -319,7 +319,7 @@ introduce the following typings:
     def perform(stm: String): Code
     def accumulate(res: => Code): String
 
-Note the by-name argument of accumulate. The \code{Code} type and the method
+Note the by-name argument of accumulate. The `Code` type and the method
 implementations can remain abstract for the moment.
 
 We can put perform and accumulate to use in the power example as follows:
@@ -329,14 +329,14 @@ We can put perform and accumulate to use in the power example as follows:
       perform("(" + accumulate { b } + " * " + accumulate { power(b, n - 1) } + ")")
 
 We define perform and accumulate in the following way to perform automatic eager
-let insertion. The private constructor \code{code} builds a \code{Code} object from a string:
+let insertion. The private constructor `code` builds a `Code` object from a string:
 
     accumulate { E[ perform("str") ] } 
         $\longrightarrow$ "{ val fresh = str; " + accumulate { E[ code("fresh") ] } + "}"
     accumulate { code("str") }         
         $\longrightarrow$ "str"
 
-Where \code{E} is an accumulate-free evaluation context and \code{fresh} a fresh identifier.
+Where `E` is an accumulate-free evaluation context and `fresh` a fresh identifier.
 These rules can be implemented using one piece of mutable state in a 
 straightforward way.
 
@@ -362,7 +362,7 @@ of the generated code:
 
 If structural equality is desired, a simple special case can be added to 
 the above definition to directly translate 
-\code{accumulate(perform("a"))} to \lstinline{"a"}.
+`accumulate(perform("a"))` to \lstinline{"a"}.
 Within a suitable context, perform is also a left inverse
 of accumulate: Performing a set of accumulated statements together 
 is the same as just performing the statements individually.
@@ -466,9 +466,9 @@ and operations:
     def power(b: Code[Double], n: Int): Code[Double] = 
       if (n == 0) q"1.0" else  q"($\$$b * $\$${ power(b, n - 1) } )"
 
-We already identify object code via \code{Code[T]} types.
+We already identify object code via `Code[T]` types.
 Instead of quasiquotes we can employ other ways of lifting the necessary 
-operations on type \code{T} to type \code{Code[T]}:
+operations on type `T` to type `Code[T]`:
 
     implicit def liftDouble(x: Double): Code[Double] = q"x"
     def infix_*(x: Code[Double], y: Code[Double]): Code[Double] = q"$\$$x * $\$$y"
@@ -484,7 +484,7 @@ the work for us and we can write just this:
     def power(b: Code[Double], n: Int): Code[Double] = 
       if (n == 0) 1.0 else b * power(b, n - 1)
 
-Apart from the \code{Code[_]} types, we have re-engineered exactly
+Apart from the `Code[_]` types, we have re-engineered exactly
 the regular, unstaged power function! All other traces of staging
 annotations are gone.
 
@@ -514,9 +514,9 @@ of the client code.
 
 We can use any representation we like for staged expressions.
 For the sake of simplicity we will stick to strings. Where we have
-used type \code{Code[T]} above, we will use \code{Rep[T]} from now
+used type `Code[T]` above, we will use `Rep[T]` from now
 on because we want to allude to thinking more about the
-\emph{representation} of a \code{T} value in the next stage and
+\emph{representation} of a `T` value in the next stage and
 less about composing code fragments.
 
 Where quasiquoting allowed the full language to be staged,
@@ -531,10 +531,10 @@ It is also possible to lift whole traits or classes
 using reflection [(*)](DBLP:conf/ecoop/KossakowskiARO12).
 
 
-We can define a simple object language \code{MyStagedLanguage} as follows, 
-using \code{private} access qualifiers to ensure that the staging primitives 
+We can define a simple object language `MyStagedLanguage` as follows, 
+using `private` access qualifiers to ensure that the staging primitives 
 perform and accumulate are inaccessible to client code outside of package
-\code{internal}:
+`internal`:
 
     package internal
     trait Base extends EmbeddedControls {
@@ -556,13 +556,13 @@ perform and accumulate are inaccessible to client code outside of package
 
 Note that we invoke accumulate only for by-name parameters. All others are already
 object code values, so evaluating them is a no-op and cannot have side effects.
-In doing so we silently assume a sensible \code{toString} operation on \code{Rep[T]}.
+In doing so we silently assume a sensible `toString` operation on `Rep[T]`.
 If we do not want to make this assumption then we need accumulate calls everywhere
-a \code{Rep[T]} value is converted to a string representation.
+a `Rep[T]` value is converted to a string representation.
 
 
 
-Client code just needs access to an object of type \code{MyStagedLanguage} to
+Client code just needs access to an object of type `MyStagedLanguage` to
 call methods on it. Common ways to achieve this include path-dependent
 types and imports:
 
@@ -645,9 +645,9 @@ can be defined in terms of a simple higher-order abstract syntax (HOAS) [(*)](DB
 representation, similar to those of Carette et al.\ [(*)](DBLP:journals/jfp/CaretteKS09) 
 and Hofer et al. [(*)](DBLP:conf/gpce/HoferORM08).
 
-The idea is to provide a \code{lambda} operation that transforms present-stage 
-functions over staged values (type \code{Rep[A] => Rep[B]}) to staged
-function values (type \code{Rep[A=>B]}). 
+The idea is to provide a `lambda` operation that transforms present-stage 
+functions over staged values (type `Rep[A] => Rep[B]`) to staged
+function values (type `Rep[A=>B]`). 
 
     trait Functions extends Base {
       def lambda[A,B](f: Rep[A] => Rep[B]): Rep[A=>B]
@@ -662,21 +662,21 @@ recursive factorial function will look like this:
       else n * fac(n - 1)
     }
 
-As opposed to the earlier power example, an invocation \code{fac(m)} will not
-inline the definition of \code{fac} but result in an actual function call in 
+As opposed to the earlier power example, an invocation `fac(m)` will not
+inline the definition of `fac` but result in an actual function call in 
 the generated code.
 
 However the HOAS representation has the disadvantage of being
 opaque: there is no immediate way to ''look into'' a Scala function object.
 If we want to treat functions in the same way as other program constructs, we
 need a way to transform the HOAS encoding into our string representation.
-We can implement \code{lambda(f)} to call 
+We can implement `lambda(f)` to call 
 
     accumulate { f(fresh[A]) }
 
 which will unfold the function definition into a block that represents the
-entire computation defined by the function (assuming that \code{fresh[A]} creates
-a fresh symbol of type \code{A}).
+entire computation defined by the function (assuming that `fresh[A]` creates
+a fresh symbol of type `A`).
 But eagerly expanding function definitions is problematic.
 For recursive functions, the result would be infinite, i.e.\ the computation will not
 terminate.
@@ -690,7 +690,7 @@ However this is difficult because recursion might be very indirect:
       g(x)
     }
 
-Each incarnation of \code{foo} creates a new function \code{f};
+Each incarnation of `foo` creates a new function `f`;
 unfolding will thus create unboundedly many different function objects.
 
 To detect cycles, we have to \emph{compare} those functions.
@@ -738,8 +738,8 @@ Given a method or function implementation:
 
 Scala's type inference can determine whether the operations
 and the result will be staged or not. We just have to provide 
-the binding time for parameter \code{b}. Note that staging \code{n}
-would require explicit use of \code{lambda} because there
+the binding time for parameter `b`. Note that staging `n`
+would require explicit use of `lambda` because there
 is no static criterion to stop the recursion.
 
 In some cases we need to be conservative, for example for mutable
@@ -749,7 +749,7 @@ objects:
     if (c)    // c: Rep[Boolean]
       i += 1
 
-The variable \code{i} must be lifted because writes depend 
+The variable `i` must be lifted because writes depend 
 on dynamic control flow. We can accomplish this by
 implementing the virtualized var constructor to always
 lift variable declarations, even if the initial
@@ -767,25 +767,25 @@ a trait, it can be selectively imported:
 
 Code generation in LMS is an explicit operation. For the common case where
 generated code is to be loaded immediately into the running program, 
-trait \code{Compile} provides a suitable interface in form of the abstract 
-method \code{compile}:
+trait `Compile` provides a suitable interface in form of the abstract 
+method `compile`:
 
     trait Compile extends Base {
       def compile[A,B](f: Rep[A] => Rep[B]): A=>B
     }
 
-The contract of \code{compile} is to ''unstage'' a function from
+The contract of `compile` is to ''unstage'' a function from
 staged to staged values into a function operating on 
 present-stage values that can be used just like any other
 function object in the running program.
 Of course this only works for functions that do not reference
-externally bound \code{Rep[T]} values,
+externally bound `Rep[T]` values,
 otherwise the generate code will not compile due to free identifiers.
 The given encoding into Scala's type system does not
 prevent this kind of error.
 
 For generating Scala code, an implementation of the compilation
-interface is provided by trait \code{CompileScala}:
+interface is provided by trait `CompileScala`:
 
     trait CompileScala extends Compile {
       def compile[A,B](f: Rep[A] => Rep[B]) = {
@@ -800,8 +800,8 @@ interface is provided by trait \code{CompileScala}:
       }
     }
 
-The overall compilation logic of \code{CompileScala} is
-relatively simple: emit a class and \code{apply}-method declaration
+The overall compilation logic of `CompileScala` is
+relatively simple: emit a class and `apply`-method declaration
 header, emit instructions for each definition node according to 
 the schedule, close the source file, invoke the Scala compiler,
 load the generated class file and return a newly
