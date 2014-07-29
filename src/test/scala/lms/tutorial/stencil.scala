@@ -57,18 +57,6 @@ trait SlidingExp extends DslExp with Sliding {
     case _ => super.int_minus(lhs,rhs)
   }).asInstanceOf[Exp[Int]]
 
-  override def numeric_plus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
-    case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
-    case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)
-    case _ => super.numeric_plus(lhs,rhs)
-  }).asInstanceOf[Exp[T]]
-
-  override def numeric_minus[T:Numeric:Manifest](lhs: Exp[T], rhs: Exp[T])(implicit pos: SourceContext): Exp[T] = ((lhs,rhs) match {
-    case (Def(NumericMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_minus(x, unit(y+z)) // (x-y)-z --> x-(y+z)
-    case (Def(NumericPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => numeric_plus(x, unit(y-z)) // (x+y)-z --> x+(y-z)
-    case _ => super.numeric_minus(lhs,rhs)
-  }).asInstanceOf[Exp[T]]
-    
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
     val i = fresh[Int]
 
