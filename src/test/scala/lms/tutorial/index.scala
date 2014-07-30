@@ -43,10 +43,11 @@ The following tutorials are available:
 - [Sliding Stencil](stencil.html)
 
 
-In-Depth Documentation
-----------------------
+LMS In-Depth
+------------
 
-Tentative restructuring
+<div class="alert alert-danger" role="alert"> <strong>TODO:</strong> flesh out </div>
+
 
 ### Getting Started
 
@@ -109,8 +110,10 @@ Advanced:
 - LMS for Truffle / Graal
 
 
-In-Depth Documentation
+LMS In Even More Depth
 ----------------------
+
+<div class="alert alert-danger" role="alert"> <strong>TODO:</strong> integrate above </div>
 
 1. [Getting Started](01_overview.html)
     1. About Generative Programming
