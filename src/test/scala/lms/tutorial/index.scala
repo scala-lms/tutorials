@@ -3,9 +3,9 @@
 Tutorials and Documentation
 ===========================
 
-This tutorial series introduces _Lightweight Modular Staging_ (LMS),
-a technique for embedding domain-specific languages (DSL) in Scala,
-using a runtime code generation approach.
+This tutorial series introduces _Lightweight Modular Staging_ (LMS), a
+technique for embedding domain-specific languages (DSL) in Scala, using a
+runtime code generation approach.
 
 
 Self-Contained Tutorials
@@ -146,10 +146,12 @@ In-Depth Documentation
         1. Regular Expression Matcher Example
 
 
+In-Depth Documentation
+----------------------
 
+Tentative restructuring
 
-Getting Started
----------------
+### Getting Started
 
 - Why generative programming?
     Because abstraction without regret!
@@ -158,8 +160,7 @@ Getting Started
 - Hellow World
 
 
-Design Patterns
----------------
+### Design Patterns
 
 - Specialization on static data
 - Building meta-language abstractions
@@ -170,16 +171,14 @@ Design Patterns
 - Implementing DSLs with multiple abstraction levels
 
 
-From Zero to LMS
-----------------
+### From Zero to LMS
 
 - Program generation with Strings
 - Program generation with Trees
 - Program generation with Graphs
 
 
-LMS Internals
--------------
+### LMS Internals
 
 - Graph IR
 - Effects
@@ -191,8 +190,7 @@ LMS Internals
 - Structs
 
 
-Integration
------------
+### Integration
 
 - LMS for Scala
 - LMS for JavaScript
