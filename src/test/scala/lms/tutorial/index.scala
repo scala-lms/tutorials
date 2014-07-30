@@ -27,14 +27,17 @@ The following tutorials are available:
     From interpreters to compilers using staging
 
 - [Ackermann's Function](ack.html)
-    Turning a recursive function into an automaton
+
+- [Automata and Regexp Take 2](automata.html)
+    Turning recursive functions into automata
+    NFA to DFA conversion using staging
 
 - [SQL Engine](csv.html)
     Efficient data processing
 
-- [Sliding Stencil](stencil.html)
-
 - [Fast Fourier Transform (FFT)](fft.html)
+
+- [Sliding Stencil](stencil.html)
 
 
 In-Depth Documentation
