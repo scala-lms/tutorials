@@ -34,6 +34,8 @@ The following tutorials are available:
 
 - [Sliding Stencil](stencil.html)
 
+- [Fast Fourier Transform (FFT)](fft.html)
+
 
 In-Depth Documentation
 ----------------------
