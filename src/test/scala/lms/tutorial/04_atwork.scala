@@ -2214,13 +2214,12 @@ members defined by `TestFFC`.
 \label{sec:Aregex}
 
 Specializing string matchers and parsers is a popular benchmark in the partial
-evaluation and supercompilation literature [(*)](DBLP:journals/ipl/ConselD89,D
-BLP:journals/toplas/AgerDR06,DBLP:journals/toplas/SperberT00,DBLP:journals/top
-las/Turchin86, DBLP:journals/jfp/SorensenGJ96). % We consider ``multi-
-threaded'' regular expression matchers, that spawn a new conceptual thread to
-process alternatives in parallel. Of course these matchers do not actually
-spawn OS-level threads, but rather need to be advanced manually by client
-code. Thus, they are similar to coroutines.
+evaluation and supercompilation literature 
+[(*)](DBLP:journals/ipl/ConselD89,DBLP:journals/toplas/AgerDR06,DBLP:journals/toplas/SperberT00,DBLP:journals/toplas/Turchin86, DBLP:journals/jfp/SorensenGJ96). 
+We consider ``multi-threaded'' regular expression matchers, that spawn a new 
+conceptual thread to process alternatives in parallel. Of course these matchers 
+do not actually spawn OS-level threads, but rather need to be advanced manually 
+by client code. Thus, they are similar to coroutines.
 
 Here is a simple example for the fixed regular expression `.*AAB`:
 
