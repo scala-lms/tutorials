@@ -145,4 +145,65 @@ In-Depth Documentation
         1. Fast Fourier Transform Example
         1. Regular Expression Matcher Example
 
+
+
+
+Getting Started
+---------------
+
+- Why generative programming?
+    Because abstraction without regret!
+- Why LMS?
+    Because batteries included and hackable!
+- Hellow World
+
+
+Design Patterns
+---------------
+
+- Specialization on static data
+- Building meta-language abstractions
+- From interpreter to compiler
+- Mixed-stage data structures
+- Type classes and generic programming
+
+- Implementing DSLs with multiple abstraction levels
+
+
+From Zero to LMS
+----------------
+
+- Program generation with Strings
+- Program generation with Trees
+- Program generation with Graphs
+
+
+LMS Internals
+-------------
+
+- Graph IR
+- Effects
+- Code Motion
+- Transformers
+- Code Generators
+
+- Functions
+- Structs
+
+
+Integration
+-----------
+
+- LMS for Scala
+- LMS for JavaScript
+- LMS for C
+
+- LMS for Scala Macros
+- LMS for Vector Intrinsics
+- LMS for GPUs
+- LMS for FPGAs
+- LMS for SMT Solvers
+- LMS for Truffle / Graal
+
+
 */
