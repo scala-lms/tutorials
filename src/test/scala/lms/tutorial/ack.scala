@@ -4,6 +4,10 @@ Ackermann's Function
 
 Turning a recursive function into an automaton, i.e. a set of mutually 
 recursive functions.
+
+Outline:
+<div id="tableofcontents"></div>
+
 */
 
 package scala.lms.tutorial

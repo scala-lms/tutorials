@@ -4,6 +4,10 @@ Sliding Stencil
 
 Shonan Challenge 3.3 Stencil
 https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
+
+Outline:
+<div id="tableofcontents"></div>
+
 */
 
 package scala.lms.tutorial

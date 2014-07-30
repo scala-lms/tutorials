@@ -5,13 +5,15 @@ Shonan Challenge
 
 In this tutorial we will develop a solution to the HMM problem from the Shonan Challenge.
 
-  For further reference, see:
+For further reference, see:
 
-    - Shonan Challenge for Generative Programming
-      Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
-      https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf
+- Shonan Challenge for Generative Programming
+  Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
+  https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf
+- https://github.com/StagedHPC/shonan-challenge
 
-    - https://github.com/StagedHPC/shonan-challenge
+Outline:
+<div id="tableofcontents"></div>
 
 */
 

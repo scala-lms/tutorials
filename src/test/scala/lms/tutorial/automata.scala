@@ -2,9 +2,13 @@
 # From Functions to Automata: Regex take 2
 \label{sec:Aregex}
 
+Outline:
+<div id="tableofcontents"></div>
+
+
 Specializing string matchers and parsers is a popular benchmark in the partial
 evaluation and supercompilation literature 
-[(*)](DBLP:journals/ipl/ConselD89,DBLP:journals/toplas/AgerDR06,DBLP:journals/toplas/SperberT00,DBLP:journals/toplas/Turchin86, DBLP:journals/jfp/SorensenGJ96). 
+[(*)](DBLP:journals/ipl/ConselD89,DBLP:journals/toplas/AgerDR06,DBLP:journals/toplas/SperberT00,DBLP:journals/toplas/Turchin86,DBLP:journals/jfp/SorensenGJ96). 
 We consider ``multi-threaded'' regular expression matchers, that spawn a new 
 conceptual thread to process alternatives in parallel. Of course these matchers 
 do not actually spawn OS-level threads, but rather need to be advanced manually 

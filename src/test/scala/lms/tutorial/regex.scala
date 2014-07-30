@@ -2,6 +2,10 @@
 From Interpreter to Compiler
 ============================
 
+Outline:
+<div id="tableofcontents"></div>
+
+
 A staged interpreter is a compiler. This is useful, because an
 interpreter is usually much easier to implement than a compiler. In
 this section, we illustrate how to turn a vanilla interpreter into a

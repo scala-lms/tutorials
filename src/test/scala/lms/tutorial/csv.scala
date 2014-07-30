@@ -3,6 +3,10 @@ A SQL Query Compiler
 ====================
 
 Abstraction without regret for efficient data processing.
+
+Outline:
+<div id="tableofcontents"></div>
+
 */
 
 package scala.lms.tutorial

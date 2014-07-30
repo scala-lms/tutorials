@@ -2,6 +2,10 @@
 # Fast Fourier Transform (FFT)
 <a name="sec:Afft"></a>
 
+Outline:
+<div id="tableofcontents"></div>
+
+
 We consider staging a fast fourier transform (FFT) algorithm.  A staged FFT,
 implemented in MetaOCaml, has been presented by Kiselyov et~al.\
 [(*)](DBLP:conf/emsoft/KiselyovST04) Their work is a very good example for how

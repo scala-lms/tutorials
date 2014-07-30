@@ -1,29 +1,12 @@
 /**
 
-Overview
-========
-
-1. Getting Started
-    1. About Generative Programming
-        1. Productivity vs Performance
-        1. About Generative Programming
-        1. Generative Programming Patterns
-        1. Staging and Extensible Compilers
-        1. Domain-Specific Languages
-    3. LMS Basics
-        1. Rep Types
-        2. Staging as a Scala library
-        3. Comparing LMS to other systems
-    4. Installing LMS
-    5. Getting Help
-    6. Summary
-
-
-
 Getting Started
 ===============
 
 This chapter will be about getting started with LMS. We will begin by explaining some background on generative programming, then move on to how to get LMS running on your system and finally how to get it set up to start working with. At the end of this chapter you should understand why LMS is around, why you should use it and you should be all set up to do so.
+
+Outline:
+<div id="tableofcontents"></div>
 
 
 About Generative Programming

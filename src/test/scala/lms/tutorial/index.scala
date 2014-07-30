@@ -7,6 +7,9 @@ This tutorial series introduces _Lightweight Modular Staging_ (LMS), a
 technique for embedding domain-specific languages (DSL) in Scala, using a
 runtime code generation approach.
 
+Outline:
+<div id="tableofcontents"></div>
+
 
 Self-Contained Tutorials
 ------------------------
@@ -38,6 +41,72 @@ The following tutorials are available:
 - [Fast Fourier Transform (FFT)](fft.html)
 
 - [Sliding Stencil](stencil.html)
+
+
+In-Depth Documentation
+----------------------
+
+Tentative restructuring
+
+### Getting Started
+
+- Why generative programming?
+    _Because abstraction without regret!_
+- Why LMS?
+    _Because batteries included and hackable!_
+- Hellow World
+
+
+### Design Patterns
+
+Purely generative:
+
+- Specialization on static data
+- Abstractions in the meta-language
+- From interpreter to compiler
+- Mixed-stage data structures
+- Type classes and generic programming
+
+Including IR:
+
+- DSLs with multiple abstraction levels
+
+
+### From Zero to LMS
+
+- Program generation with Strings
+- Program generation with Trees
+- Program generation with Graphs
+
+
+### LMS Internals
+
+- Graph IR
+- Effects
+- Code Motion
+- Transformers
+- Code Generators
+
+Advanced:
+
+- Functions
+- Structs
+
+
+### Integration
+
+- LMS for Scala
+- LMS for JavaScript
+- LMS for C
+
+Advanced:
+
+- LMS for Scala Macros
+- LMS for Vector Intrinsics
+- LMS for GPUs
+- LMS for FPGAs
+- LMS for SMT Solvers
+- LMS for Truffle / Graal
 
 
 In-Depth Documentation
@@ -142,66 +211,6 @@ In-Depth Documentation
     1. Case Studies
         1. OptiML Stream Example
         1. OptiQL Struct Of Arrays Example
-        1. Fast Fourier Transform Example
-        1. Regular Expression Matcher Example
-
-
-In-Depth Documentation
-----------------------
-
-Tentative restructuring
-
-### Getting Started
-
-- Why generative programming?
-    Because abstraction without regret!
-- Why LMS?
-    Because batteries included and hackable!
-- Hellow World
-
-
-### Design Patterns
-
-- Specialization on static data
-- Building meta-language abstractions
-- From interpreter to compiler
-- Mixed-stage data structures
-- Type classes and generic programming
-
-- Implementing DSLs with multiple abstraction levels
-
-
-### From Zero to LMS
-
-- Program generation with Strings
-- Program generation with Trees
-- Program generation with Graphs
-
-
-### LMS Internals
-
-- Graph IR
-- Effects
-- Code Motion
-- Transformers
-- Code Generators
-
-- Functions
-- Structs
-
-
-### Integration
-
-- LMS for Scala
-- LMS for JavaScript
-- LMS for C
-
-- LMS for Scala Macros
-- LMS for Vector Intrinsics
-- LMS for GPUs
-- LMS for FPGAs
-- LMS for SMT Solvers
-- LMS for Truffle / Graal
 
 
 */

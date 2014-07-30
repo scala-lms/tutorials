@@ -1,55 +1,13 @@
 /**
 
-Overview
-========
-
-1. Intro: Not your Grandfather's Compiler
-1. Intermediate Representation: Trees
-    1. Trees Instead of Strings
-        1. Modularity: Adding IR Node Types
-    1. Enabling Analysis and Transformation
-        1. Modularity: Adding Traversal Passes
-        1. Solving the ''Expression Problem''
-        1. Generating Code
-        1. Modularity: Adding Transformations
-        1. Transformation by Iterated Staging
-    1. Problem: Phase Ordering
-1. Intermediate Representation: Graphs
-    1. Purely Functional Subset
-    1. Modularity: Adding IR Node Types
-    1. Simpler Analysis and More Flexible Transformations
-        1. Common Subexpression Elimination/Global Value Numbering
-        1. Pattern Rewrites
-        1. Modularity: Adding new Optimizations
-        1. Context- and Flow-Sensitive Transformations
-        1. Graph Transformations
-        1. Dead Code Elimination
-    1. From Graphs Back to Trees
-        1. Code Motion
-            1. Pathological Cases
-            1. Scheduling
-        1. Tree-Like Traversals and Transformers
-    1. Effects
-        1. Simple Effect Domain
-        1. Fine Grained Effects: Tracking Mutations per Allocation Site
-            1. Restricting Possible Effects
-1. Advanced Optimizations
-    1. Rewriting
-        1. Context-Sensitive Rewriting
-        1. Speculative Rewriting: Combining Analyses and Transformations
-        1. Delayed Rewriting and Multi-Level IR
-    1. Splitting and Combining Statements
-        1. Effectful Statements
-        1. Data Structures
-        1. Representation Conversion
-    1. Loop Fusion and Deforestation
-
-
 # (Chapter 0) Intro: Not your Grandfather's Compiler
 <a name="chap:300"></a>
 
 This part discusses compiler internals.  How do embedded compilers compile
 their programs?
+
+Outline:
+<div id="tableofcontents"></div>
 
 The purely string based representation of staged programs from [Part
 2](02_basics.html) does  not allow analysis or transformation of embedded

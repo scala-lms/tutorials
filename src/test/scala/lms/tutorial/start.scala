@@ -2,6 +2,9 @@
 Getting Started
 ===============
 
+Outline:
+<div id="tableofcontents"></div>
+
 Staging
 -------
 

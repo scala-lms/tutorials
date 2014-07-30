@@ -1,27 +1,5 @@
 /**
 
-Overview
-========
-
-1. Generative Programming Basics
-    1. Program Generation with Strings
-    1. Program Generation with Quasi-Quotes
-    1. Syntactic Correctness through Deep Reuse of Syntax
-    1. Scope Correctness through Deep Reuse of Scope
-    1. Type Correctness through Deep Reuse of Types
-    1. Value Correctness is an Open Problem
-    1. Let Insertion as a Remedy
-1. The LMS Way
-    1. Value Correctness through Deep Reuse of Evaluation Order
-    1. Removing Syntactic Overhead
-    1. Staging as a Library and Modular Definition of Object Languages
-        1. Syntax correctness through Embedding as Methods
-        1. Scope Correctness through Deep Reuse Of Val Bindings
-        1. Type Correctness through Typed Embedding (Deep Reuse of Types)
-        1. Value Correctness through Deep Reuse of Evaluation Order
-    1. Functions and Recursion 
-    1. Generating and Loading Executable Code
-
 
 <a name="sec:221"></a>
 Generative Programming Basics
@@ -31,6 +9,13 @@ Previous staging approaches either work directly with strings that represent
 concrete program syntax or make use of quasiquoting to compose abstract syntax
 trees. We examine both approaches in turn, with an eye on how linguistic reuse
 improves productivity and safety for the multi-stage programmer.
+
+Outline:
+<div id="tableofcontents"></div>
+
+
+
+
 
 ## Program Generation with Strings
 

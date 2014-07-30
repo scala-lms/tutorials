@@ -1,45 +1,11 @@
 /**
 
-Overview
-========
-
-1. Intro: Abstraction Without Regret
-1. Common Compiler Optimizations
-1. Delite: An End-to-End System for Embedded Parallel DSLs
-    1. Building a Simple DSL
-    1. Code Generation
-    1. The Delite Compiler Framework and Runtime
-1. Control Abstraction
-    1. Leveraging Higher-Order Functions in the Generator
-    1. Using Continuations in the Generator to Implement Backtracking
-    1. Using Continuations in the Generator to Generate Async Code Patterns
-        1. CPS and Staging
-        1. CPS for Interruptible Traversals
-        1. Defining the Ajax API
-        1. CPS for Parallelism
-    1. Guarantees by Construction
-1. Data Abstraction
-    1. Static Data Structures
-    1. Dynamic Data Structures with Partial Evaluation
-    1. Generic Programming with Type Classes
-    1. Unions and Inheritance
-    1. Struct of Array and Other Data Format Conversions
-    1. Loop Fusion and Deforestation
-    1. Extending the Framework
-    1. Lowering Transforms}
-1. Case Studies
-    1. OptiML Stream Example
-        1. Downsampling in Bioinformatics
-    1. OptiQL Struct Of Arrays Example
-    1. Fast Fourier Transform Example
-        1. Implementing Optimizations
-        1. Running the Generated Code
-    1. Regular Expression Matcher Example
-
-
 
 # (Chapter 0) Intro: Abstraction Without Regret
 \label{chap:400}
+
+Outline:
+<div id="tableofcontents"></div>
 
 
 LMS is a dynamic multi-stage programming approach: We have the full Scala
