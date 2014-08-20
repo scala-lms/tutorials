@@ -7,8 +7,6 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   def infix_&&&(lhs: Rep[Boolean], rhs: => Rep[Boolean]): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
-  def infix_mkString(a: Rep[Array[String]], sep: Rep[String])(implicit pos: SourceContext): Rep[String] = array_mkstring(a, sep)
-  def array_mkstring(a: Rep[Array[String]], sep: Rep[String])(implicit pos: SourceContext): Rep[String]
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A])
 }
 trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
@@ -16,9 +14,6 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
   }
-
-  case class ArrayMkString(a: Exp[Array[String]], sep: Exp[String]) extends Def[String]
-  def array_mkstring(a: Rep[Array[String]], sep: Rep[String])(implicit pos: SourceContext): Rep[String] = ArrayMkString(a, sep)
 
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
   def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]) = {
@@ -37,11 +32,6 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
       if (y.isInstanceOf[Int]) unit(y) else staticData(y)
     case _ => super.array_apply(x,n)
   }
-
-  override def mirrorDef[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Def[A] = (e match {
-    case ArrayMkString(l,r) => ArrayMkString(f(l),f(r))
-    case _ => super.mirrorDef(e,f)
-  }).asInstanceOf[Def[A]]
 }
 trait DslGen extends ScalaGenNumericOps with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile with ScalaGenStaticData with ScalaGenVariables {
   val IR: DslExp
@@ -51,7 +41,6 @@ trait DslGen extends ScalaGenNumericOps with ScalaGenPrimitiveOps with ScalaGenB
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
       emitValDef(sym, quote(c))
-    case ArrayMkString(l, sep) => emitValDef(sym, src"$l.mkString($sep)")
     case Comment(s, verbose, b) =>
       stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)
