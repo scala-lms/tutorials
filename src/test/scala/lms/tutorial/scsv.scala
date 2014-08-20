@@ -6,7 +6,7 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
-  type Fields = Rep[Array[String]]
+  type Fields = Vector[Rep[String]]
 
   case class Record(fields: Fields, schema: Schema) {
     def apply(key: String): Rep[String] = fields(schema indexOf key)
@@ -19,11 +19,18 @@ trait StagedCSV extends Dsl with ScannerBase {
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
       val s = newScanner(filename)
-      s.next // ignore csv header
-      while (s.hasNext) yld(Record(s.next, schema))
-    case PrintRecord(parent) => execOp(parent) { rec =>
-      println(if (rec.schema.length < 2) rec.fields else rec.fields.mkString(","))
-    }
+      def nextRecord = Record(schema.map{_ => s.next}, schema)
+      nextRecord // ignore csv header
+      while (s.hasNext) yld(nextRecord)
+    case PrintRecord(parent) =>
+      def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
+        case Nil => ""
+        case x::Nil => x
+        case x::xs => x+","+pretty(xs)
+      }
+      execOp(parent) { rec =>
+        println(pretty(rec.fields.toList))
+      }
   }
   def execQuery(q: Operator): Rep[Unit] = execOp(q){ _ => }
 }

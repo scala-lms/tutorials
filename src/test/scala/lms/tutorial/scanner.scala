@@ -7,9 +7,19 @@ import java.io.FileReader
 import java.io.BufferedReader
 
 class Scanner(filename: String) {
+  val fieldDelimiter = ","
+
   val br = new BufferedReader(new FileReader(filename))
-  def next: Array[String] = br.readLine.split(",")
-  def hasNext = br.ready || {br.close; false}
+  var pending: List[String] = Nil
+  def next: String = pending match {
+    case Nil =>
+      pending = br.readLine.split(fieldDelimiter).toList
+      next
+    case field::rest =>
+      pending = rest
+      field
+  }
+  def hasNext = pending.nonEmpty || br.ready || {br.close; false}
 }
 
 trait ScannerBase extends Base {
@@ -18,18 +28,18 @@ trait ScannerBase extends Base {
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
   }
   def newScanner(fn: Rep[String])(implicit pos: SourceContext): Rep[Scanner]
-  def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Array[String]]
+  def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[String]
   def scannerHasNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Boolean]
 }
 
 trait ScannerExp extends ScannerBase with EffectExp {
   case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
-  case class ScannerNext(s: Exp[Scanner]) extends Def[Array[String]]
+  case class ScannerNext(s: Exp[Scanner]) extends Def[String]
   case class ScannerHasNext(s: Exp[Scanner]) extends Def[Boolean]
 
   override def newScanner(fn: Rep[String])(implicit pos: SourceContext): Rep[Scanner] =
     reflectMutable(ScannerNew(fn))
-  override def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Array[String]] =
+  override def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[String] =
     reflectWrite(s)(ScannerNext(s))
   override def scannerHasNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Boolean] =
     reflectWrite(s)(ScannerHasNext(s))
