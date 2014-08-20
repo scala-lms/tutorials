@@ -49,15 +49,12 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
 }
 
 class StagedCSVTest extends TutorialFunSuite {
-  val under = "scsv"
+  val under = "query_"
 
   def testquery(name: String, csv: String, query: StagedQuery) {
     test(name) {
-      // TODO: check
-      //checkOut(name+"-eval", "csv", query.eval("src/data/" + csv))
-      //check(name+"-code", query.code)
-      query.eval("src/data/" + csv)
-      exec(name+"-code", query.code)
+      check(name, query.code)
+      checkOut(name, "csv", query.eval("src/data/" + csv))
     }
   }
 

@@ -27,6 +27,12 @@ trait TutorialFunSuite extends FunSuite {
     printIndented(content)(out)
     out.close()
   }
+  def checkOut(label: String, suffix: String, thunk: => Unit) = {
+    val output = new ByteArrayOutputStream()
+    scala.Console.setOut(new PrintStream(output))
+    thunk
+    check(label, output.toString(), suffix = suffix)
+  }
   def check(label: String, code: String, suffix: String = "scala") = {
     val fileprefix = prefix+under+label
     val name = fileprefix+".check."+suffix
