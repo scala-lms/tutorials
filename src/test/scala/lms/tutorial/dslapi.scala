@@ -57,7 +57,7 @@ trait DslGen extends ScalaGenNumericOps with ScalaGenPrimitiveOps with ScalaGenB
   }
 }
 trait DslImpl extends DslExp { q =>
-  object codegen extends DslGen {
+  val codegen = new DslGen {
     val IR: q.type = q
   }
 }
