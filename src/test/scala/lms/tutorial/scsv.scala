@@ -16,6 +16,23 @@ trait StagedCSV extends Dsl with ScannerBase {
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
   case class Project(schema: Schema, parent: Operator) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
+  case class Filter(pred: Predicate, parent: Operator) extends Operator
+
+  sealed abstract class Predicate
+  case class Eq(a: Ref, b: Ref) extends Predicate
+
+  sealed abstract class Ref
+  case class Field(name: String) extends Ref
+  case class Value(x: String) extends Ref
+
+  def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
+    case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
+  }
+
+  def evalRef(r: Ref)(rec: Record): Rep[String] = r match {
+    case Field(name) => rec(name)
+    case Value(x) => x
+  }
 
   def execOp(o: Operator)(yldHd: Schema => Rep[Unit], yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
@@ -24,6 +41,11 @@ trait StagedCSV extends Dsl with ScannerBase {
       nextRecord // ignore csv header
       yldHd(schema)
       while (s.hasNext) yld(nextRecord)
+    case Filter(pred, parent) =>
+      execOp(parent) (
+        yldHd,
+        { rec => if (evalPred(pred)(rec)) yld(rec) }
+      )
     case Project(schema, parent) =>
       execOp(parent) (
         { _ => yldHd(schema) },
@@ -74,5 +96,13 @@ class StagedCSVTest extends TutorialFunSuite {
       PrintCSV(Project(Schema("Name"),
         Scan(fn, Schema("Name", "Value", "Flag"))
       ))
+  })
+
+  testquery("t3", "t.csv", new StagedQuery {
+    def query(fn: Rep[String]) =
+      PrintCSV(Project(Schema("Name"),
+        Filter(Eq(Field("Flag"), Value("yes")),
+          Scan(fn, Schema("Name", "Value", "Flag"))
+      )))
   })
 }
