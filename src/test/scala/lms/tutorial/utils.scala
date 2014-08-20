@@ -27,10 +27,10 @@ trait TutorialFunSuite extends FunSuite {
     printIndented(content)(out)
     out.close()
   }
-  def check(label: String, code: String) = {
+  def check(label: String, code: String, suffix: String = "scala") = {
     val fileprefix = prefix+under+label
-    val name = fileprefix+".check.scala"
-    val aname = fileprefix+".actual.scala"
+    val name = fileprefix+".check."+suffix
+    val aname = fileprefix+".actual."+suffix
     val expected = readFile(name)
     if (expected != code) {
       println("writing " + aname)
