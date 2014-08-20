@@ -13,11 +13,13 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   sealed abstract class Operator
+  // the definition of operators in order of incremental development
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
-  case class Project(schema: Schema, parent: Operator) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
+  case class Project(schema: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
 
+  // these utilities are (for now) only needed for filtering
   sealed abstract class Predicate
   case class Eq(a: Ref, b: Ref) extends Predicate
 
@@ -33,6 +35,7 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Field(name) => rec(name)
     case Value(x) => x
   }
+  // end of utilities for filtering
 
   def execOp(o: Operator)(yldHd: Schema => Rep[Unit], yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
