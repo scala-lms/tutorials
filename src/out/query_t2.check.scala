@@ -7,15 +7,16 @@ val x1 = new scala.lms.tutorial.Scanner(x0)
 val x2 = x1.next
 val x3 = x1.next
 val x4 = x1.next
-val x12 = while ({val x5 = x1.hasNext
-x5}) {
-val x7 = x1.next
+val x5 = println("Name")
+val x13 = while ({val x6 = x1.hasNext
+x6}) {
 val x8 = x1.next
 val x9 = x1.next
-val x10 = println(x7)
-x10
+val x10 = x1.next
+val x11 = println(x8)
+x11
 }
-x12
+x13
 }
 }
 /*****************************************

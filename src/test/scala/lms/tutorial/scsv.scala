@@ -17,27 +17,30 @@ trait StagedCSV extends Dsl with ScannerBase {
   case class Project(schema: Schema, parent: Operator) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
 
-  def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
+  def execOp(o: Operator)(yldHd: Schema => Rep[Unit], yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
       val s = newScanner(filename)
       def nextRecord = Record(schema.map{_ => s.next}, schema)
       nextRecord // ignore csv header
+      yldHd(schema)
       while (s.hasNext) yld(nextRecord)
     case Project(schema, parent) =>
-      execOp(parent) { rec =>
-        yld(Record(schema.map(k => rec(k)), schema))
-      }
+      execOp(parent) (
+        { _ => yldHd(schema) },
+        { rec => yld(Record(schema.map(k => rec(k)), schema)) }
+      )
     case PrintCSV(parent) =>
       def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
         case Nil => ""
         case x::Nil => x
         case x::xs => x+","+pretty(xs)
       }
-      execOp(parent) { rec =>
-        println(pretty(rec.fields.toList))
-      }
+      execOp(parent) (
+        { schema => println(schema.mkString(",")) },
+        { rec => println(pretty(rec.fields.toList)) }
+      )
   }
-  def execQuery(q: Operator): Rep[Unit] = execOp(q){ _ => }
+  def execQuery(q: Operator): Rep[Unit] = execOp(q)({ _ => }, { _ => })
 }
 
 abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
