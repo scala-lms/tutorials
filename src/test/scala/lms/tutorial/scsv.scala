@@ -15,7 +15,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   sealed abstract class Operator
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
   case class Project(schema: Schema, parent: Operator) extends Operator
-  case class PrintRecord(parent: Operator) extends Operator
+  case class PrintCSV(parent: Operator) extends Operator
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
@@ -27,7 +27,7 @@ trait StagedCSV extends Dsl with ScannerBase {
       execOp(parent) { rec =>
         yld(Record(schema.map(k => rec(k)), schema))
       }
-    case PrintRecord(parent) =>
+    case PrintCSV(parent) =>
       def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
         case Nil => ""
         case x::Nil => x
@@ -60,14 +60,14 @@ class StagedCSVTest extends TutorialFunSuite {
 
   testquery("t1", "t.csv", new StagedQuery {
     def query(fn: Rep[String]) =
-      PrintRecord(
+      PrintCSV(
         Scan(fn, Schema("Name", "Value", "Flag"))
       )
   })
 
   testquery("t2", "t.csv", new StagedQuery {
     def query(fn: Rep[String]) =
-      PrintRecord(Project(Schema("Name"),
+      PrintCSV(Project(Schema("Name"),
         Scan(fn, Schema("Name", "Value", "Flag"))
       ))
   })
