@@ -19,6 +19,18 @@ trait StagedCSV extends Dsl with ScannerBase {
     while (s.hasNext) yld(nextRecord)
   }
 
+  def printSchema(schema: Schema) = println(schema.mkString(","))
+
+  def printFields(fields: Fields) = {
+    def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
+      case Nil => ""
+      case x::Nil => x
+      case x::xs => x+","+pretty(xs)
+    }
+    println(pretty(fields.toList))
+  }
+
+
   sealed abstract class Operator
   // the definition of operators in order of incremental development
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
@@ -60,15 +72,8 @@ trait StagedCSV extends Dsl with ScannerBase {
       execOp(parent) { rec => yld(Record(schema.map(k => rec(k)), schema)) }
     case PrintCSV(parent) =>
       val schema = resultSchema(parent)
-      if (schema.nonEmpty) {
-        println(schema.mkString(","))
-        def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
-          case Nil => ""
-          case x::Nil => x
-          case x::xs => x+","+pretty(xs)
-        }
-        execOp(parent) { rec => println(pretty(rec.fields.toList)) }
-      }
+      printSchema(schema)
+      execOp(parent) { rec => printFields(rec.fields) }
   }
   def execQuery(q: Operator): Rep[Unit] = execOp(q) { _ => }
 }
