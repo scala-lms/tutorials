@@ -20,6 +20,7 @@ class Scanner(filename: String) {
       field
   }
   def hasNext = pending.nonEmpty || br.ready || {br.close; false}
+  def hasNextInLine = pending.nonEmpty
 }
 
 trait ScannerBase extends Base {

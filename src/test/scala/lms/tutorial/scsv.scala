@@ -12,9 +12,18 @@ trait StagedCSV extends Dsl with ScannerBase {
     def apply(key: String): Rep[String] = fields(schema indexOf key)
   }
 
+  def loadSchema(filename: String): Schema = {
+    val s = new Scanner(filename)
+    var schema: Schema = Schema() // force present-stage var
+    do (schema :+= s.next) while (s.hasNextInLine)
+    schema
+  }
+
   def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
     val s = newScanner(filename)
     def nextRecord = Record(schema.map{_ => s.next}, schema)
+    // the right thing would be to check the schema, but it clutters the generated code
+    // schema.foreach(f => if (s.next != f) println("ERROR: schema mismatch"))
     nextRecord // ignore csv header
     while (s.hasNext) yld(nextRecord)
   }
@@ -115,7 +124,7 @@ class StagedCSVTest extends TutorialFunSuite {
     def query(fn: Rep[String]) =
       PrintCSV(Project(Schema("Name"),
         Filter(Eq(Field("Flag"), Value("yes")),
-          Scan(fn, Schema("Name", "Value", "Flag"))
+          Scan(fn, loadSchema("src/data/t.csv")) //Schema("Name", "Value", "Flag")
       )))
   })
 }
