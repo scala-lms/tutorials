@@ -37,35 +37,36 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
   // end of utilities for filtering
 
-  def execOp(o: Operator)(yldHd: Schema => Rep[Unit], yld: Record => Rep[Unit]): Rep[Unit] = o match {
+  def resultSchema(o: Operator): Schema = o match {
+    case Scan(filename, schema)  => schema
+    case Filter(pred, parent)    => resultSchema(parent)
+    case Project(schema, parent) => schema
+    case PrintCSV(parent)        => Schema()
+  }
+
+  def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
       val s = newScanner(filename)
       def nextRecord = Record(schema.map{_ => s.next}, schema)
       nextRecord // ignore csv header
-      yldHd(schema)
       while (s.hasNext) yld(nextRecord)
     case Filter(pred, parent) =>
-      execOp(parent) (
-        yldHd,
-        { rec => if (evalPred(pred)(rec)) yld(rec) }
-      )
+      execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(schema, parent) =>
-      execOp(parent) (
-        { _ => yldHd(schema) },
-        { rec => yld(Record(schema.map(k => rec(k)), schema)) }
-      )
+      execOp(parent) { rec => yld(Record(schema.map(k => rec(k)), schema)) }
     case PrintCSV(parent) =>
-      def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
-        case Nil => ""
-        case x::Nil => x
-        case x::xs => x+","+pretty(xs)
+      val schema = resultSchema(parent)
+      if (schema.nonEmpty) {
+        println(schema.mkString(","))
+        def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
+          case Nil => ""
+          case x::Nil => x
+          case x::xs => x+","+pretty(xs)
+        }
+        execOp(parent) { rec => println(pretty(rec.fields.toList)) }
       }
-      execOp(parent) (
-        { schema => println(schema.mkString(",")) },
-        { rec => println(pretty(rec.fields.toList)) }
-      )
   }
-  def execQuery(q: Operator): Rep[Unit] = execOp(q)({ _ => }, { _ => })
+  def execQuery(q: Operator): Rep[Unit] = execOp(q) { _ => }
 }
 
 abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
