@@ -12,6 +12,13 @@ trait StagedCSV extends Dsl with ScannerBase {
     def apply(key: String): Rep[String] = fields(schema indexOf key)
   }
 
+  def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
+    val s = newScanner(filename)
+    def nextRecord = Record(schema.map{_ => s.next}, schema)
+    nextRecord // ignore csv header
+    while (s.hasNext) yld(nextRecord)
+  }
+
   sealed abstract class Operator
   // the definition of operators in order of incremental development
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
@@ -46,10 +53,7 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema) =>
-      val s = newScanner(filename)
-      def nextRecord = Record(schema.map{_ => s.next}, schema)
-      nextRecord // ignore csv header
-      while (s.hasNext) yld(nextRecord)
+      processCSV(filename,schema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(schema, parent) =>
