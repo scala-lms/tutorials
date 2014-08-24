@@ -69,7 +69,9 @@ generated code is executed.
     assert(snippet.eval(0) === 2)
     check("1", snippet.code)    
   }
-
+/**
+      .. includecode:: ../../../../out/dslapi1.check.scala
+*/
 
   test("2") {
     val snippet = new  DslDriver[Int,Int] {
@@ -87,12 +89,8 @@ generated code is executed.
     check("2", snippet.code)
   }
 /**
-      .. includecode:: ../../../../out/dslapi1.check.scala
       .. includecode:: ../../../../out/dslapi2.check.scala
-*/  
 
-
-/**
 ### Rep[A => B] vs Rep[A]=>Rep[B]
 
 In the previous snippets, we already notice some *abstraction without
@@ -143,6 +141,9 @@ the second stage, driven by the type of their condition.
     }
     check("range1", snippet.code)
   }
+/**
+      .. includecode:: ../../../../out/dslapirange1.check.scala for
+*/
 
   test("range2") {
     val snippet = new DslDriver[Int,Unit] {
@@ -158,16 +159,9 @@ the second stage, driven by the type of their condition.
     }
     check("range2", snippet.code)
   }
-
 /**
-      .. includecode:: ../../../../out/dslapirange1.check.scala
-         :include: for
-      .. includecode:: ../../../../out/dslapirange2.check.scala
-         :include: for
-*/
+      .. includecode:: ../../../../out/dslapirange2.check.scala for
 
-
-/**
 ### Shonan Challenge
 */
 
@@ -237,11 +231,11 @@ dense row, and unroll the loop for the sparse rows.
   }
 
 /**
-Let's compare the code generated for a dense vs sparse row.
-      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala
-         :include: row_0
-      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala
-         :include: row_2
+Let's compare the code generated for a dense vs sparse row. Dense:
+      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala row_0
+
+Sparse:
+      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala row_2
 */
 
 }
