@@ -87,8 +87,8 @@ generated code is executed.
     check("2", snippet.code)
   }
 /**
-      .. includecode:: ../out/dslapi1.check.scala
-      .. includecode:: ../out/dslapi2.check.scala
+      .. includecode:: ../../../../out/dslapi1.check.scala
+      .. includecode:: ../../../../out/dslapi2.check.scala
 */  
 
 
@@ -160,9 +160,9 @@ the second stage, driven by the type of their condition.
   }
 
 /**
-      .. includecode:: ../out/dslapirange1.check.scala
+      .. includecode:: ../../../../out/dslapirange1.check.scala
          :include: for
-      .. includecode:: ../out/dslapirange2.check.scala
+      .. includecode:: ../../../../out/dslapirange2.check.scala
          :include: for
 */
 
@@ -238,9 +238,9 @@ dense row, and unroll the loop for the sparse rows.
 
 /**
 Let's compare the code generated for a dense vs sparse row.
-      .. includecode:: ../out/dslapishonan-hmm.check.scala
+      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala
          :include: row_0
-      .. includecode:: ../out/dslapishonan-hmm.check.scala
+      .. includecode:: ../../../../out/dslapishonan-hmm.check.scala
          :include: row_2
 */
 

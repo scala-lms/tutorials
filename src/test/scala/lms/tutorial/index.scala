@@ -4,11 +4,19 @@ Tutorials and Documentation
 ===========================
 
 This tutorial series introduces _Lightweight Modular Staging_ (LMS), a
-technique for embedding domain-specific languages (DSL) in Scala, using a
-runtime code generation approach.
+framework for runtime code generation in Scala.
 
 Outline:
 <div id="tableofcontents"></div>
+
+Quick Start
+-----------
+
+These docs are a collection of literate Scala files. Clone the repo:
+
+    git clone git://github.com/scala-lms/tutorials
+
+Check the README file and start hacking!
 
 
 Self-Contained Tutorials
@@ -18,9 +26,6 @@ The following tutorials are available:
 
 - [Getting Started](start.html)
     Rep[T] vs T
-    Rep[A => B] vs Rep[A]=>Rep[B]
-    Rep[Range] vs Range
-
 
 - [Shonan HMM Challenge](shonan.html)
     Sparse matrix vector multiplication

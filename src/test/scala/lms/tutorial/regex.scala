@@ -235,7 +235,7 @@ Generated Code
 
 As an example, here is the code generated for `^ab`.
 
-.. includecode:: ../out/sre__bab.check.scala
+.. includecode:: ../../../../out/sre__bab.check.scala
 */
 
 }
