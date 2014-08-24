@@ -3,16 +3,16 @@
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Unit)) {
 def apply(x0:java.lang.String): Unit = {
-val x1 = new scala.lms.tutorial.Scanner(x0)
-val x2 = x1.next
-val x3 = x1.next
-val x4 = x1.next
-val x5 = println("Name,Value,Flag")
-val x17 = while ({val x6 = x1.hasNext
+val x1 = println("Name,Value,Flag")
+val x2 = new scala.lms.tutorial.Scanner(x0)
+val x3 = x2.next
+val x4 = x2.next
+val x5 = x2.next
+val x17 = while ({val x6 = x2.hasNext
 x6}) {
-val x8 = x1.next
-val x9 = x1.next
-val x10 = x1.next
+val x8 = x2.next
+val x9 = x2.next
+val x10 = x2.next
 val x11 = x8+","
 val x12 = x9+","
 val x13 = x12+x10

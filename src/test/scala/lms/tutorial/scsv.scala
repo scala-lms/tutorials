@@ -12,6 +12,34 @@ trait StagedCSV extends Dsl with ScannerBase {
     def apply(key: String): Rep[String] = fields(schema indexOf key)
   }
 
+  def loadSchema(filename: String): Schema = {
+    val s = new Scanner(filename)
+    var schema: Schema = Schema() // force present-stage var
+    do (schema :+= s.next) while (s.hasNextInLine)
+    schema
+  }
+
+  def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
+    val s = newScanner(filename)
+    def nextRecord = Record(schema.map{_ => s.next}, schema)
+    // the right thing would be to check the schema, but it clutters the generated code
+    // schema.foreach(f => if (s.next != f) println("ERROR: schema mismatch"))
+    nextRecord // ignore csv header
+    while (s.hasNext) yld(nextRecord)
+  }
+
+  def printSchema(schema: Schema) = println(schema.mkString(","))
+
+  def printFields(fields: Fields) = {
+    def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
+      case Nil => ""
+      case x::Nil => x
+      case x::xs => x+","+pretty(xs)
+    }
+    println(pretty(fields.toList))
+  }
+
+
   sealed abstract class Operator
   // the definition of operators in order of incremental development
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
@@ -37,35 +65,26 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
   // end of utilities for filtering
 
-  def execOp(o: Operator)(yldHd: Schema => Rep[Unit], yld: Record => Rep[Unit]): Rep[Unit] = o match {
-    case Scan(filename, schema) =>
-      val s = newScanner(filename)
-      def nextRecord = Record(schema.map{_ => s.next}, schema)
-      nextRecord // ignore csv header
-      yldHd(schema)
-      while (s.hasNext) yld(nextRecord)
-    case Filter(pred, parent) =>
-      execOp(parent) (
-        yldHd,
-        { rec => if (evalPred(pred)(rec)) yld(rec) }
-      )
-    case Project(schema, parent) =>
-      execOp(parent) (
-        { _ => yldHd(schema) },
-        { rec => yld(Record(schema.map(k => rec(k)), schema)) }
-      )
-    case PrintCSV(parent) =>
-      def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
-        case Nil => ""
-        case x::Nil => x
-        case x::xs => x+","+pretty(xs)
-      }
-      execOp(parent) (
-        { schema => println(schema.mkString(",")) },
-        { rec => println(pretty(rec.fields.toList)) }
-      )
+  def resultSchema(o: Operator): Schema = o match {
+    case Scan(filename, schema)  => schema
+    case Filter(pred, parent)    => resultSchema(parent)
+    case Project(schema, parent) => schema
+    case PrintCSV(parent)        => Schema()
   }
-  def execQuery(q: Operator): Rep[Unit] = execOp(q)({ _ => }, { _ => })
+
+  def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
+    case Scan(filename, schema) =>
+      processCSV(filename,schema)(yld)
+    case Filter(pred, parent) =>
+      execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
+    case Project(schema, parent) =>
+      execOp(parent) { rec => yld(Record(schema.map(k => rec(k)), schema)) }
+    case PrintCSV(parent) =>
+      val schema = resultSchema(parent)
+      printSchema(schema)
+      execOp(parent) { rec => printFields(rec.fields) }
+  }
+  def execQuery(q: Operator): Rep[Unit] = execOp(q) { _ => }
 }
 
 abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
@@ -105,7 +124,7 @@ class StagedCSVTest extends TutorialFunSuite {
     def query(fn: Rep[String]) =
       PrintCSV(Project(Schema("Name"),
         Filter(Eq(Field("Flag"), Value("yes")),
-          Scan(fn, Schema("Name", "Value", "Flag"))
+          Scan(fn, loadSchema("src/data/t.csv")) //Schema("Name", "Value", "Flag")
       )))
   })
 }
