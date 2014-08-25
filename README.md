@@ -17,8 +17,8 @@ Dependencies
   * `git clone https://github.com/TiarkRompf/virtualization-lms-core.git`
   * `sbt publish-local`
 
-SBT commands for learners
--------------------------
+SBT commands
+------------
 
 * `test` -- runs all the tests
 
