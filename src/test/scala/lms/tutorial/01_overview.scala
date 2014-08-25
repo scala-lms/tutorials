@@ -1,5 +1,12 @@
 /**
 
+About Generative Programming
+============================
+
+Outline:
+<div id="tableofcontents"></div>
+
+<!--
 Getting Started
 ===============
 
@@ -8,10 +15,9 @@ This chapter will be about getting started with LMS. We will begin by explaining
 Outline:
 <div id="tableofcontents"></div>
 
-
 About Generative Programming
 ----------------------------
-
+-->
 
 ### Productivity vs Performance
 
@@ -58,7 +64,7 @@ A key use for such multi-pass compiler pipelines is in implementing highly effic
 With compilers based on staging, it is easy to first perform purely domain-specific optimizations, say, on the level of linear algebra operations, before lowering the domain-specific operations and data structures to a more generic representation (say, as arrays and loops) on which a different set of optimizations apply.
 
 
-
+<!--
 LMS Basics
 ----------
 
@@ -89,6 +95,6 @@ Summary
 -------
 
 You should have a basic understanding of what LMS is and how it’s different from the program generation approach you may have been using. You should also now have a working version of LMS on your system. It’s now time to learn some LMS basics.
-
+-->
 */
 

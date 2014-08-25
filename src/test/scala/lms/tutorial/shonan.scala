@@ -5,6 +5,11 @@ Shonan Challenge
 
 In this tutorial we will develop a solution to the HMM problem from the Shonan Challenge.
 
+The task is to implement a sparse matrix vector product, where the matrix is statically 
+known but the vector is not. This situation comes up in hidden markov models (HMM),
+where a single transition matrix is multiplied by many different observation vectors.
+Therefore, it pays off to generate code that is specialized to a particular matrix.
+
 For further reference, see:
 
 - Shonan Challenge for Generative Programming
@@ -28,7 +33,7 @@ class ShonanTest extends TutorialFunSuite {
 
 /**
 We first define our static matrix. We notice that some rows are dense, 
-some rows are sparse, and some rows are fully zero.
+some rows are sparse, and some rows contain only zeroes.
 */
 
   val a =
@@ -69,14 +74,16 @@ We start with a fully static implementation.
     check("shonan-hmm1a", result)
   }
 /**
+We get a concrete vector as result:
+
+      .. includecode:: ../../../../out/dslapishonan-hmm1a.check.scala
+
+
 STEP 0.5: static vs dynamic conditional
 ---------------------------------------
 
-Now we're adding some basic codegen facilities and play
-with static vs dynamic expressions. Fully static expressions
-do not show up in generated code. If we change the 
-condition to depend on the (dynamic) input array, an if/else
-statement will be generated.
+Now we add basic code generation facilities and, as a recap how
+LMS works, play with static vs dynamic expressions. 
 */
 
   test("shonan-hmm1b") {
@@ -96,25 +103,38 @@ statement will be generated.
   }
 
 /**
+The condition above is fully static, so it does not show up in
+the generated code:
+
+      .. includecode:: ../../../../out/dslapishonan-hmm1b.check.scala
+
+If we change the condition to depend on the (dynamic) input array, 
+an if/else statement will be generated.
+
+
 STEP 1: Staging the matrix vector product
 -----------------------------------------
 
-We want to change the mv prod function to take a dynamic vector
-and a static matrix. We move it into the DslDriver trait so
-it can use Rep.
+We want to change the `matrix_vector_prod` function to take a dynamic 
+vector and a static matrix. We move it into the `DslDriver` trait so
+that it can use `Rep`.
 
-We generate nested loops by default (Rep[Range]). To make that
-work, we need to lift the static matrix to a Rep value. We
-do that using `staticData`.
+We generate nested loops by default (type `Rep[Range]`). This means that
+the loop index becomes a `Rep[Int]` value. To access the static matrix,
+we need to lift it to a `Rep` value as well. We accomplish this with
+the help of `staticData`.
 
-Now we can play with the loops shapes: Range loops are computed
-statically, i.e. unrolled at staging time. Rep[Range] loops cause
+We also need to replace `new Array` with `NewArray`: instead of creating
+an array at staging time, we want to generate code to create a the array.
+
+Now we can play with the loop shapes: `Range` loops are computed
+statically, i.e. unrolled at staging time. `Rep[Range]` loops cause
 generation of loop code. 
 
 We can make unrolling decisions in a very fine-grained manner:
 for dense rows we want to generate a loop, for sparse rows
-we want to unroll. We just add a condition `sparse` and 
-either do a Range or Rep[Range] loop.
+we want to unroll. We just add a condition `sparse` and dispatch
+to either a `Range` or a `Rep[Range]` loop.
 */
 
   test("shonan-hmm1c") {
@@ -136,7 +156,7 @@ either do a Range or Rep[Range] loop.
               for (j <- (0 until n):Rep[Range]) {
                 v1(i) = v1(i) + a(i).apply(j) * v(j)
               }
-          }
+            }
           }
           v1
         }
@@ -149,34 +169,35 @@ either do a Range or Rep[Range] loop.
   }
 
 /**
+Looking at the generated code, we can easily see that we get a while
+loop for row 0, which is dense, no operations for row 1, and an
+unrolled loop for row 2, which is sparse:
+
+      .. includecode:: ../../../../out/dslapishonan-hmm1c.check.scala
+
+
 STEP 2: Conditional unrolling
 -----------------------------
 
-The code duplication of the loop body above is not very nice.
-fortunately, we can create arbitrary staging-time abstractions.
-We create an auxiliary method unrollIf that captures the
-conditional unrolling pattern in a general way.
-The mv prod function no longer needs to express the loop
+The code duplication of the loop body above is not very nice. Fortunately, 
+we can create arbitrary staging-time abstractions. We create an auxiliary 
+method unrollIf that captures the conditional unrolling pattern in a general 
+way. The `matrix_vector_prod` function no longer needs to express the loop
 body twice.
 
-The generated code is identical. "abstraction without regret" ftw!
+The generated code is identical: "abstraction without regret" ftw!
 */
 
   test("shonan-hmm1d") {
     val snippet = new DslDriver[Array[Int],Array[Int]] {
       def snippet(v: Rep[Array[Int]]) = {
 
-        def unrollIf(c:Boolean,r: Range) = new { def foreach(f: Rep[Int] => Rep[Unit]) = {
-          if (c) {
-            for (j <- (r.start until r.end):Range) {
-              f(j)
-            }
-          } else {                  
-            for (j <- (r.start until r.end):Rep[Range]) {
-              f(j)
-            }
+        def unrollIf(c:Boolean,r: Range) = new { 
+          def foreach(f: Rep[Int] => Rep[Unit]) = {
+            if (c) for (j <- (r.start until r.end):Range)      f(j)
+            else   for (j <- (r.start until r.end):Rep[Range]) f(j)
           }
-        }}
+        }
 
         def matrix_vector_prod(a0: Array[Array[Int]], v: Rep[Array[Int]]) = {
           val n = a0.length
@@ -199,4 +220,11 @@ The generated code is identical. "abstraction without regret" ftw!
     check("shonan-hmm1d", snippet.code)
   }
 
+
+/**
+What's next?
+------------
+
+Go back to the [tutorial index](index.html) or continue with the [Regular Expression matcher](regex.html).
+*/
 }

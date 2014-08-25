@@ -1,6 +1,5 @@
 /**
 # From Functions to Automata: Regex take 2
-\label{sec:Aregex}
 
 Outline:
 <div id="tableofcontents"></div>
