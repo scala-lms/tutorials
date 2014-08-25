@@ -22,8 +22,6 @@ scalacOptions += "-deprecation"
 
 site.settings
 
-site.sphinxSupport()
-
 SiteKeys.previewLaunchBrowser := false
 
 ghpages.settings
