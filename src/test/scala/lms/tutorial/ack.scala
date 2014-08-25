@@ -48,7 +48,6 @@ class AckermannTest extends TutorialFunSuite {
 /**
       .. includecode:: ../../../../out/ackm2.check.scala
 
-/**
 What's next?
 ------------
 
