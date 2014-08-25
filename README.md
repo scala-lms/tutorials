@@ -8,7 +8,7 @@ Lightweight Modular Staging (LMS) is a framework for runtime code generation and
 Dependencies
 ------------
 
-* [SBT](http://www.scala-sbt.org/)
+* [SBT](http://www.scala-sbt.org/):
   * Create or edit the file `~/.sbtconfig` to contain the following options for the JVM:
 
     `SBT_OPTS="-Xms3G -Xmx3G -Xss1M -XX:MaxPermSize=192M -XX:+UseParallelGC"`
@@ -22,7 +22,9 @@ SBT commands for learners
 
 * `test` -- runs all the tests
 
+<!--
 SBT commands for maintainers
 -----------------------------
 * `preview-site` -- previews the website locally
 * `ghpages-push-site` -- updates the [live website](http://scala-lms.github.io/tutorials)
+-->
