@@ -46,6 +46,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   case class PrintCSV(parent: Operator) extends Operator
   case class Project(schema: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
+  case class Join(parent1: Operator, parent2: Operator) extends Operator // TODO: natural join? explicit join condition? for now it's just a cartesian product
 
   // these utilities are (for now) only needed for filtering
   sealed abstract class Predicate
@@ -69,6 +70,7 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Scan(filename, schema)  => schema
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, parent) => schema
+    case Join(left, right)       => resultSchema(left) ++ resultSchema(right) 
     case PrintCSV(parent)        => Schema()
   }
 
@@ -79,6 +81,12 @@ trait StagedCSV extends Dsl with ScannerBase {
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(schema, parent) =>
       execOp(parent) { rec => yld(Record(schema.map(k => rec(k)), schema)) }
+    case Join(left, right) =>
+      execOp(left) { rec1 => 
+        execOp(right) { rec2 =>
+          yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
+        }
+      }
     case PrintCSV(parent) =>
       val schema = resultSchema(parent)
       printSchema(schema)
