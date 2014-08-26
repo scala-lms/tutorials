@@ -135,4 +135,14 @@ class StagedCSVTest extends TutorialFunSuite {
           Scan(fn, loadSchema("src/data/t.csv")) //Schema("Name", "Value", "Flag")
       )))
   })
+
+  testquery("t4", "t.csv", new StagedQuery {
+    def query(fn: Rep[String]) =
+      PrintCSV(
+        Join(
+          Scan(fn, loadSchema("src/data/t.csv")),
+          Scan(fn, loadSchema("src/data/t.csv"))
+      ))
+  })
+
 }
