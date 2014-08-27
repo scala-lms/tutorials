@@ -26,7 +26,7 @@ import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
 class ShonanTest extends TutorialFunSuite {
-  val under = "dslapi"
+  val under = ""
   val A = scala.Array
 
 /**
@@ -74,7 +74,7 @@ We start with a fully static implementation.
 /**
 We get a concrete vector as result:
 
-      .. includecode:: ../../../../out/dslapishonan-hmm1a.check.scala
+      .. includecode:: ../../../../out/shonan-hmm1a.check.scala
 
 
 STEP 0.5: static vs dynamic conditional
@@ -104,7 +104,7 @@ LMS works, play with static vs dynamic expressions.
 The condition above is fully static, so it does not show up in
 the generated code:
 
-      .. includecode:: ../../../../out/dslapishonan-hmm1b.check.scala
+      .. includecode:: ../../../../out/shonan-hmm1b.check.scala
 
 
 If we change the condition to depend on the (dynamic) input array,
@@ -130,7 +130,7 @@ an `if/else` statement will be generated.
 /**
 Notice the `if/else` statement in the generated code.
 
-.. includecode:: ../../../../out/dslapishonan-hmm1b_dyn.check.scala
+.. includecode:: ../../../../out/shonan-hmm1b_dyn.check.scala
 
 Aside: LMS relies on Scala's local type inference to propagate dynamic
 expressions (`Rep` types) automatically within a method, and on
@@ -208,7 +208,7 @@ Looking at the generated code, we can easily see that we get a while
 loop for row 0, which is dense, no operations for row 1, and an
 unrolled loop for row 2, which is sparse:
 
-      .. includecode:: ../../../../out/dslapishonan-hmm1c.check.scala
+      .. includecode:: ../../../../out/shonan-hmm1c.check.scala
 
 
 STEP 2: Conditional unrolling
