@@ -140,7 +140,7 @@ are consistent.
 Aside: In the snippet, the `if/else` statement with the dynamic
 condition is peculiar, because its condition is not a plain `Boolean`
 but a `Rep[Boolean]`. Hence, LMS also relies on virtualization of
-control structures to overload the meaning of contorl structures such
+control structures to overload the meaning of control structures such
 as `if/else` and `while` -- in the same way that the `for` syntax is
 overloaded in Scala.
 
