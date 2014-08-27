@@ -44,7 +44,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   // the definition of operators in order of incremental development
   case class Scan(filename: Rep[String], schema: Schema) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
-  case class Project(schema: Schema, parent: Operator) extends Operator
+  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
   case class Join(parent1: Operator, parent2: Operator) extends Operator // TODO: natural join? explicit join condition? for now it's just a cartesian product
 
@@ -69,7 +69,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   def resultSchema(o: Operator): Schema = o match {
     case Scan(filename, schema)  => schema
     case Filter(pred, parent)    => resultSchema(parent)
-    case Project(schema, parent) => schema
+    case Project(schema, _, _)   => schema
     case Join(left, right)       => resultSchema(left) ++ resultSchema(right) 
     case PrintCSV(parent)        => Schema()
   }
@@ -79,8 +79,8 @@ trait StagedCSV extends Dsl with ScannerBase {
       processCSV(filename,schema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
-    case Project(schema, parent) =>
-      execOp(parent) { rec => yld(Record(schema.map(k => rec(k)), schema)) }
+    case Project(schema, schema2, parent) =>
+      execOp(parent) { rec => yld(Record(schema2.map(k => rec(k)), schema)) }
     case Join(left, right) =>
       execOp(left) { rec1 => 
         execOp(right) { rec2 =>
@@ -123,14 +123,14 @@ class StagedCSVTest extends TutorialFunSuite {
 
   testquery("t2", "t.csv", new StagedQuery {
     def query(fn: Rep[String]) =
-      PrintCSV(Project(Schema("Name"),
+      PrintCSV(Project(Schema("Name"), Schema("Name"),
         Scan(fn, Schema("Name", "Value", "Flag"))
       ))
   })
 
   testquery("t3", "t.csv", new StagedQuery {
     def query(fn: Rep[String]) =
-      PrintCSV(Project(Schema("Name"),
+      PrintCSV(Project(Schema("Name"), Schema("Name"),
         Filter(Eq(Field("Flag"), Value("yes")),
           Scan(fn, loadSchema("src/data/t.csv")) //Schema("Name", "Value", "Flag")
       )))
@@ -141,7 +141,7 @@ class StagedCSVTest extends TutorialFunSuite {
       PrintCSV(
         Join(
           Scan(fn, loadSchema("src/data/t.csv")),
-          Scan(fn, loadSchema("src/data/t.csv"))
+          Project(Schema("Name1"), Schema("Name"), Scan(fn, loadSchema("src/data/t.csv")))
       ))
   })
 

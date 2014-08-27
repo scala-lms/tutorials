@@ -1,5 +1,5 @@
-Name,Value,Flag,Name,Value,Flag
-A,7,no,A,7,no
-A,7,no,B,2,yes
-B,2,yes,A,7,no
-B,2,yes,B,2,yes
+Name,Value,Flag,Name1
+A,7,no,A
+A,7,no,B
+B,2,yes,A
+B,2,yes,B
