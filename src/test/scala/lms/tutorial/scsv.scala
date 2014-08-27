@@ -9,10 +9,10 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
   type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
-  type Fields = Vector[Rep[String]]
+  type Fields = Vector[Rep[Any]]
 
   case class Record(fields: Fields, schema: Schema) {
-    def apply(key: String): Rep[String] = fields(schema indexOf key)
+    def apply(key: String): Rep[Any] = fields(schema indexOf key)
   }
 
   def loadSchema(filename: String): Schema = {
@@ -35,9 +35,9 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   def printSchema(schema: Schema) = println(schema.mkString(","))
 
   def printFields(fields: Fields) = {
-    def pretty(xs: List[Rep[String]]): Rep[String] = xs match {
+    def pretty(xs: List[Rep[Any]]): Rep[String] = xs match {
       case Nil => ""
-      case x::Nil => x
+      case x::Nil => x.ToString
       case x::xs => x+","+pretty(xs)
     }
     println(pretty(fields.toList))
@@ -48,6 +48,8 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
   def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##") // TODO: clean up / add in LMS
+  def infix_ToString(a: Rep[Any]) = if (a.asInstanceOf[{def tp: Manifest[Any]}].tp == manifest[String]) a.asInstanceOf[Rep[String]] 
+                                    else unchecked[String](a,".toString") // TODO: clean up / add in LMS
 
   // query operators
 
@@ -73,7 +75,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }
 
-  def evalRef(r: Ref)(rec: Record): Rep[String] = r match {
+  def evalRef(r: Ref)(rec: Record): Rep[Any] = r match {
     case Field(name) => rec(name)
     case Value(x) => x
   }
@@ -188,7 +190,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   }
 
   class ArrayBuffer(dataSize: Int, schema: Schema) {
-    val buf = schema.map(f => NewArray[String](dataSize))
+    val buf = schema.map(f => NewArray[Any](dataSize))
     var len = 0
     def +=(x: Fields) = {
       this(len) = x

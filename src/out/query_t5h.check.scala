@@ -4,9 +4,9 @@ Emitting Generated Code
 class Snippet extends ((java.lang.String)=>(Unit)) {
   def apply(x0:java.lang.String): Unit = {
     val x1 = println("Name,Value,Flag,Name")
-    val x2 = new Array[java.lang.String](65536)
-    val x3 = new Array[java.lang.String](65536)
-    val x4 = new Array[java.lang.String](65536)
+    val x2 = new Array[Any](65536)
+    val x3 = new Array[Any](65536)
+    val x4 = new Array[Any](65536)
     var x5: Int = 0
     var x6: Int = 0
     val x7 = new Array[Int](65536)
