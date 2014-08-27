@@ -39,6 +39,8 @@ trait StagedCSV extends Dsl with ScannerBase {
     println(pretty(fields.toList))
   }
 
+  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
+
 
   sealed abstract class Operator
   // the definition of operators in order of incremental development
@@ -71,7 +73,7 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Scan(filename, schema)  => schema
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, _, _)   => schema
-    case Join(left, right)       => resultSchema(left) ++ resultSchema(right) 
+    case Join(left, right)       => resultSchema(left) ++ resultSchema(right)
     case PrintCSV(parent)        => Schema()
   }
 
@@ -85,7 +87,11 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Join(left, right) =>
       execOp(left) { rec1 => 
         execOp(right) { rec2 =>
-          yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
+          val keySchema = rec1.schema intersect rec2.schema
+          val key1 = keySchema.map(rec1 apply _)
+          val key2 = keySchema.map(rec2 apply _)
+          if (fieldsEqual(key1, key2))
+            yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
     case PrintCSV(parent) =>
@@ -146,5 +152,14 @@ class StagedCSVTest extends TutorialFunSuite {
           Project(Schema("Name1"), Schema("Name"), Scan(filePath("t.csv")))
       ))
   })
-  
+
+  testquery("t5", new StagedQuery {
+    def query =
+      PrintCSV(
+        Join(
+          Scan(filePath("t.csv")),
+          Project(Schema("Name"), Schema("Name"), Scan(filePath("t.csv")))
+      ))
+  })
+
 }
