@@ -80,7 +80,7 @@ We get a concrete vector as result:
 STEP 0.5: static vs dynamic conditional
 ---------------------------------------
 
-Now we add basic code generation facilities and, as a recap how
+Now we add basic code generation facilities and, as a recap of how
 LMS works, play with static vs dynamic expressions. 
 */
 
@@ -88,7 +88,7 @@ LMS works, play with static vs dynamic expressions.
     val snippet = new DslDriver[Array[Int],Array[Int]] {
       def snippet(v: Rep[Array[Int]]) = {
 
-        val x = 100 - 5 //* v0.length
+        val x = 100 - 5
 
         if (x > 10) {
           println("hello")
@@ -106,10 +106,47 @@ the generated code:
 
       .. includecode:: ../../../../out/dslapishonan-hmm1b.check.scala
 
+
 If we change the condition to depend on the (dynamic) input array, 
-an if/else statement will be generated.
+an `if/else` statement will be generated.
 
+*/
+   test("shonan-hmm1b_dyn") {
+    val snippet = new DslDriver[Array[Int],Array[Int]] {
+      def snippet(v: Rep[Array[Int]]) = {
 
+        val x = 100 - v.length
+
+        if (x > 10) {
+          println("hello")
+        }
+
+        v
+      }
+    }
+    check("shonan-hmm1b_dyn", snippet.code)
+  }
+
+/**
+Notice the `if/else` statement in the generated code.
+
+.. includecode:: ../../../../out/dslapishonan-hmm1b_dyn.check.scala
+
+Aside: LMS relies on Scala's local type inference to propagate dynamic
+expressions (`Rep` types) automatically within a method, and on
+Scala's type checker to ensure the binding times (dynamic vs static)
+are consistent.
+
+Aside: In the snippet, the `if/else` statement with the dynamic
+condition is peculiar, because its condition is not a plain `Boolean`
+but a `Rep[Boolean]`. Hence, LMS also relies on virtualization of
+control structures to overload the meaning of contorl structures such
+as `if/else` and `while` -- in the same way that the `for` syntax is
+overloaded in Scala.
+
+*/
+
+/**
 STEP 1: Staging the matrix vector product
 -----------------------------------------
 
