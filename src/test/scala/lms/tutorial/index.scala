@@ -17,7 +17,7 @@ These docs are a collection of literate Scala files. Clone the [GitHub repo](htt
 
     git clone https://github.com/scala-lms/tutorials.git
 
-Check the README file for prerequisites and start hacking!
+Check the [`README.md`](https://github.com/scala-lms/tutorials/blob/master/README.md) file for prerequisites and start hacking!
 
 
 ### Why Generative Programming ?
@@ -32,10 +32,10 @@ affecting performance of the **generated code**.
 
 ### Why LMS ?
 
-Because it is **lightweight** and **modular**: LMS is just a Scala library. It distinguishes
+Because it is **lightweight** and **modular**: LMS is just a Scala library. With types, it distinguishes
 expressions that are evaluated _now_ (type `T`) vs _later_ (type `Rep[T]`).
 
-LMS comes with **batteries included**: it goes beyond purely generative approaches by 
+LMS comes with **batteries included**: it provides many optimizations such as common subexpression elimination out of the box, and it goes beyond purely generative approaches by 
 providing an extensible intermediate representation that can be used to implement
 sophisticated domain-specific compiler pipelines. 
 
