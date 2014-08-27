@@ -391,8 +391,8 @@ It is important to note that `infix_foreach` and `infix_count` are static
 methods, i.e. calls will happen at staging time and result in inserting the
 computed DSL code in the place of the call. Likewise, while the argument
 vector `v` is a dynamic value, the function argument `f` is again static.
-However, `f` operates on dynamic values, as made explicit by its type 
-`Rep[A] => Rep[Boolean]`. By contrast, a dynamic function value would have 
+However, `f` operates on dynamic values, as made explicit by its type
+`Rep[A] => Rep[Boolean]`. By contrast, a dynamic function value would have
 type `Rep[A => B]`.
 
 This means that the code generated for the example program will look roughly
@@ -453,8 +453,8 @@ regular `reset`. The other operators are defined  as follows:
 
     def amb[T](xs: Rep[Vector[T]]): Rep[T] @cps[Rep[Unit]] = shift { k =>
       xs foreach k
-    }  
-    def require(x: Rep[Boolean]): Rep[Unit] @cps[Rep[Unit]] = shift { k => 
+    }
+    def require(x: Rep[Boolean]): Rep[Unit] @cps[Rep[Unit]] = shift { k =>
       if (x) k() else ()
     }
 
@@ -586,9 +586,9 @@ library for Ajax calls:
         },
         success: callback
       })
-    }  
+    }
 
-    def fetchTweets(user: Rep[String]) = 
+    def fetchTweets(user: Rep[String]) =
       (ajax.get { new JSLiteral {
         val url = "http://api.twitter.com/1/"
               + "statuses/user_timeline.json"
@@ -602,7 +602,7 @@ library for Ajax calls:
         }
       }
     }).as[TwitterResponse]
-    type TwitterResponse = 
+    type TwitterResponse =
       Array[JSLiteral {val text: String}]
 
 Note that the JavaScript version takes a callback as second argument that will
@@ -610,7 +610,7 @@ be used to process the fetched tweets. We provide the rest of the logic that
 iterates over array of users and makes Ajax requests:
 
     var processed = 0
-    var users = ["gkossakowski", 
+    var users = ["gkossakowski",
       "odersky", "adriaanm"]
     users.forEach(function (user) {
       console.log("fetching " + user)
@@ -626,7 +626,7 @@ iterates over array of users and makes Ajax requests:
       })
     })
 
-    val users = array("gkossakowski", 
+    val users = array("gkossakowski",
       "odersky", "adriaanm")
     for (user <- users.parSuspendable) {
       console.log("fetching " + user)
@@ -661,18 +661,18 @@ non-CPS libraries as the whole program needs to adhere to the CPS style. Here
 we use a _selective_ CPS transformation, which precisely identifies
 expressions that need to be CPS transformed.
 
-In fact, the Scala compiler already does selective, `@suspendable` 
+In fact, the Scala compiler already does selective, `@suspendable`
 type-annotation-driven CPS transformations of Scala programs
-[(*)](DBLP:conf/icfp/RompfMO09,DBLP:conf/lfp/DanvyF90,DBLP:journals/mscs/DanvyF92).  
-We show how this mechanism can be used for transforming our DSL code before 
-staging and stripping out most CPS abstractions at staging time. The generated 
-JavaScript code does not contain any CPS-specific code but is written in CPS-style 
+[(*)](DBLP:conf/icfp/RompfMO09,DBLP:conf/lfp/DanvyF90,DBLP:journals/mscs/DanvyF92).
+We show how this mechanism can be used for transforming our DSL code before
+staging and stripping out most CPS abstractions at staging time. The generated
+JavaScript code does not contain any CPS-specific code but is written in CPS-style
 by use of JavaScript anonymous functions.
 
 
 
 
-## CPS and Staging 
+## CPS and Staging
 
 As an example, we will consider a seemingly blocking `sleep` method
 implemented in a non-blocking, asynchronous style. In JavaScript, there are no
@@ -840,7 +840,7 @@ continuation, reify it as a staged function using `fun` and store it in an
     trait AjaxExp extends JSExp with Ajax {
       case class AjaxGet(request: Rep[Request],
         success: Rep[Response => Unit]) extends Def[Unit]
-      def ajax_get(request: Rep[Request]): Rep[Response] @suspendable = 
+      def ajax_get(request: Rep[Request]): Rep[Response] @suspendable =
         shift { k =>
           reflectEffect(AjaxGet(request, lambda(k)))
         }
@@ -855,8 +855,8 @@ callback function in the `success` field of the request object:
       import IR._
       override def emitNode(sym: Sym[Any], rhs: Def[Any])(
         implicit stream: PrintWriter) = rhs match {
-          case AjaxGet(req, succ) => 
-            stream.println(quote(req) + ".success = " + quote(succ)) 
+          case AjaxGet(req, succ) =>
+            stream.println(quote(req) + ".success = " + quote(succ))
             emitValDef(sym, "jQuery.ajax(" + quote(req) + ")")
         case _ => super.emitNode(sym, rhs)
       }
@@ -924,7 +924,7 @@ integrating external libraries with our DSL:
         } else {
           this.value = v
           this.isDefined = true
-          this.queue.forEach(function (f) { 
+          this.queue.forEach(function (f) {
             f(v) //non-trivial spawn could be used here
           })
         }
@@ -1020,7 +1020,7 @@ implementation of Ackermann's function:
     }
 
 Calling `ack(m)(n)` will produce a set of mutually recursive
-functions, each specialized to a particular value of `m` 
+functions, each specialized to a particular value of `m`
 (example `m`=2):
 
 
@@ -1043,7 +1043,7 @@ generated code for efficiency reasons, or to simplify subsequent analysis
 passes. In this case, we can define a new function constructor `fundef` as
 follows:
 
-    def fundef[A,B](f: Rep[A] => Rep[B]): Rep[A] => Rep[B] = 
+    def fundef[A,B](f: Rep[A] => Rep[B]): Rep[A] => Rep[B] =
       (x: Rep[A]) => lambda(f).apply(x)
 
 Using `fundef` instead of `lambda` produces a restricted function that can
@@ -1089,9 +1089,9 @@ values:
 
 
     case class Complex(re: Rep[Double], im: Rep[Double])
-    def infix_+(a: Complex, b: Complex) = 
+    def infix_+(a: Complex, b: Complex) =
       Complex(a.re + b.re, a.im + b.im)
-    def infix_*(a: Complex, b: Complex) = 
+    def infix_*(a: Complex, b: Complex) =
       Complex(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re)
 
 
@@ -1121,7 +1121,7 @@ To make complex numbers work across conditionals,  we have have to split the
 control flow explicitly (another option would be using mutable variables).
 There are multiple ways to achieve this splitting.  We can either duplicate
 the test and create a single result object:
-  
+
 
     val test: Rep[Boolean] = ...
     val c3 = Complex(if (test) c1.re else c2.re, if (test) c1.im else c2.im)
@@ -1148,7 +1148,7 @@ generate two specialized computation paths:
     def split[A](c: Rep[Boolean]) = shift { k: (Boolean => A) =>
       if (c) k(true) else k(false) // "The Trick"
     }
-    val test: Rep[Boolean] = ... 
+    val test: Rep[Boolean] = ...
     val c3 = if (split(test)) c1 else c2
 
 
@@ -1169,12 +1169,12 @@ We observe that we can increase the amount of statically possible computation
 (in a sense, applying binding-time improvements) for dynamic values with
 domain-specific rewritings:
 
-    val s: Int = ...            // static  
+    val s: Int = ...            // static
     val d: Rep[Int] = ...       // dynamic
 
-    val x1 = s + s + d          // left assoc: s + s evaluated statically, 
+    val x1 = s + s + d          // left assoc: s + s evaluated statically,
                                 // one dynamic addition
-    val x2 = s + (d + s)        // naively: two dynamic additions, 
+    val x2 = s + (d + s)        // naively: two dynamic additions,
                                 // using pattern rewrite: only one
 
 
@@ -1196,9 +1196,9 @@ An implementation of complex numbers in terms of `Struct` could look like
 this:
 
     trait ComplexOps extends ComplexBase with ArithOps {
-      def infix_+(x: Rep[Complex], y: Rep[Complex]): Rep[Complex] = 
+      def infix_+(x: Rep[Complex], y: Rep[Complex]): Rep[Complex] =
         Complex(x.re + y.re, x.im + y.im)
-      def infix_*(x: Rep[Complex], y: Rep[Complex]): Rep[Complex] = 
+      def infix_*(x: Rep[Complex], y: Rep[Complex]): Rep[Complex] =
         Complex(a.re*b.re - ...)
     }
     trait ComplexBase extends Base {
@@ -1228,7 +1228,7 @@ and remove the need for methods `infix_re` and `infix_im`. The Scala-
 Virtualized compiler will automatically provide staged field accesses like
 `c.re` and `c.im`. It is still useful to add a simplified constructor method
 
-    def Complex(r: Rep[Double], i: Rep[Double]) = 
+    def Complex(r: Rep[Double], i: Rep[Double]) =
       new Complex { val re = re; val im = im }
 
 to enable using `Complex(re,im)` instead of the `new Complex` syntax.
@@ -1273,7 +1273,7 @@ class from the Scala library
 
 and provide a type class instance for complex numbers:
 
-    implicit def complexIsNumeric = new Numeric[Complex] { 
+    implicit def complexIsNumeric = new Numeric[Complex] {
       def num_plus(a: Rep[Complex], b: Rep[Complex]) = a + b
     }
 
@@ -1333,8 +1333,8 @@ class is not known at staging time. As an example, the expression
 
 produces this generated code:
 
-    val (re, im, r, phi, clzz) = 
-      if (x > 0) (1.0, 2.0, null, null, classOf[Cartesian]) 
+    val (re, im, r, phi, clzz) =
+      if (x > 0) (1.0, 2.0, null, null, classOf[Cartesian])
       else (null, null, 3.0, 4.0, classOf[Polar])
     struct("re"->re, "im"->im, "r"->r, "phi"->phi, "clzz"->clzz)
 
@@ -1396,12 +1396,12 @@ is:
     val vector1re = ...
     val vector1im = ...
     val vector1clzz = ... // array holding classOf[Cartesian] values
-    val vector2im = if (test) { 
+    val vector2im = if (test) {
       Array.fill(vector1size) { i => -vector1im(i) }
     } else {
       vector1im
     }
-    struct(ArraySoaTag(Complex,vector1size), 
+    struct(ArraySoaTag(Complex,vector1size),
       Map("re"->vector1re, "im"->vector2im, "clzz"->vector1clzz))
 
 Note how the conditionals for the `re` and `clzz` fields have been eliminated
@@ -1449,7 +1449,7 @@ side-by-side operations also appear frequently. As an example, consider a DSL
 that provides mean and variance methods.
 
 
-    def mean(x: Rep[Vector[Double]]) = 
+    def mean(x: Rep[Vector[Double]]) =
         sum(x.length) { i => x(i) } / x.length
     def variance(x: Rep[Vector[Double]]) =
         sum(x.length) { i => square(x(i)) } / x.length - square(mean(x))
@@ -1572,9 +1572,9 @@ of the pattern.
     case class VectorNorm[T](v: Exp[Vector[T]]) extends Def[T]
     case class UnitVector[T](v: Exp[Vector[T]]) extends Def[Vector[T]]
 
-    override def scalar_times_vector[T:Numeric](s: Exp[T], v: Exp[Vector[T]]) = 
+    override def scalar_times_vector[T:Numeric](s: Exp[T], v: Exp[Vector[T]]) =
     (s,v) match {
-      case (Def(Divide(Const(1), Def(VectorNorm(v1)))), v2) 
+      case (Def(Divide(Const(1), Def(VectorNorm(v1)))), v2)
         if v1 == v2 => UnitVector(v)
       case _ => super.scalar_times_vector(s,v)
     }
@@ -1622,8 +1622,8 @@ by delegating back to user-space code, namely method `vec_plus_ll` in trait
 
 
     // Vector interface
-    trait Vectors extends Base { 
-      // elided implicit enrichment boilerplate: 
+    trait Vectors extends Base {
+      // elided implicit enrichment boilerplate:
       //   Vector.zeros(n) = vec_zeros(n), v1 + v2 = vec_plus(a,b)
       def vec_zeros[T:Numeric](n: Rep[Int]): Rep[Vector[T]]
       def vec_plus[T:Numeric](a: Rep[Vector[T]], b: Rep[Vector[T]]): Rep[Vector[T]]
@@ -1726,7 +1726,7 @@ Consider the following small but compute-intensive snippet from SPADE (C++):
 
 
     std::fill(densities, densities+obs, 0);
-    #pragma omp parallel for shared(densities)  
+    #pragma omp parallel for shared(densities)
     for (size_t i=0; i<obs; i++) {
       if (densities[i] > 0)
         continue;
@@ -1761,8 +1761,8 @@ particular implementation. In contrast, consider the equivalent snippet of
 code, but written in OptiML:
 
 
-    val distances = Stream[Double](data.numRows, data.numRows) { 
-      (i,j) => dist(data(i),data(j)) 
+    val distances = Stream[Double](data.numRows, data.numRows) {
+      (i,j) => dist(data(i),data(j))
     }
     val densities = Vector[Int](data.numRows, true)
 
@@ -1789,7 +1789,7 @@ express the original problem in a more natural way without adding overwhelming
 performance overhead. The foreach implementation for stream.rows is:
 
 
-    def stream_foreachrow[A:Manifest](x: Exp[Stream[A]], 
+    def stream_foreachrow[A:Manifest](x: Exp[Stream[A]],
                   block: Exp[StreamRow[A]] => Exp[Unit]) = {
       var i = 0
       while (i < numChunks) {
@@ -1843,7 +1843,7 @@ matching mechanism described earlier:
       this: OptiMLExp with StreamImplOps =>
 
       override def stream_numrows[A:Manifest](x: Exp[Stream[A]]) = x match {
-        case Def(Reflect(StreamObjectNew(numRows, numCols, 
+        case Def(Reflect(StreamObjectNew(numRows, numCols,
                           chunkSize, func, isPure),_,_)) => numRows
         case _ => super.stream_numrows(x)
       }
@@ -1869,13 +1869,13 @@ indentation added for clarity):
 
     // ... initialization code omitted ...
     // -- FOR EACH ELEMENT IN ROW --
-    while (x155 < x61) {  
+    while (x155 < x61) {
       val x168 = x155 * x64
       var x185: Double = 0
       var x180 = 0
 
       // -- INIT STREAM VALUE (dist(i,j))
-      while (x180 < x64) {  
+      while (x180 < x64) {
         val x248 = x164 + x180
         val x249 = x55(x248)
         val x251 = x168 + x180
@@ -1885,7 +1885,7 @@ indentation added for clarity):
         val x184 = x185 + x255
         x185 = x184
         x180 += 1
-      } 
+      }
       val x186 = x185
       val x245 = x186 < 6.689027961000001
       val x246 = x186 < 22.296759870000002
@@ -1899,16 +1899,16 @@ indentation added for clarity):
         x208 = x207
       }
       x155 += 1
-    } 
+    }
 
     // -- VECTOR BULK UPDATE --
     var forIdx = 0
-    while (forIdx < x201.size) { 
+    while (forIdx < x201.size) {
       val x210 = x201(forIdx)
       val x211 = x133(x210) = x208
       x211
       forIdx += 1
-    } 
+    }
 
 This code, though somewhat obscured by the compiler generated names, closely
 resembles the hand-written C++ snippet shown earlier. It was generated from a
@@ -1926,7 +1926,7 @@ LINQ~[(*)](meijer06linq). We consider querying a data set with roughly 10
 columns, similar to the table lineItems from the TPCH benchmark. The example
 is slightly trimmed down from TPCH Query 1:
 
-    val res = lineItems Where(_.l_shipdate <= Date("1998-12-01")) 
+    val res = lineItems Where(_.l_shipdate <= Date("1998-12-01"))
     GroupBy(l => l.l_returnflag) Select(g => new Result {
       val returnFlag = g.key
       val sumQty = g.Sum(_.l_quantity)
@@ -1960,7 +1960,7 @@ Below is the annotated generated code:
     val x52 = generated.scala.util.Date("1998-12-01")
     val x16 = x10.columns("l_quantity")
     val x283 = x264 + x265
-    
+
     // hash table constituents, grouped for both x304,x306
     var x304x306_hash_to_pos: Array[Int] = alloc_htable // actual hash table
     var x304x306_hash_keys: Array[Char] = alloc_buffer  // holds keys
@@ -1978,8 +1978,8 @@ Below is the annotated generated code:
       if (x53) {
         val x35_hash_val = x35.hashCode
         val x304x306_hash_index_x35 = {
-          // code to lookup x35_hash_val 
-          // in hash table x304x306_hash_to_pos 
+          // code to lookup x35_hash_val
+          // in hash table x304x306_hash_to_pos
           // with key table x304x306_hash_keys
           // (growing hash table if necessary)
         }

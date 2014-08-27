@@ -3,7 +3,7 @@ Ackermann's Function
 ====================
 
 By selectively specializing on a subset of the argument, we can turn
-a recursive function into an automaton, i.e. a set of mutually recursive 
+a recursive function into an automaton, i.e. a set of mutually recursive
 functions.
 
 Outline:

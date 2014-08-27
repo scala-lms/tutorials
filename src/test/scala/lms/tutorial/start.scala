@@ -24,7 +24,7 @@ extend.
 My First Multi-Stage Program
 ------------------------------
 
-This tutorial is a [literate Scala file](https://github.com/scala-lms/tutorials/tree/master/src/test/scala/lms/tutorial/start.scala). We invite you to clone the 
+This tutorial is a [literate Scala file](https://github.com/scala-lms/tutorials/tree/master/src/test/scala/lms/tutorial/start.scala). We invite you to clone the
 [GitHub repo](https://github.com/scala-lms/tutorials/) and play with the code as you follow along.
 
 */
@@ -64,16 +64,16 @@ will see later.
       }
     }
     assert(snippet.eval(0) === 2)
-    check("1", snippet.code)    
+    check("1", snippet.code)
   }
 /**
       .. includecode:: ../../../../out/dslapi1.check.scala
 
-Contrast the snippet above, where `b` is a `Boolean`, with the snippet 
-below, where `b` is a `Rep[Boolean]`. The expression `if (b) 1 else x` 
-is executed at staging time when `b` is a `Boolean`, while it is delayed 
-causing code to be generated for the `if` expression when `b` is a 
-`Rep[Boolean]` -- indeed, the actual value of `b` is not known at staging 
+Contrast the snippet above, where `b` is a `Boolean`, with the snippet
+below, where `b` is a `Rep[Boolean]`. The expression `if (b) 1 else x`
+is executed at staging time when `b` is a `Boolean`, while it is delayed
+causing code to be generated for the `if` expression when `b` is a
+`Rep[Boolean]` -- indeed, the actual value of `b` is not known at staging
 time, but only when the generated code is executed.
 */
 

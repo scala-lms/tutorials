@@ -112,7 +112,7 @@ compilation.
     trait FFTC extends FFT { this: Arrays with Compile =>
       def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
         assert(<size is power of 2>) // happens at staging time
-        val arg = Array.tabulate(size) { i => 
+        val arg = Array.tabulate(size) { i =>
           Complex(input(2*i), input(2*i+1))
         }
         val res = fft(arg)
@@ -143,8 +143,8 @@ We can then define code that creates and uses compiled  FFT ``codelets'' by
 extending `FFTC`:
 
     trait TestFFTC extends FFTC {
-      val fft4: Array[Double] => Array[Double] = fftc(4) 
-      val fft8: Array[Double] => Array[Double] = fftc(8) 
+      val fft4: Array[Double] => Array[Double] = fftc(4)
+      val fft8: Array[Double] => Array[Double] = fftc(8)
 
       // embedded code using fft4, fft8, ...
     }
@@ -154,7 +154,7 @@ traits) will execute the embedded code:
 
     val OP: TestFFC = new TestFFTC with CompileScala
       with ArithExpOpt  with ArithExpOptFFT with ScalaGenArith
-      with TrigExpOpt   with ScalaGenTrig 
+      with TrigExpOpt   with ScalaGenTrig
       with ArraysExpOpt with ScalaGenArrays
 
 We can also use the compiled methods from outside the object:
@@ -183,7 +183,7 @@ The full code is below:
 
 
     trait FFT { this: Arith with Trig =>
-      
+
       def omega(k: Int, N: Int): Complex = {
         val kth = -2.0 * k * math.Pi / N
         Complex(cos(kth), sin(kth))
@@ -263,9 +263,9 @@ The full code is below:
     trait FlatResult extends BaseExp { // just to make dot output nicer
 
       case class Result(x: Any) extends Def[Any]
-      
+
       def result(x: Any): Exp[Any] = toAtom(Result(x))
-      
+
     }
 
     trait ScalaGenFlat extends ScalaGenBase {
@@ -281,9 +281,9 @@ The full code is below:
 
 
     class TestFFT extends FileDiffSuite {
-      
+
       val prefix = home + "test-out/epfl/test2-"
-      
+
       def testFFT1 = {
         withOutFile(prefix+"fft1") {
           val o = new FFT with ArithExp with TrigExpOpt with FlatResult with DisableCSE //with DisableDCE
@@ -292,7 +292,7 @@ The full code is below:
           val r = fft(List.tabulate(4)(_ => Complex(fresh, fresh)))
           println(globalDefs.mkString("\n"))
           println(r)
-          
+
           val p = new ExportGraph with DisableDCE { val IR: o.type = o }
           p.emitDepGraph(result(r), prefix+"fft1-dot", true)
         }
@@ -306,7 +306,7 @@ The full code is below:
           import o._
 
           case class Result(x: Any) extends Exp[Any]
-          
+
           val r = fft(List.tabulate(4)(_ => Complex(fresh, fresh)))
           println(globalDefs.mkString("\n"))
           println(r)
@@ -330,12 +330,12 @@ The full code is below:
               // make a new array for now - doing in-place update would be better
               makeArray(r.flatMap { case Complex(re,im) => List(re,im) })
             }
-            
+
             val codegen = new ScalaGenFlat with ScalaGenArith with ScalaGenArrays { val IR: FooBar.this.type = FooBar.this } // TODO: find a better way...
           }
           val o = new FooBar
           import o._
-        
+
           val fft4 = (input: Rep[Array[Double]]) => ffts(input, 4)
           codegen.emitSource(fft4, "FFT4", new PrintWriter(System.out))
           val fft4c = compile(fft4)
@@ -343,6 +343,6 @@ The full code is below:
         }
         assertFileEqualsCheck(prefix+"fft3")
       }
-      
+
     }
 */

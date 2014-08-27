@@ -1,11 +1,11 @@
-/** 
+/**
 
 Shonan Challenge
 ================
 
 In this tutorial we will develop a solution to the HMM problem from the Shonan Challenge.
 
-The task is to implement a sparse matrix vector product, where the matrix is statically 
+The task is to implement a sparse matrix vector product, where the matrix is statically
 known but the vector is not. This situation comes up in hidden markov models (HMM),
 where a single transition matrix is multiplied by many different observation vectors.
 Therefore, it pays off to generate code that is specialized to a particular matrix.
@@ -30,7 +30,7 @@ class ShonanTest extends TutorialFunSuite {
   val A = scala.Array
 
 /**
-We first define our static matrix. We notice that some rows are dense, 
+We first define our static matrix. We notice that some rows are dense,
 some rows are sparse, and some rows contain only zeroes.
 */
 
@@ -81,7 +81,7 @@ STEP 0.5: static vs dynamic conditional
 ---------------------------------------
 
 Now we add basic code generation facilities and, as a recap of how
-LMS works, play with static vs dynamic expressions. 
+LMS works, play with static vs dynamic expressions.
 */
 
   test("shonan-hmm1b") {
@@ -107,7 +107,7 @@ the generated code:
       .. includecode:: ../../../../out/dslapishonan-hmm1b.check.scala
 
 
-If we change the condition to depend on the (dynamic) input array, 
+If we change the condition to depend on the (dynamic) input array,
 an `if/else` statement will be generated.
 
 */
@@ -150,7 +150,7 @@ overloaded in Scala.
 STEP 1: Staging the matrix vector product
 -----------------------------------------
 
-We want to change the `matrix_vector_prod` function to take a dynamic 
+We want to change the `matrix_vector_prod` function to take a dynamic
 vector and a static matrix. We move it into the `DslDriver` trait so
 that it can use `Rep`.
 
@@ -164,7 +164,7 @@ an array at staging time, we want to generate code to create a the array.
 
 Now we can play with the loop shapes: `Range` loops are computed
 statically, i.e. unrolled at staging time. `Rep[Range]` loops cause
-generation of loop code. 
+generation of loop code.
 
 We can make unrolling decisions in a very fine-grained manner:
 for dense rows we want to generate a loop, for sparse rows
@@ -187,7 +187,7 @@ to either a `Range` or a `Rep[Range]` loop.
               for (j <- (0 until n):Range) {
                 v1(i) = v1(i) + a(i).apply(j) * v(j)
               }
-            } else {                  
+            } else {
               for (j <- (0 until n):Rep[Range]) {
                 v1(i) = v1(i) + a(i).apply(j) * v(j)
               }
@@ -214,9 +214,9 @@ unrolled loop for row 2, which is sparse:
 STEP 2: Conditional unrolling
 -----------------------------
 
-The code duplication of the loop body above is not very nice. Fortunately, 
-we can create arbitrary staging-time abstractions. We create an auxiliary 
-method unrollIf that captures the conditional unrolling pattern in a general 
+The code duplication of the loop body above is not very nice. Fortunately,
+we can create arbitrary staging-time abstractions. We create an auxiliary
+method unrollIf that captures the conditional unrolling pattern in a general
 way. The `matrix_vector_prod` function no longer needs to express the loop
 body twice.
 
@@ -227,7 +227,7 @@ The generated code is identical: "abstraction without regret" ftw!
     val snippet = new DslDriver[Array[Int],Array[Int]] {
       def snippet(v: Rep[Array[Int]]) = {
 
-        def unrollIf(c:Boolean,r: Range) = new { 
+        def unrollIf(c:Boolean,r: Range) = new {
           def foreach(f: Rep[Int] => Rep[Unit]) = {
             if (c) for (j <- (r.start until r.end):Range)      f(j)
             else   for (j <- (r.start until r.end):Rep[Range]) f(j)

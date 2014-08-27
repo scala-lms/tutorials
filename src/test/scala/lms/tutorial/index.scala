@@ -1,9 +1,9 @@
-/** 
+/**
 
 Tutorials and Documentation
 ===========================
 
-This tutorial series introduces _Lightweight Modular Staging_ (LMS), a framework for 
+This tutorial series introduces _Lightweight Modular Staging_ (LMS), a framework for
 runtime code generation in Scala.
 
 Outline:
@@ -23,10 +23,10 @@ Check the [`README.md`](https://github.com/scala-lms/tutorials/blob/master/READM
 ### Why Generative Programming ?
 
 Because it enables **abstraction without regret**: the key idea is to write very high-level
-and generic programs that generate specialized and extremely fast low-level code at runtime. 
+and generic programs that generate specialized and extremely fast low-level code at runtime.
 
-Programming abstractions that would usually be avoided in performance-sensitive code 
-(objects, type classes, higher-order functions) can be used **during generation** without 
+Programming abstractions that would usually be avoided in performance-sensitive code
+(objects, type classes, higher-order functions) can be used **during generation** without
 affecting performance of the **generated code**.
 
 
@@ -35,9 +35,9 @@ affecting performance of the **generated code**.
 Because it is **lightweight** and **modular**: LMS is just a Scala library. With types, it distinguishes
 expressions that are evaluated _now_ (type `T`) vs _later_ (type `Rep[T]`).
 
-LMS comes with **batteries included**: it provides many optimizations such as common subexpression elimination out of the box, and it goes beyond purely generative approaches by 
+LMS comes with **batteries included**: it provides many optimizations such as common subexpression elimination out of the box, and it goes beyond purely generative approaches by
 providing an extensible intermediate representation that can be used to implement
-sophisticated domain-specific compiler pipelines. 
+sophisticated domain-specific compiler pipelines.
 
 At the same time LMS is **hackable**: since it is just a library, all aspects can be
 modified or extended to suit a particular purpose.
@@ -73,7 +73,7 @@ The following tutorials are available:
 
 - [Sliding Stencil](stencil.html)
     Rearranging loop shapes
-    
+
 
 <!--
 LMS In-Depth

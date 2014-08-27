@@ -21,12 +21,12 @@ Outline:
 
 As a simple example, let us turn the power function:
 
-    def power(b: Double, n: Int): Double = 
+    def power(b: Double, n: Int): Double =
       if (n == 0) 1.0 else b * power(b, n - 1)
 
 into a code generator:
 
-    def power(b: String, n: Int): String = 
+    def power(b: String, n: Int): String =
       if (n == 0) "1.0" else "(" + b + " * " + power(b, n - 1) + ")"
 
 As result of an invocation we obtain:
@@ -37,7 +37,7 @@ As result of an invocation we obtain:
 However there is a problem: We can produce arbitrary strings that might not be
 valid code.  It is very easy to make subtle mistakes:
 
-    def power(b: String, n: Int): String = 
+    def power(b: String, n: Int): String =
       if (n == 0) "1.0" else "b * " + power(b, n - 1) + ")"
 
 We have accidentally omitted a parenthesis, so the result is not syntactically
@@ -63,7 +63,7 @@ Strings model concrete syntax, but we can also use abstract syntax. This idea
 is inspired by Lisp's ''''code as data'' model.  We start with a slightly more
 convenient string notation, denoted by `s"..."` quotes:
 
-    def power(b: String, n: Int): String = 
+    def power(b: String, n: Int): String =
       if (n == 0) s"1.0" else s"($b * ${ power(b, n - 1) })"
 
 The notation `${ ... }` denotes a hole in the string, to be filled by the
@@ -73,7 +73,7 @@ The same idea applies to abstract syntax. Let `[[ ... ]]` denote the AST of
 the enclosed expression, and let `Tree` be the type of AST nodes. Holes will
 require an expression of type `Tree`:
 
-    def power(b: Tree, n: Int): Tree = 
+    def power(b: Tree, n: Int): Tree =
       if (n == 0) [[ 1.0 ]] else [[$b * ${ power(b, n - 1) } ]]"
 
 Now we have a program generator that assembles AST nodes.
@@ -119,7 +119,7 @@ With syntax and scoping out of the way, we turn our attention to type
 correctness. Fortunately, type correctness falls out naturally if parametric
 types are available. We just replace type `Tree` with `Tree[T]`:
 
-    def power(b: Tree[Double], n: Int): Tree[Double] = 
+    def power(b: Tree[Double], n: Int): Tree[Double] =
 
 Now the type system ensures that `power` is only applied to AST nodes that
 compute `Double` values in the next stage.
@@ -136,7 +136,7 @@ type  correct.
 ## Value Correctness is an Open Problem
 <a name="sec:221valcorr"></a>
 
-The remaining big problem is what we (somewhat vaguely) call _value 
+The remaining big problem is what we (somewhat vaguely) call _value
 correctness_ or more generally preservation of program semantics:  How can we
 be reasonably certain that a program computes the same result after adding
 staging annotations?  We cannot expect a strong guarantee in all cases for
@@ -191,7 +191,7 @@ achieved our goal.
 
 As another example, let us switch to a better algorithm:
 
-    def power(b: Tree[Double], n: Int): Tree[Double] = 
+    def power(b: Tree[Double], n: Int): Tree[Double] =
       if (n == 0) $[[$ 1.0 $]]$
       else if ((n&1) == 0) { val y = power(b, n/2); $[[ \$y$ * $\$y ]]$ }
       else $[[ \$b$ * $\$\{$ power(b, n - 1) $\} ]]$
@@ -220,9 +220,9 @@ Explicit monadic style or CPS complicate code generators a lot. This dilemma
 is described as an ''agonizing trade-off'', due to which one ''cannot achieve
 clarity, safety, and efficiency at the same time''
 [(*)](DBLP:conf/pepm/KameyamaKS09). Only very recently have type-systems been
-devised to handle both staging and effects 
-[(*)](DBLP:conf/pepm/KameyamaKS08,DBLP:conf/pepm/KameyamaKS09,DBLP:conf/pldi/WestbrookRIYAT10). 
-They are not excessively restrictive but not without restrictions either. 
+devised to handle both staging and effects
+[(*)](DBLP:conf/pepm/KameyamaKS08,DBLP:conf/pepm/KameyamaKS09,DBLP:conf/pldi/WestbrookRIYAT10).
+They are not excessively restrictive but not without restrictions either.
 Mint [(*)](DBLP:conf/pldi/WestbrookRIYAT10), a multi-stage extension of Java,
 restricts non-local operations within escapes  to final classes which excludes
 much of the standard Java library. Languages that support both staging  and
@@ -288,17 +288,17 @@ implementations can remain abstract for the moment.
 
 We can put perform and accumulate to use in the power example as follows:
 
-    def power(b: Code, n: Int): Code = 
-      if (n == 0) perform("1.0") else 
+    def power(b: Code, n: Int): Code =
+      if (n == 0) perform("1.0") else
       perform("(" + accumulate { b } + " * " + accumulate { power(b, n - 1) } + ")")
 
 We define perform and accumulate in the following way to perform automatic
 eager let insertion. The private constructor `code` builds a `Code` object
 from a string:
 
-    accumulate { E[ perform("str") ] } 
+    accumulate { E[ perform("str") ] }
         $\longrightarrow$ "{ val fresh = str; " + accumulate { E[ code("fresh") ] } + "}"
-    accumulate { code("str") }         
+    accumulate { code("str") }
         $\longrightarrow$ "str"
 
 Where `E` is an accumulate-free evaluation context and `fresh` a fresh
@@ -336,17 +336,17 @@ incorporate them entirely inside the quasi quotation / interpolation syntax:
     s" foo $\$${ bar } baz " $\longrightarrow$ " foo " + bar + " baz "  // regular interpolation
     q" foo $\$${ bar } baz " $\longrightarrow$ perform(" foo " + accumulate { bar } + " baz ")
 
-In essence, we identify quotation with perform and 
+In essence, we identify quotation with perform and
 holes with accumulate.
 
 We get back to a power implementation using quasiquotes. This time
 we use type Code, although we are still working with concrete syntax:
 
-    def power(b: Code, n: Int): Code = 
+    def power(b: Code, n: Int): Code =
       if (n == 0) q"1.0" else  q"($\$$b * $\$${ power(b, n - 1) } )"
 
 The same mechanism can be used to implement order preserving
-versions of (type-safe) abstract syntax quotation $[[ ... ]]$. 
+versions of (type-safe) abstract syntax quotation $[[ ... ]]$.
 The signatures will change from strings to trees:
 
     type Code[T]
@@ -354,7 +354,7 @@ The signatures will change from strings to trees:
     def accumulate(res: => Code[T]): Tree[T]
 
 
-We put the modified quasiquotes to test by invoking power 
+We put the modified quasiquotes to test by invoking power
 on the example from the [previous Section](#sec:221valcorr):
 
     def power(b: Code[T], n: Int): Code[T] = ...
@@ -417,7 +417,7 @@ are good reasons to also hide the full power of  arbitrary program composition
 Programs, such as power, use quasiquotes for two purposes: lifting primitives
 and operations:
 
-    def power(b: Code[Double], n: Int): Code[Double] = 
+    def power(b: Code[Double], n: Int): Code[Double] =
       if (n == 0) q"1.0" else  q"($\$$b * $\$${ power(b, n - 1) } )"
 
 We already identify object code via `Code[T]` types. Instead of quasiquotes we
@@ -429,13 +429,13 @@ can employ other ways of lifting the necessary  operations on type `T` to type
 
 Now power can be implemented like this:
 
-    def power(b: Code[Double], n: Int): Code[Double] = 
+    def power(b: Code[Double], n: Int): Code[Double] =
       if (n == 0) liftDouble(1.0) else infix_*(b, power(b, n - 1))
 
 But we can simplify further. In fact, the Scala compiler will do most of  the
 work for us and we can write just this:
 
-    def power(b: Code[Double], n: Int): Code[Double] = 
+    def power(b: Code[Double], n: Int): Code[Double] =
       if (n == 0) 1.0 else b * power(b, n - 1)
 
 Apart from the `Code[_]` types, we have re-engineered exactly the regular,
@@ -574,7 +574,7 @@ follows.
 
 ### Value Correctness through Deep Reuse of Evaluation Order
 
-The perform and accumulate abstraction has been described at length 
+The perform and accumulate abstraction has been described at length
 [above](#sec220:evalOrder).
 
 
@@ -676,7 +676,7 @@ above.
 
 Given a method or function implementation:
 
-    def power(b: _, n: Int) = 
+    def power(b: _, n: Int) =
       if (n == 0) 1.0 else b * power(b, n - 1)
 
 Scala's type inference can determine whether the operations and the result
@@ -728,7 +728,7 @@ provided by trait `CompileScala`:
       def compile[A,B](f: Rep[A] => Rep[B]) = {
         val x = fresh[A]
         val y = accumulate { f(x) }
-        // emit header 
+        // emit header
         emitBlock(y)
         // emit footer
         // invoke compiler
@@ -741,6 +741,6 @@ The overall compilation logic of `CompileScala` is relatively simple: emit a
 class and `apply`-method declaration header, emit instructions for each
 definition node according to  the schedule, close the source file, invoke the
 Scala compiler, load the generated class file and return a newly instantiated
-object of that class. 
+object of that class.
 
 */
