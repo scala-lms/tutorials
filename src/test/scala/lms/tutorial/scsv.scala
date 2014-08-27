@@ -49,7 +49,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   case class PrintCSV(parent: Operator) extends Operator
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
-  case class Join(parent1: Operator, parent2: Operator) extends Operator // TODO: natural join? explicit join condition? for now it's just a cartesian product
+  case class Join(parent1: Operator, parent2: Operator) extends Operator
 
   // these utilities are (for now) only needed for filtering
   sealed abstract class Predicate

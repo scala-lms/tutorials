@@ -38,13 +38,21 @@ trait TutorialFunSuite extends FunSuite {
     val name = fileprefix+".check."+suffix
     val aname = fileprefix+".actual."+suffix
     val expected = readFile(name)
-    if (expected != code) {
+    val code1 = indent(code)
+    if (expected != code1) {
       println("writing " + aname)
-      writeFile(aname, code)
+      writeFile(aname, code1)
+    } else {
+      val f = new File(aname)
+      if (f.exists) f.delete
     }
-    assert(expected == code, name)
+    assert(expected == code1, name)
   }
-
+  def indent(str: String) = {
+    val s = new StringWriter
+    printIndented(str)(new PrintWriter(s))
+    s.toString
+  }
   def printIndented(str: String)(out: PrintWriter): Unit = {
     val lines = str.split("[\n\r]")
     var indent = 0
