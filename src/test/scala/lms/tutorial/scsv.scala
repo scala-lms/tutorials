@@ -19,6 +19,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
     val s = new Scanner(filename)
     var schema: Schema = Schema() // force present-stage var
     do (schema :+= s.next) while (s.hasNextInLine)
+    s.close
     schema
   }
 

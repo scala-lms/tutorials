@@ -21,6 +21,7 @@ class Scanner(filename: String) {
   }
   def hasNext = pending.nonEmpty || br.ready || {br.close; false}
   def hasNextInLine = pending.nonEmpty
+  def close = br.close
 }
 
 trait ScannerBase extends Base {
@@ -51,6 +52,8 @@ trait ScannerExp extends ScannerBase with EffectExp {
     case Reflect(ScannerHasNext(s), u, es) => reflectMirrored(Reflect(ScannerHasNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
+
+
 }
 
 trait ScalaGenScanner extends ScalaGenEffect {
