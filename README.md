@@ -21,3 +21,8 @@ SBT commands
 ------------
 
 * `test` -- runs all the tests
+
+Browse the sources
+------------------
+
+* The [src/test/scala/lms/tutorial](src/test/scala/lms/tutorial) directory contains the source files from which the [tutorial website](http://scala-lms.github.io/tutorials) is generated. The website generation is handled in [the main website repository](https://github.com/scala-lms/scala-lms.github.com#maintainers).
