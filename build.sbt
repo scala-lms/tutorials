@@ -19,11 +19,3 @@ libraryDependencies += "org.scala-lang.virtualized" % "scala-actors" % "2.10.2" 
 scalacOptions += "-Yvirtualize"
 
 scalacOptions += "-deprecation"
-
-site.settings
-
-SiteKeys.previewLaunchBrowser := false
-
-ghpages.settings
-
-git.remoteRepo := "git@github.com:scala-lms/tutorials.git"
