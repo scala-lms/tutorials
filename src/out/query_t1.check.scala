@@ -4,7 +4,7 @@
 class Snippet extends ((java.lang.String)=>(Unit)) {
 def apply(x0:java.lang.String): Unit = {
 val x1 = println("Name,Value,Flag")
-val x2 = new scala.lms.tutorial.Scanner(x0)
+val x2 = new scala.lms.tutorial.Scanner("src/data/t.csv")
 val x3 = x2.next
 val x4 = x2.next
 val x5 = x2.next
