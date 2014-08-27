@@ -13,6 +13,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
   case class Record(fields: Fields, schema: Schema) {
     def apply(key: String): Rep[Any] = fields(schema indexOf key)
+    def apply(keys: Schema): Fields = keys.map(this apply _)
   }
 
   def loadSchema(filename: String): Schema = {
@@ -95,27 +96,24 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
       processCSV(filename, schema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
-    case Project(schema, schema2, parent) =>
-      execOp(parent) { rec => yld(Record(schema2.map(k => rec(k)), schema)) }
+    case Project(newSchema, parentSchema, parent) =>
+      execOp(parent) { rec => yld(Record(rec(parentSchema), newSchema)) }
     case Join(left, right) =>
       execOp(left) { rec1 =>
         execOp(right) { rec2 =>
-          val keySchema = rec1.schema intersect rec2.schema
-          val key1 = keySchema.map(rec1 apply _)
-          val key2 = keySchema.map(rec2 apply _)
-          if (fieldsEqual(key1, key2))
+          val keys = rec1.schema intersect rec2.schema
+          if (fieldsEqual(rec1(keys), rec2(keys)))
             yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
     case HashJoin(left, right) =>
-      val keySchema = resultSchema(left) intersect resultSchema(right)
-      val m = new HashMap(resultSchema(left))
+      val keys = resultSchema(left) intersect resultSchema(right)
+      val hm = new HashMap(resultSchema(left))
       execOp(left) { rec1 =>
-        m += (keySchema.map(rec1 apply _), rec1.fields)
+        hm += (rec1(keys), rec1.fields)
       }
       execOp(right) { rec2 =>
-        val key2 = keySchema.map(rec2 apply _)
-        m(key2) foreach { rec1 =>
+        hm(rec2(keys)) foreach { rec1 =>
           yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
