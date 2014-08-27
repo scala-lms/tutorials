@@ -1,8 +1,11 @@
 package scala.lms.tutorial
 
+import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
-trait StagedCSV extends Dsl with ScannerBase {
+trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
+
+  // low-level processing
 
   type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
@@ -41,6 +44,11 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
 
+  def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
+
+  def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##") // TODO: clean up / add in LMS
+
+  // query operators
 
   sealed abstract class Operator
   // the definition of operators in order of incremental development
@@ -50,6 +58,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
   case class Join(parent1: Operator, parent2: Operator) extends Operator
+  case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
 
   // these utilities are (for now) only needed for filtering
   sealed abstract class Predicate
@@ -74,6 +83,7 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, _, _)   => schema
     case Join(left, right)       => resultSchema(left) ++ resultSchema(right)
+    case HashJoin(left, right)   => resultSchema(left) ++ resultSchema(right)
     case PrintCSV(parent)        => Schema()
   }
 
@@ -94,21 +104,115 @@ trait StagedCSV extends Dsl with ScannerBase {
             yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
+    case HashJoin(left, right) =>
+      val keySchema = resultSchema(left) intersect resultSchema(right)
+      val m = new HashMap(resultSchema(left))
+      execOp(left) { rec1 => 
+        m += (keySchema.map(rec1 apply _), rec1.fields)
+      }
+      execOp(right) { rec2 =>
+        val key2 = keySchema.map(rec2 apply _)
+        m(key2) foreach { rec1 =>
+          yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
+        }
+      }
     case PrintCSV(parent) =>
       val schema = resultSchema(parent)
       printSchema(schema)
       execOp(parent) { rec => printFields(rec.fields) }
   }
   def execQuery(q: Operator): Rep[Unit] = execOp(q) { _ => }
+
+  // data structure implementations
+
+  class HashMap(schema: Schema) {
+
+    // FIXME: hard coded data sizes
+    val hashSize = (1 << 8)
+    val bucketSize = (1 << 8)
+    val dataSize = hashSize * bucketSize
+
+    // TODO: implement resizing and/or initial size heuristic based on file size
+
+    val data = new ArrayBuffer(dataSize, schema)
+    val dataCount = var_new(0)
+
+    val buckets = NewArray[Int](dataSize)
+    val bucketHash = NewArray[Int](hashSize)
+    val bucketCounts = NewArray[Int](hashSize)
+
+    for (i <- 0 until hashSize) {
+        bucketHash(i) = -1
+        bucketCounts(i) = 0
+    }
+
+    val hashMask = hashSize - 1
+
+    def lookup(put: Boolean)(k: Fields): Rep[Int] = {
+        val h = fieldsHash(k).toInt
+        var bucket = h & hashMask
+        var curHash = bucketHash(bucket)
+        while (curHash != -1 && curHash != h) {
+          // TODO: need to compare keys in full, not just hash code
+          bucket = (bucket + 1) & hashMask
+          curHash = bucketHash(bucket)
+        }
+        if (put) bucketHash(bucket) = h
+        bucket
+    }
+
+    def +=(k: Fields, v: Fields) = {
+      val dataPos = dataCount: Rep[Int] // force read
+      data(dataPos) = v
+      dataCount += 1
+
+      val bucket = lookup(true)(k)
+      val bucketPos = bucketCounts(bucket)
+      buckets(bucket * bucketSize + bucketPos) = dataPos
+      bucketCounts(bucket) = bucketPos + 1
+    }
+
+    def apply(k: Fields) = new {
+      def foreach(f: Record => Rep[Unit]): Rep[Unit] = {
+        val bucket = lookup(false)(k)
+
+        val bucketLen = bucketCounts(bucket)
+        val bucketStart = bucket * bucketSize
+
+        for (i <- bucketStart until (bucketStart + bucketLen)) {
+          f(Record(data(buckets(i)),schema))
+        }
+      }
+    }
+  }
+
+  class ArrayBuffer(dataSize: Int, schema: Schema) {
+    val buf = schema.map(f => NewArray[String](dataSize))
+    var len = 0
+    def +=(x: Fields) = {
+      this(len) = x
+      len += 1
+    }
+    def update(i: Rep[Int], x: Fields) = {
+      (buf,x).zipped.foreach((b,x) => b(i) = x)
+    }
+    def apply(i: Rep[Int]) = {
+      buf.map(b => b(i))
+    }
+  }
+
+
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
-  override val codegen = new DslGen with ScalaGenScanner {
+abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp { q =>
+  override val codegen = new DslGen with ScalaGenScanner with ScalaGenUncheckedOps {
     val IR: q.type = q
   }
   override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query)
   def filePath(csv: String) = "src/data/" + csv
   def query: Operator
+
+  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }
 
 class StagedCSVTest extends TutorialFunSuite {
@@ -157,6 +261,24 @@ class StagedCSVTest extends TutorialFunSuite {
     def query =
       PrintCSV(
         Join(
+          Scan(filePath("t.csv")),
+          Project(Schema("Name"), Schema("Name"), Scan(filePath("t.csv")))
+      ))
+  })
+
+  testquery("t4h", new StagedQuery {
+    def query =
+      PrintCSV(
+        HashJoin(
+          Scan(filePath("t.csv")),
+          Project(Schema("Name1"), Schema("Name"), Scan(filePath("t.csv")))
+      ))
+  })
+
+  testquery("t5h", new StagedQuery {
+    def query =
+      PrintCSV(
+        HashJoin(
           Scan(filePath("t.csv")),
           Project(Schema("Name"), Schema("Name"), Scan(filePath("t.csv")))
       ))

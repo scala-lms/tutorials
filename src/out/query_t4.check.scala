@@ -17,14 +17,14 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x12 = x11.next
       val x13 = x11.next
       val x14 = x11.next
+      val x20 = x8+","
+      val x21 = x9+","
+      val x22 = x10+","
       val x28 = while ({val x15 = x11.hasNext
         x15}) {
         val x17 = x11.next
         val x18 = x11.next
         val x19 = x11.next
-        val x20 = x8+","
-        val x21 = x9+","
-        val x22 = x10+","
         val x23 = x22+x17
         val x24 = x21+x23
         val x25 = x20+x24
