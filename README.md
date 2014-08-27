@@ -21,10 +21,3 @@ SBT commands
 ------------
 
 * `test` -- runs all the tests
-
-<!--
-SBT commands for maintainers
------------------------------
-* `preview-site` -- previews the website locally
-* `ghpages-push-site` -- updates the [live website](http://scala-lms.github.io/tutorials)
--->
