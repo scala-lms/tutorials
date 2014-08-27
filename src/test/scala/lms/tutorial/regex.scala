@@ -106,7 +106,7 @@ trait RegexpMatcher {
 class RegexpMatcherTest extends FunSuite with RegexpMatcher {
   def testmatch(regexp: String, text: String, expected: Boolean) {
     test(s"""matchsearch("$regexp", "$text") == $expected""") {
-      expectResult(expected){matchsearch(regexp, text)}
+      assertResult(expected){matchsearch(regexp, text)}
     }
   }
 
@@ -209,7 +209,7 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
         })
       check("_"+regexp.replace("^", "_b").replace("*", "_s").replace("$", "_e"),
             snippet.code)
-      expectResult(expected){snippet.eval(text)}
+      assertResult(expected){snippet.eval(text)}
     }
   }
 
