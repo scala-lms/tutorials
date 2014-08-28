@@ -1,5 +1,5 @@
 /**
-# From Functions to Automata: Regex take 2
+# Automata-Based Regex Matcher
 
 Outline:
 <div id="tableofcontents"></div>
