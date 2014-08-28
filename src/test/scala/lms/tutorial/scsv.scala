@@ -242,55 +242,14 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
   override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }
 
-// TODO: extract to dslapi.scala
-abstract class StagedQueryC extends DslSnippet[String,Unit] with DslExp with StagedCSV with ScannerExp with UncheckedOpsExp 
+abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp 
   with VariablesExpOpt with IfThenElseExpOpt { q =>
-  val codegen = new CGenNumericOps 
-    with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse 
-    with CGenEqual with CGenRangeOps with CGenOrderingOps 
-    with CGenMiscOps with CGenArrayOps with CGenStringOps 
-    with CGenSeqOps with CGenFunctions with CGenWhile 
-    with CGenStaticData with CGenVariables 
-    with CGenScanner with CGenUncheckedOps {
+  override val codegen = new DslGenC with CGenScanner with CGenUncheckedOps {
     val IR: q.type = q
-
-    // TODO: missing bits
-    def getMemoryAllocString(count: String, memType: String): String = {
-        "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
-    }
-    override def remap[A](m: Manifest[A]): String = m.toString match {    
-      case "Any" => "(void*)"
-      case _ => super.remap(m)
-    }
-    override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-      case a@ArrayNew(n) =>
-        val arrType = remap(a.m)
-        stream.println(arrType + "* " + quote(sym) + " = " + getMemoryAllocString(quote(n), arrType))
-      case StringPlus(a,b) =>
-        stream.println(quote(a) + "+" + quote(b) + "// strcat")
-      case Comment(s, verbose, b) =>
-        stream.println("val " + quote(sym) + " = {")
-        stream.println("//#" + s)
-        if (verbose) {
-          stream.println("// generated code for " + s.replace('_', ' '))
-        } else {
-          stream.println("// generated code")
-        }
-        emitBlock(b)
-        emitValDef(sym, quote(getBlockResult(b)))
-        stream.println("//#" + s)
-      case _ => super.emitNode(sym,rhs)
-    }
   }
   override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query)
   def filePath(csv: String) = "src/data/" + csv
   def query: Operator
-
-  lazy val code: String = {
-    val source = new java.io.StringWriter()
-    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
-    source.toString
-  }
 
   override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }

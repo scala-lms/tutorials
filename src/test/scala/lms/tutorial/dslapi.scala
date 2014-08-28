@@ -33,7 +33,12 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
     case _ => super.array_apply(x,n)
   }
 }
-trait DslGen extends ScalaGenNumericOps with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile with ScalaGenStaticData with ScalaGenVariables {
+trait DslGen extends ScalaGenNumericOps 
+    with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse 
+    with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps 
+    with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps 
+    with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile 
+    with ScalaGenStaticData with ScalaGenVariables {
   val IR: DslExp
 
   import IR._
@@ -62,6 +67,44 @@ trait DslImpl extends DslExp { q =>
   }
 }
 
+trait DslGenC extends CGenNumericOps 
+    with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse 
+    with CGenEqual with CGenRangeOps with CGenOrderingOps 
+    with CGenMiscOps with CGenArrayOps with CGenStringOps 
+    with CGenSeqOps with CGenFunctions with CGenWhile 
+    with CGenStaticData with CGenVariables {
+  val IR: DslExp
+  import IR._
+
+  // FIXME
+  def getMemoryAllocString(count: String, memType: String): String = {
+      "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
+  }
+  override def remap[A](m: Manifest[A]): String = m.toString match {    
+    case "Any" => "(void*)"
+    case _ => super.remap(m)
+  }
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case a@ArrayNew(n) =>
+      val arrType = remap(a.m)
+      stream.println(arrType + "* " + quote(sym) + " = " + getMemoryAllocString(quote(n), arrType))
+    case StringPlus(a,b) =>
+      stream.println(quote(a) + "+" + quote(b) + "// strcat")
+    case Comment(s, verbose, b) =>
+      stream.println("val " + quote(sym) + " = {")
+      stream.println("//#" + s)
+      if (verbose) {
+        stream.println("// generated code for " + s.replace('_', ' '))
+      } else {
+        stream.println("// generated code")
+      }
+      emitBlock(b)
+      emitValDef(sym, quote(getBlockResult(b)))
+      stream.println("//#" + s)
+    case _ => super.emitNode(sym,rhs)
+  }}
+
+
 abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }
@@ -70,6 +113,17 @@ abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Dsl
   lazy val f = compile(snippet)
   def precompile: Unit = f
   def eval(x: A): B = f(x)
+  lazy val code: String = {
+    val source = new java.io.StringWriter()
+    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
+    source.toString
+  }
+}
+
+abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslExp { q =>
+  val codegen = new DslGenC {
+    val IR: q.type = q
+  }  
   lazy val code: String = {
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
