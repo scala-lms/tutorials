@@ -20,7 +20,7 @@ specialized as is.
 As a case study, we stage a simple regular expression matcher. Our
 vanilla regular expression matcher is invoked on a regular expression
 string and an input string. The staged regular expression matcher is
-invoked on a regular expression constant string and a staged input
+invoked on a _static_ regular expression constant string and a _dynamic_ input
 string of type ``Rep[String]``, and generates code specialized to match
 any input string against the constant regular expression pattern.
 
@@ -41,15 +41,11 @@ Regular Expression Matcher
 --------------------------
 
 We start with a small regular expression matcher, ported to Scala from
-a C version, written by Rob Pike and Brian Kernighan
-[http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html](http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html).
+[a C version, written by Rob Pike and Brian Kernighan](http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html).
 */
 
-
-// translated to Scala from
-// http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html
 trait RegexpMatcher {
-  //#matchsearch
+
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {
     if (regexp(0) == '^')
@@ -64,9 +60,8 @@ trait RegexpMatcher {
       found
     }
   }
-  //#matchsearch
 
-  //#matchhere
+
   /* search for restart of regexp at start of text */
   def matchhere(regexp: String, restart: Int, text: String, start: Int): Boolean = {
     if (restart==regexp.length)
@@ -79,9 +74,7 @@ trait RegexpMatcher {
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
-  //#matchhere
 
-  //#matchstar
   /* search for c* followed by restart of regexp at start of text */
   def matchstar(c: Char, regexp: String, restart: Int, text: String, start: Int): Boolean = {
     var sstart = start
@@ -94,13 +87,10 @@ trait RegexpMatcher {
     }
     !failed && found
   }
-  //#matchstar
 
-  //#matchchar
   def matchchar(c: Char, t: Char): Boolean = {
     c == '.' || c == t
   }
-  //#matchchar
 }
 
 class RegexpMatcherTest extends FunSuite with RegexpMatcher {
@@ -136,7 +126,7 @@ parameters in ``Rep[_]`` types. Otherwise, the code is the same.
 */
 
 trait StagedRegexpMatcher extends Dsl {
-  //#matchsearch
+
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: Rep[String]): Rep[Boolean] = {
     if (regexp(0) == '^')
@@ -151,9 +141,7 @@ trait StagedRegexpMatcher extends Dsl {
       found
     }
   }
-  //#matchsearch
 
-  //#matchhere
   /* search for restart of regexp at start of text */
   def matchhere(regexp: String, restart: Int, text: Rep[String], start: Rep[Int]): Rep[Boolean] = {
     if (restart==regexp.length)
@@ -166,9 +154,7 @@ trait StagedRegexpMatcher extends Dsl {
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
-  //#matchhere
 
-  //#matchstar
   /* search for c* followed by restart of regexp at start of text */
   def matchstar(c: Char, regexp: String, restart: Int, text: Rep[String], start: Rep[Int]): Rep[Boolean] = {
     val sstart = var_new(start)
@@ -181,13 +167,10 @@ trait StagedRegexpMatcher extends Dsl {
     }
     !failed &&& found
   }
-  //#matchstar
 
-  //#matchchar
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
     c == '.' || c == t
   }
-  //#matchchar
 }
 
 class StagedRegexpMatcherTest extends TutorialFunSuite {
@@ -236,6 +219,12 @@ Generated Code
 As an example, here is the code generated for `^ab`.
 
 .. includecode:: ../../../../out/sre__bab.check.scala
+
+
+What's next?
+------------
+
+Go back to the [tutorial index](index.html) or continue with the [Ackermann's Function](ack.html).
 */
 
 }

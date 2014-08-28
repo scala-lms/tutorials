@@ -73,10 +73,10 @@ trait CGenScanner extends CGenEffect {
   import IR._
 
   // FXIME: C impl
-  override def remap[A](m: Manifest[A]): String = m.toString match {    
+  override def remap[A](m: Manifest[A]): String = m.toString match {
     case "scala.lms.tutorial.Scanner" => "Scanner"
     case _ => super.remap(m)
-  }  
+  }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case ScannerNew(fn) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn)")
     case ScannerNext(s) => emitValDef(sym, src"$s.next")

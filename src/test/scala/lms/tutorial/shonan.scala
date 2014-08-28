@@ -216,11 +216,11 @@ STEP 2: Conditional unrolling
 
 The code duplication of the loop body above is not very nice. Fortunately,
 we can create arbitrary staging-time abstractions. We create an auxiliary
-method unrollIf that captures the conditional unrolling pattern in a general
+method `unrollIf` that captures the conditional unrolling pattern in a general
 way. The `matrix_vector_prod` function no longer needs to express the loop
 body twice.
 
-The generated code is identical: "abstraction without regret" ftw!
+The generated code is identical: _"abstraction without regret"_ FTW!
 */
 
   test("shonan-hmm1d") {
@@ -260,6 +260,6 @@ The generated code is identical: "abstraction without regret" ftw!
 What's next?
 ------------
 
-Go back to the [tutorial index](index.html) or continue with the [Regular Expression matcher](regex.html).
+Go back to the [tutorial index](index.html) or continue with the [Regular Expression Matcher](regex.html).
 */
 }
