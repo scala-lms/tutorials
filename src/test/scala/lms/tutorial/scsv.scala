@@ -60,7 +60,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
   def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##") // TODO: clean up / add in LMS
-  def infix_ToString(a: Rep[Any]) = if (a.asInstanceOf[{def tp: Manifest[Any]}].tp == manifest[String]) a.asInstanceOf[Rep[String]] 
+  def infix_ToString(a: Rep[Any]) = if (a.asInstanceOf[{def tp: Manifest[Any]}].tp == manifest[String]) a.asInstanceOf[Rep[String]]
                                     else unchecked[String](a,".toString") // TODO: clean up / add in LMS
 
   // query operators
@@ -230,7 +230,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp 
+abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp
   with VariablesExpOpt with IfThenElseExpOpt { q =>
   override val codegen = new DslGen with ScalaGenScanner with ScalaGenUncheckedOps {
     val IR: q.type = q
@@ -242,7 +242,7 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
   override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }
 
-abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp 
+abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp
   with VariablesExpOpt with IfThenElseExpOpt { q =>
   override val codegen = new DslGenC with CGenScanner with CGenUncheckedOps {
     val IR: q.type = q
