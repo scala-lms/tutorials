@@ -39,11 +39,11 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
     case _ => super.array_apply(x,n)
   }
 }
-trait DslGen extends ScalaGenNumericOps 
-    with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse 
-    with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps 
-    with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps 
-    with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile 
+trait DslGen extends ScalaGenNumericOps
+    with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse
+    with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps
+    with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps
+    with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile
     with ScalaGenStaticData with ScalaGenVariables
     with ScalaGenUncheckedOps {
   val IR: DslExp
@@ -76,11 +76,11 @@ trait DslImpl extends DslExp { q =>
   override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
 
-trait DslGenC extends CGenNumericOps 
-    with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse 
-    with CGenEqual with CGenRangeOps with CGenOrderingOps 
-    with CGenMiscOps with CGenArrayOps with CGenStringOps 
-    with CGenSeqOps with CGenFunctions with CGenWhile 
+trait DslGenC extends CGenNumericOps
+    with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse
+    with CGenEqual with CGenRangeOps with CGenOrderingOps
+    with CGenMiscOps with CGenArrayOps with CGenStringOps
+    with CGenSeqOps with CGenFunctions with CGenWhile
     with CGenStaticData with CGenVariables
     with CGenUncheckedOps{
   val IR: DslExp
@@ -90,7 +90,7 @@ trait DslGenC extends CGenNumericOps
   def getMemoryAllocString(count: String, memType: String): String = {
       "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
   }
-  override def remap[A](m: Manifest[A]): String = m.toString match {    
+  override def remap[A](m: Manifest[A]): String = m.toString match {
     case "Any" => "(void*)"
     case _ => super.remap(m)
   }
@@ -133,7 +133,7 @@ abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Dsl
 abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslExp { q =>
   val codegen = new DslGenC {
     val IR: q.type = q
-  }  
+  }
   lazy val code: String = {
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
