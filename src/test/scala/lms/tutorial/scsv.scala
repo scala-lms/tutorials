@@ -73,6 +73,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
   case class Join(parent1: Operator, parent2: Operator) extends Operator
+  case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
   case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
 
   // these utilities are (for now) only needed for filtering
@@ -98,6 +99,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, _, _)   => schema
     case Join(left, right)       => resultSchema(left) ++ resultSchema(right)
+    case Group(keys, agg, parent)=> keys ++ agg
     case HashJoin(left, right)   => resultSchema(left) ++ resultSchema(right)
     case PrintCSV(parent)        => Schema()
   }
@@ -117,9 +119,17 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
             yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
+    case Group(keys, agg, parent) =>
+      val hm = new HashMapAgg(keys, agg)
+      execOp(parent) { rec =>
+        hm += (rec(keys), rec(agg))
+      }
+      hm foreach { (k,a) =>
+        yld(Record(k ++ a, keys ++ agg))
+      }
     case HashJoin(left, right) =>
       val keys = resultSchema(left) intersect resultSchema(right)
-      val hm = new HashMap(keys, resultSchema(left))
+      val hm = new HashMapBuffer(keys, resultSchema(left))
       execOp(left) { rec1 =>
         hm += (rec1(keys), rec1.fields)
       }
@@ -137,7 +147,15 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
   // data structure implementations
 
-  class HashMap(keySchema: Schema, schema: Schema) {
+  class HashMapAgg(keySchema: Schema, schema: Schema) {
+
+    // TODO: finish
+    def +=(k: Fields, v: Fields) = ???
+
+    def foreach(f: (Fields,Fields) => Rep[Unit]): Rep[Unit] = ???
+  }
+
+  class HashMapBuffer(keySchema: Schema, schema: Schema) {
 
     // FIXME: hard coded data sizes
     val hashSize = (1 << 8)
