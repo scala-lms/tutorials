@@ -42,6 +42,9 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
       if (y.isInstanceOf[Int]) unit(y) else staticData(y)
     case _ => super.array_apply(x,n)
   }
+
+  // TODO: should this be in LMS?
+  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
 trait DslGen extends ScalaGenNumericOps
     with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse
@@ -78,8 +81,6 @@ trait DslImpl extends DslExp { q =>
   val codegen = new DslGen {
     val IR: q.type = q
   }
-  // TODO: should this be in LMS?
-  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
 
 trait DslGenC extends CGenNumericOps
@@ -140,8 +141,6 @@ abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Ds
   val codegen = new DslGenC {
     val IR: q.type = q
   }
-  // TODO: should this be in LMS?
-  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
   lazy val code: String = {
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
