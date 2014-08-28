@@ -227,8 +227,7 @@ trait StagedCSV extends Dsl with ScannerBase {
 
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp
-  with VariablesExpOpt { q =>
+abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
   override val codegen = new DslGen with ScalaGenScanner {
     val IR: q.type = q
   }
@@ -237,8 +236,7 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
   def query: Operator
 }
 
-abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp
-  with VariablesExpOpt { q =>
+abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp { q =>
   override val codegen = new DslGenC with CGenScanner {
     val IR: q.type = q
   }
@@ -331,5 +329,4 @@ class StagedCSVTest extends TutorialFunSuite {
           Project(Schema("Name"), Schema("Name"), Scan(filePath("t.csv")))
       ))
   })
-
 }

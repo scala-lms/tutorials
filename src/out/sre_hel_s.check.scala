@@ -6,7 +6,7 @@ class Snippet extends ((java.lang.String)=>(Boolean)) {
     var x1: Int = -1
     var x2: Boolean = false
     val x6 = x0.length
-    val x58 = while ({val x3 = x2
+    val x57 = while ({val x3 = x2
       val x9 = if (x3) {
         false
       } else {
@@ -25,7 +25,7 @@ class Snippet extends ((java.lang.String)=>(Boolean)) {
       } else {
         false
       }
-      val x55 = if (x16) {
+      val x54 = if (x16) {
         val x17 = x12 + 1
         val x18 = x17 < x6
         val x21 = if (x18) {
@@ -35,58 +35,57 @@ class Snippet extends ((java.lang.String)=>(Boolean)) {
         } else {
           false
         }
-        val x54 = if (x21) {
+        val x53 = if (x21) {
           val x22 = x17 + 1
           var x23: Int = x22
-          val x24 = x23
-          var x25: Boolean = true
-          var x26: Boolean = false
-          val x47 = while ({val x27 = x26
-            val x32 = if (x27) {
+          var x24: Boolean = true
+          var x25: Boolean = false
+          val x46 = while ({val x26 = x25
+            val x31 = if (x26) {
               false
             } else {
-              val x29 = x25
-              val x30 = !x29
-              x30
+              val x28 = x24
+              val x29 = !x28
+              x29
             }
-            val x36 = if (x32) {
-              val x33 = x23
-              val x34 = x33 < x6
-              x34
+            val x35 = if (x31) {
+              val x32 = x23
+              val x33 = x32 < x6
+              x33
             } else {
               false
             }
-            x36}) {
-            val x38 = x23
-            val x39 = x0(x38)
-            val x40 = 'l' == x39
-            val x41 = !x40
-            x26 = x41
-            val x43 = x23 += 1
-            val x44 = x23
-            x25 = true
+            x35}) {
+            val x37 = x23
+            val x38 = x0(x37)
+            val x39 = 'l' == x38
+            val x40 = !x39
+            x25 = x40
+            val x42 = x23 += 1
+            val x43 = x23
+            x24 = true
             ()
           }
-          val x48 = x26
-          val x52 = if (x48) {
+          val x47 = x25
+          val x51 = if (x47) {
             false
           } else {
-            val x50 = x25
-            x50
+            val x49 = x24
+            x49
           }
-          x52
+          x51
         } else {
           false
         }
-        x54
+        x53
       } else {
         false
       }
-      x2 = x55
+      x2 = x54
       ()
     }
-    val x59 = x2
-    x59
+    val x58 = x2
+    x58
   }
 }
 /*****************************************

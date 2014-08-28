@@ -12,51 +12,50 @@ class Snippet extends ((java.lang.String)=>(Boolean)) {
     } else {
       false
     }
-    val x39 = if (x5) {
+    val x38 = if (x5) {
       var x6: Int = 1
-      val x7 = x6
-      val x8 = x7 == x1
-      var x9: Boolean = x8
-      var x10: Boolean = false
-      val x32 = while ({val x11 = x10
-        val x16 = if (x11) {
+      val x7 = 1 == x1
+      var x8: Boolean = x7
+      var x9: Boolean = false
+      val x31 = while ({val x10 = x9
+        val x15 = if (x10) {
           false
         } else {
-          val x13 = x9
-          val x14 = !x13
-          x14
+          val x12 = x8
+          val x13 = !x12
+          x13
         }
-        val x20 = if (x16) {
-          val x17 = x6
-          val x18 = x17 < x1
-          x18
+        val x19 = if (x15) {
+          val x16 = x6
+          val x17 = x16 < x1
+          x17
         } else {
           false
         }
-        x20}) {
-        val x22 = x6
-        val x23 = x0(x22)
-        val x24 = 'b' == x23
-        val x25 = !x24
-        x10 = x25
-        val x27 = x6 += 1
-        val x28 = x6
-        val x29 = x28 == x1
-        x9 = x29
+        x19}) {
+        val x21 = x6
+        val x22 = x0(x21)
+        val x23 = 'b' == x22
+        val x24 = !x23
+        x9 = x24
+        val x26 = x6 += 1
+        val x27 = x6
+        val x28 = x27 == x1
+        x8 = x28
         ()
       }
-      val x33 = x10
-      val x37 = if (x33) {
+      val x32 = x9
+      val x36 = if (x32) {
         false
       } else {
-        val x35 = x9
-        x35
+        val x34 = x8
+        x34
       }
-      x37
+      x36
     } else {
       false
     }
-    x39
+    x38
   }
 }
 /*****************************************
