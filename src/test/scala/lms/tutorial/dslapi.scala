@@ -3,13 +3,19 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
-trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables {
+trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with UncheckedOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   def infix_&&&(lhs: Rep[Boolean], rhs: => Rep[Boolean]): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
+
+  // TODO: clean up / add in LMS (and remove any `with \w*UncheckedOps\w*` mixin)
+  def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##")
+  def infix_ToString(a: Rep[Any]) = if (a.asInstanceOf[{def tp: Manifest[Any]}].tp == manifest[String]) a.asInstanceOf[Rep[String]]
+                                    else unchecked[String](a,".toString")
 }
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
+
+trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp with UncheckedOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
@@ -38,7 +44,8 @@ trait DslGen extends ScalaGenNumericOps
     with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps 
     with ScalaGenMiscOps with ScalaGenArrayOps with ScalaGenStringOps 
     with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile 
-    with ScalaGenStaticData with ScalaGenVariables {
+    with ScalaGenStaticData with ScalaGenVariables
+    with ScalaGenUncheckedOps {
   val IR: DslExp
 
   import IR._
@@ -65,6 +72,8 @@ trait DslImpl extends DslExp { q =>
   val codegen = new DslGen {
     val IR: q.type = q
   }
+  // TODO: should this be in LMS?
+  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
 
 trait DslGenC extends CGenNumericOps 
@@ -72,7 +81,8 @@ trait DslGenC extends CGenNumericOps
     with CGenEqual with CGenRangeOps with CGenOrderingOps 
     with CGenMiscOps with CGenArrayOps with CGenStringOps 
     with CGenSeqOps with CGenFunctions with CGenWhile 
-    with CGenStaticData with CGenVariables {
+    with CGenStaticData with CGenVariables
+    with CGenUncheckedOps{
   val IR: DslExp
   import IR._
 

@@ -14,7 +14,7 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
-trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
+trait StagedCSV extends Dsl with ScannerBase {
 
   // low-level processing
 
@@ -38,7 +38,8 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
     val s = newScanner(filename)
     def nextRecord = Record(schema.map{_ => s.next}, schema)
-    // the right thing would be to check the schema, but it clutters the generated code
+    // the right thing would be to dynamically re-check the schema,
+    // but it clutters the generated code
     // schema.foreach(f => if (s.next != f) println("ERROR: schema mismatch"))
     nextRecord // ignore csv header
     while (s.hasNext) yld(nextRecord)
@@ -58,10 +59,6 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
   def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
-
-  def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##") // TODO: clean up / add in LMS
-  def infix_ToString(a: Rep[Any]) = if (a.asInstanceOf[{def tp: Manifest[Any]}].tp == manifest[String]) a.asInstanceOf[Rep[String]]
-                                    else unchecked[String](a,".toString") // TODO: clean up / add in LMS
 
   // query operators
 
@@ -230,28 +227,24 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp
-  with VariablesExpOpt with IfThenElseExpOpt { q =>
-  override val codegen = new DslGen with ScalaGenScanner with ScalaGenUncheckedOps {
+abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp
+  with VariablesExpOpt { q =>
+  override val codegen = new DslGen with ScalaGenScanner {
     val IR: q.type = q
   }
   override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query)
   def filePath(csv: String) = "src/data/" + csv
   def query: Operator
-
-  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }
 
 abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp
-  with VariablesExpOpt with IfThenElseExpOpt { q =>
-  override val codegen = new DslGenC with CGenScanner with CGenUncheckedOps {
+  with VariablesExpOpt { q =>
+  override val codegen = new DslGenC with CGenScanner {
     val IR: q.type = q
   }
   override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query)
   def filePath(csv: String) = "src/data/" + csv
   def query: Operator
-
-  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m) // TODO: should this be in LMS?
 }
 
 class StagedCSVTest extends TutorialFunSuite {
