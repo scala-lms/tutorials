@@ -119,7 +119,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
       }
     case HashJoin(left, right) =>
       val keys = resultSchema(left) intersect resultSchema(right)
-      val hm = new HashMap(resultSchema(left))
+      val hm = new HashMap(keys, resultSchema(left))
       execOp(left) { rec1 =>
         hm += (rec1(keys), rec1.fields)
       }
@@ -137,7 +137,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
   // data structure implementations
 
-  class HashMap(schema: Schema) {
+  class HashMap(keySchema: Schema, schema: Schema) {
 
     // FIXME: hard coded data sizes
     val hashSize = (1 << 8)
@@ -150,27 +150,23 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
     val dataCount = var_new(0)
 
     val buckets = NewArray[Int](dataSize)
-    val bucketHash = NewArray[Int](hashSize)
+    val bucketKey = new ArrayBuffer(hashSize, keySchema)
     val bucketCounts = NewArray[Int](hashSize)
 
     for (i <- 0 until hashSize) {
-        bucketHash(i) = -1
         bucketCounts(i) = 0
     }
 
     val hashMask = hashSize - 1
 
-    def lookup(put: Boolean)(k: Fields): Rep[Int] = {
+    def lookup(put: Boolean)(k: Fields): Rep[Int] = comment[Int]("hash_lookup") {
         val h = fieldsHash(k).toInt
         var bucket = h & hashMask
-        var curHash = bucketHash(bucket)
-        while (curHash != -1 && curHash != h) {
-          // TODO: need to compare keys in full, not just hash code
+        while (bucketCounts(bucket) != 0 && !fieldsEqual(bucketKey(bucket),k)) {
           bucket = (bucket + 1) & hashMask
-          curHash = bucketHash(bucket)
         }
-        if (put) bucketHash(bucket) = h
-        bucket
+        if (put) bucketKey(bucket) = k
+        bucket: Rep[Int]
     }
 
     def +=(k: Fields, v: Fields) = {
@@ -178,7 +174,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
       data(dataPos) = v
       dataCount += 1
 
-      val bucket = lookup(true)(k)
+      val bucket = lookup(put = true)(k)
       val bucketPos = bucketCounts(bucket)
       buckets(bucket * bucketSize + bucketPos) = dataPos
       bucketCounts(bucket) = bucketPos + 1
@@ -186,7 +182,7 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
     def apply(k: Fields) = new {
       def foreach(f: Record => Rep[Unit]): Rep[Unit] = {
-        val bucket = lookup(false)(k)
+        val bucket = lookup(put = false)(k)
 
         val bucketLen = bucketCounts(bucket)
         val bucketStart = bucket * bucketSize
@@ -216,7 +212,8 @@ trait StagedCSV extends Dsl with ScannerBase with UncheckedOps {
 
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp { q =>
+abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp with UncheckedOpsExp 
+  with VariablesExpOpt with IfThenElseExpOpt { q =>
   override val codegen = new DslGen with ScalaGenScanner with ScalaGenUncheckedOps {
     val IR: q.type = q
   }
