@@ -61,6 +61,7 @@ The following tutorials are available:
 
 - [Ackermann's Function](ack.html)
     From recursive functions to automata
+    Automatic specialization using staging
 
 - [Automata and Regexp Take 2](automata.html)
     NFA to DFA conversion using staging
