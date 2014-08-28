@@ -7,7 +7,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   def infix_&&&(lhs: Rep[Boolean], rhs: => Rep[Boolean]): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
-  def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A])
+  def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
@@ -16,10 +16,10 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
   }
 
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
-  def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]) = {
+  def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {
     val br = reifyEffects(b)
     val be = summarizeEffects(br)
-    reflectEffect(Comment(l, verbose, br), be)
+    reflectEffect[A](Comment(l, verbose, br), be)
   }
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
     case Comment(_, _, b) => effectSyms(b)
