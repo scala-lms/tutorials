@@ -9,7 +9,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
     __ifThenElse(lhs, rhs, unit(false))
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with CompileScala with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
+trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
@@ -66,7 +66,7 @@ abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }
 
-abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl {
+abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
   lazy val f = compile(snippet)
   def precompile: Unit = f
   def eval(x: A): B = f(x)
