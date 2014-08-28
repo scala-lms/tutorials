@@ -108,7 +108,6 @@ trait DslGenC extends CGenNumericOps
     case StringPlus(a,b) =>
       stream.println(quote(a) + "+" + quote(b) + "// strcat")
     case Comment(s, verbose, b) =>
-      stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)
       if (verbose) {
         stream.println("// generated code for " + s.replace('_', ' '))

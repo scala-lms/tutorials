@@ -82,6 +82,7 @@ trait TutorialFunSuite extends FunSuite {
         indent += (open - close)
       }
     }
+    assert (indent==0, "indentation sanity check")
   }
 
   def exec(label: String, code: String) = {
