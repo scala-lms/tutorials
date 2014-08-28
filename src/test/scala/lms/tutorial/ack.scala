@@ -28,6 +28,7 @@ and re-use.
 
 trait Ackermann extends Dsl {
   def a(m: Int): Rep[Int => Int] = fun { (n: Rep[Int]) =>
+    generate_comment("ack_"+m) // to navigate the generated code
     if (m==0) n+1
     else if (n==0) a(m-1)(1)
     else a(m-1)(a(m)(n-1))

@@ -7,6 +7,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   def infix_&&&(lhs: Rep[Boolean], rhs: => Rep[Boolean]): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
+  def generate_comment(l: String): Rep[Unit]
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 
   // TODO: clean up / add in LMS (and remove any `with \w*UncheckedOps\w*` mixin)
@@ -21,12 +22,15 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
     case _ => super.boolean_or(lhs, rhs)
   }
 
+  case class GenerateComment(l: String) extends Def[Unit]
+  def generate_comment(l: String) = reflectEffect(GenerateComment(l))
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
   def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {
     val br = reifyEffects(b)
     val be = summarizeEffects(br)
     reflectEffect[A](Comment(l, verbose, br), be)
   }
+
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
     case Comment(_, _, b) => effectSyms(b)
     case _ => super.boundSyms(e)
@@ -53,6 +57,8 @@ trait DslGen extends ScalaGenNumericOps
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
       emitValDef(sym, quote(c))
+    case GenerateComment(s) =>
+      stream.println("// "+s)
     case Comment(s, verbose, b) =>
       stream.println("val " + quote(sym) + " = {")
       stream.println("//#" + s)
