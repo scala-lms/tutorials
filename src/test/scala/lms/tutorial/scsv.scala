@@ -266,7 +266,7 @@ class StagedCSVTest extends TutorialFunSuite {
   }
   def testquery(name: String, query: StagedQueryC) {
     test(name) {
-      check(name, query.code)
+      check(name, query.code, suffix = "c")
       //query.precompile
       //checkOut(name, "csv", query.eval(""))
     }
