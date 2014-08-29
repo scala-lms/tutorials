@@ -333,4 +333,24 @@ class StagedCSVTest extends TutorialFunSuite {
           Project(Schema("Name"), Schema("Name"), Scan(filePath("t.csv")))
       ))
   })
+
+  trait NGramQuery extends StagedCSV {
+    val ngramSchema = Schema("Phrase", "Year", "MatchCount", "VolumeCount")
+    def ScanNGram(fn: String) = Scan(fn, ngramSchema, '\t')
+  }
+
+  testquery("t1gram1", new StagedQuery with NGramQuery {
+    def query =
+      PrintCSV(
+        ScanNGram(filePath("t1gram.csv"))
+      )
+  })
+
+  testquery("t1gram2", new StagedQuery with NGramQuery {
+    def query =
+      PrintCSV(
+        Filter(Eq(Field("Phrase"), Value("Auswanderung")),
+          ScanNGram(filePath("t1gram.csv"))
+      ))
+  })
 }
