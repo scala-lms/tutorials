@@ -68,7 +68,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   sealed abstract class Operator
   // the definition of operators in order of incremental development
   def Scan(filename: String) = new Scan(filename, loadSchema(filename), defaultFieldDelimiter, false)
-  def Scan(filename: String, schema: Schema, fieldDelimiter: Char) = new Scan(filename, schema, defaultFieldDelimiter, true)
+  def Scan(filename: String, schema: Schema, fieldDelimiter: Char) = new Scan(filename, schema, fieldDelimiter, true)
   case class Scan(filename: String, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
