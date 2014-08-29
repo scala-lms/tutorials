@@ -367,7 +367,6 @@ trait NGramQuery extends StagedCSV {
   ))
 }
 
-/*
 object RunQuery {
   def run(fn: String) = {
     val query = new StagedQuery with NGramQuery {
@@ -385,4 +384,3 @@ object RunQuery {
     }
   }
 }
-*/
