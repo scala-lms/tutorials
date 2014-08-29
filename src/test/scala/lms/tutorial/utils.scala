@@ -4,6 +4,8 @@ import java.io._
 import org.scalatest.FunSuite
 
 trait TutorialFunSuite extends FunSuite {
+  val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
+
   val prefix = "src/out/"
   val under: String
   def readFile(name: String): String = {
@@ -33,20 +35,23 @@ trait TutorialFunSuite extends FunSuite {
     thunk
     check(label, output.toString(), suffix = suffix)
   }
-  def check(label: String, code: String, suffix: String = "scala") = {
+  def check(label: String, raw_code: String, suffix: String = "scala") = {
     val fileprefix = prefix+under+label
     val name = fileprefix+".check."+suffix
     val aname = fileprefix+".actual."+suffix
     val expected = readFile(name)
-    val code1 = indent(code)
-    if (expected != code1) {
-      println("writing " + aname)
-      writeFile(aname, code1)
+    val code = indent(raw_code)
+    if (expected != code) {
+      val wname = if (overwriteCheckFiles) name else aname
+      println("writing " + wname)
+      writeFile(wname, code)
     } else {
       val f = new File(aname)
       if (f.exists) f.delete
     }
-    assert(expected == code1, name)
+    if (!overwriteCheckFiles) {
+      assert(expected == code, name)
+    }
   }
   def indent(str: String) = {
     val s = new StringWriter
