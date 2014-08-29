@@ -10,11 +10,13 @@ To generate the samples, download, uncompress and rename the following raw datas
 The `*gram*` data samples were generated with the following commands
 * `head -n 97500 1gram_a.csv | tail -n 2000 | egrep -v _ >`**`t1gram.csv`**
 
-Creating and Importing the Data in MySql
+Creating, Importing and Querying the Data in MySql
 ----------------------------------------
 
 * `create table 1gram_a (n_gram text, year int(11) default null, match_count int(11) default null, volume_count int(11) default null);`
 * `mysqlimport --local -u $USER -p $DB 1gram_a.csv`
+* `select * from 1gram_a where n_gram = 'Auswanderung'`
+* `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
 Running Compiled Queries
 ------------------------
