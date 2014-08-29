@@ -9,3 +9,13 @@ To generate the samples, download, uncompress and rename the following raw datas
 
 The `*gram*` data samples were generated with the following commands
 * `head -n 97500 1gram-a | tail -n 2000 | egrep -v _ >`**`t1gram.csv`**
+
+Running Compiled Queries
+------------------------
+
+From the `../out` directory, pick a `$QUERY` and some `$DATA`:
+* `export QUERY=query_t1gram2.check.scala`
+* `export DATA=../data/t1gram.csv`
+* `cat ../test/scala/lms/tutorial/scannerlib.scala $QUERY query.scala >run.scala`
+* `scalac run.scala`
+* `scala scala.lms.tutorial.query $DATA`
