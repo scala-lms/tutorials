@@ -15,7 +15,7 @@ import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
 trait StagedCSV extends Dsl with ScannerBase {
-  val fieldDelimiter = ','
+  val defaultFieldDelimiter = ','
 
   // low-level processing
 
@@ -29,30 +29,32 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   def loadSchema(filename: String): Schema = {
-    val s = new Scanner(filename, fieldDelimiter)
+    val s = new Scanner(filename, defaultFieldDelimiter)
     var schema: Schema = Schema() // force present-stage var
     do (schema :+= s.next) while (s.hasNextInLine)
     s.close
     schema
   }
 
-  def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
+  def processCSV(filename: Rep[String], schema: Schema, fieldDelimiter: Char, externalSchema: Boolean)(yld: Record => Rep[Unit]): Rep[Unit] = {
     val s = newScanner(filename, fieldDelimiter)
     def nextRecord = Record(schema.map{_ => s.next}, schema)
-    // the right thing would be to dynamically re-check the schema,
-    // but it clutters the generated code
-    // schema.foreach(f => if (s.next != f) println("ERROR: schema mismatch"))
-    nextRecord // ignore csv header
+    if (!externalSchema) {
+      // the right thing would be to dynamically re-check the schema,
+      // but it clutters the generated code
+      // schema.foreach(f => if (s.next != f) println("ERROR: schema mismatch"))
+      nextRecord // ignore csv header
+    }
     while (s.hasNext) yld(nextRecord)
   }
 
-  def printSchema(schema: Schema) = println(schema.mkString(","))
+  def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))
 
   def printFields(fields: Fields) = {
     def pretty(xs: List[Rep[Any]]): Rep[String] = xs match {
       case Nil => ""
       case x::Nil => x.ToString
-      case x::xs => x+","+pretty(xs)
+      case x::xs => x+defaultFieldDelimiter.toString+pretty(xs)
     }
     println(pretty(fields.toList))
   }
@@ -65,8 +67,9 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   sealed abstract class Operator
   // the definition of operators in order of incremental development
-  def Scan(filename: String) = new Scan(filename, loadSchema(filename))
-  case class Scan(filename: String, schema: Schema) extends Operator
+  def Scan(filename: String) = new Scan(filename, loadSchema(filename), defaultFieldDelimiter, false)
+  def Scan(filename: String, schema: Schema, fieldDelimiter: Char) = new Scan(filename, schema, defaultFieldDelimiter, true)
+  case class Scan(filename: String, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
@@ -93,7 +96,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   // end of utilities for filtering
 
   def resultSchema(o: Operator): Schema = o match {
-    case Scan(filename, schema)  => schema
+    case Scan(_, schema, _, _)   => schema
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, _, _)   => schema
     case Join(left, right)       => resultSchema(left) ++ resultSchema(right)
@@ -103,8 +106,8 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
-    case Scan(filename, schema) =>
-      processCSV(filename, schema)(yld)
+    case Scan(filename, schema, fieldDelimiter, externalSchema) =>
+      processCSV(filename, schema, fieldDelimiter, externalSchema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(newSchema, parentSchema, parent) =>
