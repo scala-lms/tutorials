@@ -15,6 +15,7 @@ import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
 trait StagedCSV extends Dsl with ScannerBase {
+  val fieldDelimiter = ','
 
   // low-level processing
 
@@ -28,7 +29,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   def loadSchema(filename: String): Schema = {
-    val s = new Scanner(filename)
+    val s = new Scanner(filename, fieldDelimiter)
     var schema: Schema = Schema() // force present-stage var
     do (schema :+= s.next) while (s.hasNextInLine)
     s.close
@@ -36,7 +37,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   def processCSV(filename: Rep[String], schema: Schema)(yld: Record => Rep[Unit]): Rep[Unit] = {
-    val s = newScanner(filename)
+    val s = newScanner(filename, fieldDelimiter)
     def nextRecord = Record(schema.map{_ => s.next}, schema)
     // the right thing would be to dynamically re-check the schema,
     // but it clutters the generated code

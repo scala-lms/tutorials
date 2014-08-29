@@ -19,16 +19,16 @@ void Snippet(string  x0) {
   for(int x12=0; x12 < 256; x12++) {
     x10->update(x12,0);
   }
-  Scanner *x16 = new scala.lms.tutorial.Scanner(string("src/data/t.csv"));
-  string x17 = x16.next;
-  string x18 = x16.next;
-  string x19 = x16.next;
+  Scanner *x16 = null/*TODO*/;
+  string x17 = null/*TODO*/;
+  string x18 = null/*TODO*/;
+  string x19 = null/*TODO*/;
   for (;;) {
-    bool x20 = x16.hasNext;
+    bool x20 = null/*TODO*/;
     if (!x20) break;
-    string x22 = x16.next;
-    string x23 = x16.next;
-    string x24 = x16.next;
+    string x22 = null/*TODO*/;
+    string x23 = null/*TODO*/;
+    string x24 = null/*TODO*/;
     int32_t x25 = x6;
     x2->update(x25,x22);
     x3->update(x25,x23);
@@ -66,16 +66,16 @@ void Snippet(string  x0) {
     int32_t x57 = x53 + 1;
     x10->update(x52,x57);
   }
-  Scanner *x61 = new scala.lms.tutorial.Scanner(string("src/data/t.csv"));
-  string x62 = x61.next;
-  string x63 = x61.next;
-  string x64 = x61.next;
+  Scanner *x61 = null/*TODO*/;
+  string x62 = null/*TODO*/;
+  string x63 = null/*TODO*/;
+  string x64 = null/*TODO*/;
   for (;;) {
-    bool x65 = x61.hasNext;
+    bool x65 = null/*TODO*/;
     if (!x65) break;
-    string x67 = x61.next;
-    string x68 = x61.next;
-    string x69 = x61.next;
+    string x67 = null/*TODO*/;
+    string x68 = null/*TODO*/;
+    string x69 = null/*TODO*/;
     //#hash_lookup
     // generated code for hash lookup
     int64_t x70 = x67.##;

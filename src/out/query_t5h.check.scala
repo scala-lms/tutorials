@@ -18,7 +18,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x13 = x10(x12) = 0
       x12 = x12 + 1
     }
-    val x16 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    val x16 = new scala.lms.tutorial.Scanner("src/data/t.csv", ',')
     val x17 = x16.next
     val x18 = x16.next
     val x19 = x16.next
@@ -67,7 +67,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x58 = x10(x52) = x57
       x58
     }
-    val x61 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    val x61 = new scala.lms.tutorial.Scanner("src/data/t.csv", ',')
     val x62 = x61.next
     val x63 = x61.next
     val x64 = x61.next

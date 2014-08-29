@@ -6,9 +6,7 @@ import scala.reflect.SourceContext
 import java.io.FileReader
 import java.io.BufferedReader
 
-class Scanner(filename: String) {
-  val fieldDelimiter = ","
-
+class Scanner(filename: String, fieldDelimiter: Char) {
   val br = new BufferedReader(new FileReader(filename))
   var pending: List[String] = Nil
   def next: String = pending match {
@@ -29,25 +27,25 @@ trait ScannerBase extends Base {
     def next(implicit pos: SourceContext) = scannerNext(s)
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
   }
-  def newScanner(fn: Rep[String])(implicit pos: SourceContext): Rep[Scanner]
+  def newScanner(fn: Rep[String], d: Rep[Char])(implicit pos: SourceContext): Rep[Scanner]
   def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[String]
   def scannerHasNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Boolean]
 }
 
 trait ScannerExp extends ScannerBase with EffectExp {
-  case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
+  case class ScannerNew(fn: Exp[String], d: Exp[Char]) extends Def[Scanner]
   case class ScannerNext(s: Exp[Scanner]) extends Def[String]
   case class ScannerHasNext(s: Exp[Scanner]) extends Def[Boolean]
 
-  override def newScanner(fn: Rep[String])(implicit pos: SourceContext): Rep[Scanner] =
-    reflectMutable(ScannerNew(fn))
+  override def newScanner(fn: Rep[String], d: Rep[Char])(implicit pos: SourceContext): Rep[Scanner] =
+    reflectMutable(ScannerNew(fn, d))
   override def scannerNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[String] =
     reflectWrite(s)(ScannerNext(s))
   override def scannerHasNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Boolean] =
     reflectWrite(s)(ScannerHasNext(s))
 
   override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case Reflect(e@ScannerNew(fn), u, es) => reflectMirrored(Reflect(ScannerNew(f(fn)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
+    case Reflect(e@ScannerNew(fn, d), u, es) => reflectMirrored(Reflect(ScannerNew(f(fn), f(d)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case Reflect(ScannerNext(s), u, es) => reflectMirrored(Reflect(ScannerNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case Reflect(ScannerHasNext(s), u, es) => reflectMirrored(Reflect(ScannerHasNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case _ => super.mirror(e,f)
@@ -61,7 +59,7 @@ trait ScalaGenScanner extends ScalaGenEffect {
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ScannerNew(fn) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn)")
+    case ScannerNew(fn, d) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn, $d)")
     case ScannerNext(s) => emitValDef(sym, src"$s.next")
     case ScannerHasNext(s) => emitValDef(sym, src"$s.hasNext")
     case _ => super.emitNode(sym, rhs)
@@ -78,9 +76,9 @@ trait CGenScanner extends CGenEffect {
     case _ => super.remap(m)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ScannerNew(fn) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn)")
-    case ScannerNext(s) => emitValDef(sym, src"$s.next")
-    case ScannerHasNext(s) => emitValDef(sym, src"$s.hasNext")
+    case ScannerNew(fn, d) => emitValDef(sym, src"null/*TODO*/")
+    case ScannerNext(s) => emitValDef(sym, src"null/*TODO*/")
+    case ScannerHasNext(s) => emitValDef(sym, src"null/*TODO*/")
     case _ => super.emitNode(sym, rhs)
   }
 }
