@@ -18,4 +18,4 @@ From the `../out` directory, pick a `$QUERY` and some `$DATA`:
 * `export DATA=../data/t1gram.csv`
 * `cat ../test/scala/lms/tutorial/scannerlib.scala $QUERY query.scala >run.scala`
 * `scalac run.scala`
-* `scala scala.lms.tutorial.query $CSV`
+* `scala scala.lms.tutorial.query $DATA`
