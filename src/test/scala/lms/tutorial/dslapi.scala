@@ -128,6 +128,7 @@ abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
 abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
   lazy val f = compile(snippet)
   def precompile: Unit = f
+  def precompileSilently: Unit = utils.devnull(f)
   def eval(x: A): B = f(x)
   lazy val code: String = {
     val source = new java.io.StringWriter()

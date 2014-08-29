@@ -96,3 +96,17 @@ trait TutorialFunSuite extends FunSuite {
     writeFileIndented(aname, code)
   }
 }
+
+object utils {
+  def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
+    scala.Console.withOut(out)(scala.Console.withErr(out)(f))
+  }
+  def devnull(f: => Unit): Unit = {
+    withOutput(nullout)(f)
+  }
+  def nullout = new PrintStream(new OutputStream() {
+    override def write(b: Int) = {}
+    override def write(b: Array[Byte]) = {}
+    override def write(b: Array[Byte], off: Int, len: Int) = {}
+  })
+}

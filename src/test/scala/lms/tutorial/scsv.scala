@@ -362,7 +362,25 @@ trait NGramQuery extends StagedCSV {
   def query_id(fn: Rep[String]) =  PrintCSV(ScanNGram(fn))
   def query_filter(v: String)(fn: Rep[String]) =
     PrintCSV(
-      Filter(Eq(Field("Phrase"), Value("Auswanderung")),
+      Filter(Eq(Field("Phrase"), Value(v)),
        ScanNGram(fn)
   ))
+}
+
+object RunQuery {
+  def run(fn: String) = {
+    val query = new StagedQuery with NGramQuery {
+      def testfn = fn
+      def query(fn: Rep[String]) = query_filter("Auswanderung")(fn)
+    }
+    query.precompileSilently
+    query.eval(fn)
+  }
+  def main(args: Array[String]): Unit = {
+    if (args.length != 1) {
+      println("usage: query <filename>")
+    } else {
+      run(args(0))
+    }
+  }
 }
