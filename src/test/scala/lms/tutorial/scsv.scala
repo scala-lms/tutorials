@@ -214,7 +214,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   class ArrayBuffer(dataSize: Int, schema: Schema) {
-    val buf = schema.map(f => NewArray[Any](dataSize))
+    val buf = schema.map(f => NewArray[Any](dataSize)) // array type?
     var len = 0
     def +=(x: Fields) = {
       this(len) = x

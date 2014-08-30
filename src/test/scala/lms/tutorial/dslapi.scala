@@ -98,13 +98,49 @@ trait DslGenC extends CGenNumericOps
       "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
   }
   override def remap[A](m: Manifest[A]): String = m.toString match {
-    case "Any" => "(void*)"
+    case "java.lang.String" => "char*"
+    case "Any" => "void*"
     case _ => super.remap(m)
+  }
+  def format(s: Exp[Any]): String = {
+    remap(s.tp) match {
+      case "uint16_t" => "%c"
+      case "bool" | "int8_t" | "int16_t" | "int32_t" => "%d"
+      case "int64_t" => "%ld"
+      case "float" | "double" => "%f"
+      case "string" => "%s" 
+      case "char*" => "%s"
+      case _ => 
+        import scala.virtualization.lms.internal.GenerationFailedException
+        throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
+    }
+  }
+  def quoteRawString(s: Exp[Any]): String = {
+    remap(s.tp) match {
+      case "string" => quote(s) + ".c_str()"
+      case _ => quote(s)
+    }
+  }
+  // we treat string as a primitive type to prevent memory management on strings
+  // strings are always stack allocated and freed automatically at the scope exit
+  override def isPrimitiveType(tpe: String) : Boolean = {
+    tpe match {
+      case "char*" => true
+      case _ => super.isPrimitiveType(tpe)
+    }
+  }
+  
+  override def quote(x: Exp[Any]) = x match {
+    case Const(s: String) => "\""+s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")+"\"" // TODO: more escapes?
+    case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case a@ArrayNew(n) =>
       val arrType = remap(a.m)
       stream.println(arrType + "* " + quote(sym) + " = " + getMemoryAllocString(quote(n), arrType))
+    case ArrayApply(x,n) => emitValDef(sym, quote(x) + "[" + quote(n) + "]")
+    case ArrayUpdate(x,n,y) => stream.println(quote(x) + "[" + quote(n) + "] = " + quote(y) + ";")
+    case PrintLn(s) => stream.println("printf(\"" + format(s) + "\\n\"," + quoteRawString(s) + ");")
     case StringPlus(a,b) =>
       stream.println(quote(a) + "+" + quote(b) + "// strcat")
     case Comment(s, verbose, b) =>

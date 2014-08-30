@@ -35,6 +35,7 @@ trait ScannerExp extends ScannerBase with EffectExp {
 
 }
 
+
 trait ScalaGenScanner extends ScalaGenEffect {
   val IR: ScannerExp
   import IR._
