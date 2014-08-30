@@ -1,5 +1,5 @@
 // example run
-// cc query_t1gram2.hand.c; ./a.out ../data/t1gram.csv
+// cc -O3 query_t1gram2.hand.c; ./a.out ../data/t1gram.csv
 
 #include <stdio.h>
 
