@@ -131,7 +131,7 @@ trait DslGenC extends CGenNumericOps
   }
   
   override def quote(x: Exp[Any]) = x match {
-    case Const(s: String) => "\""+s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")+"\"" // TODO: more escapes?
+    case Const(s: String) => "\""+s.replace("\"", "\\\"")+"\"" // TODO: more escapes?
     case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
