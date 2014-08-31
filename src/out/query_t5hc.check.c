@@ -19,16 +19,16 @@ void Snippet(char*  x0) {
   for(int x12=0; x12 < 256; x12++) {
     x10[x12] = 0;
   }
-  Scanner *x16 = null/*TODO*/;
-  char* x17 = null/*TODO*/;
-  char* x18 = null/*TODO*/;
-  char* x19 = null/*TODO*/;
+  void*/*TODO:Scanner*/ *x16 = NULL/*TODO:ScannerNew*/;
+  char* x17 = NULL/*TODO:ScannerNext*/;
+  char* x18 = NULL/*TODO:ScannerNext*/;
+  char* x19 = NULL/*TODO:ScannerNext*/;
   for (;;) {
-    bool x20 = null/*TODO*/;
+    bool x20 = NULL/*TODO:ScannerHasNext*/;
     if (!x20) break;
-    char* x22 = null/*TODO*/;
-    char* x23 = null/*TODO*/;
-    char* x24 = null/*TODO*/;
+    char* x22 = NULL/*TODO:ScannerNext*/;
+    char* x23 = NULL/*TODO:ScannerNext*/;
+    char* x24 = NULL/*TODO:ScannerNext*/;
     int32_t x25 = x6;
     x2[x25] = x22;
     x3[x25] = x23;
@@ -66,16 +66,16 @@ void Snippet(char*  x0) {
     int32_t x57 = x53 + 1;
     x10[x52] = x57;
   }
-  Scanner *x61 = null/*TODO*/;
-  char* x62 = null/*TODO*/;
-  char* x63 = null/*TODO*/;
-  char* x64 = null/*TODO*/;
+  void*/*TODO:Scanner*/ *x61 = NULL/*TODO:ScannerNew*/;
+  char* x62 = NULL/*TODO:ScannerNext*/;
+  char* x63 = NULL/*TODO:ScannerNext*/;
+  char* x64 = NULL/*TODO:ScannerNext*/;
   for (;;) {
-    bool x65 = null/*TODO*/;
+    bool x65 = NULL/*TODO:ScannerHasNext*/;
     if (!x65) break;
-    char* x67 = null/*TODO*/;
-    char* x68 = null/*TODO*/;
-    char* x69 = null/*TODO*/;
+    char* x67 = NULL/*TODO:ScannerNext*/;
+    char* x68 = NULL/*TODO:ScannerNext*/;
+    char* x69 = NULL/*TODO:ScannerNext*/;
     //#hash_lookup
     // generated code for hash lookup
     int64_t x70 = x67.##;
