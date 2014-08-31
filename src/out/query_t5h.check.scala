@@ -32,12 +32,12 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x27 = x3(x25) = x23
       val x28 = x4(x25) = x24
       val x29 = x6 += 1
+      val x30 = x22.##
+      val x31 = x30.toInt
+      val x32 = x31 & 255
       val x52 = {
         //#hash_lookup
         // generated code for hash lookup
-        val x30 = x22.##
-        val x31 = x30.toInt
-        val x32 = x31 & 255
         var x33: Int = x32
         val x48 = while ({val x34 = x33
           val x35 = x10(x34)
@@ -76,12 +76,12 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x67 = x61.next
       val x68 = x61.next
       val x69 = x61.next
+      val x70 = x67.##
+      val x71 = x70.toInt
+      val x72 = x71 & 255
       val x91 = {
         //#hash_lookup
         // generated code for hash lookup
-        val x70 = x67.##
-        val x71 = x70.toInt
-        val x72 = x71 & 255
         var x73: Int = x72
         val x88 = while ({val x74 = x73
           val x75 = x10(x74)

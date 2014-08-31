@@ -4,14 +4,49 @@ import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
 // TODO: clean up at least, maybe add to LMS?
-trait HashCodeOps extends UncheckedOps {
-  def infix_HashCode(a: Rep[Any]) = unchecked[Long](a,".##")
+trait HashCodeOps extends Base {
+  def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
 }
-trait HashCodeOpsExp extends UncheckedOpsExp {
+trait HashCodeOpsExp extends HashCodeOps with BaseExp {
+  case class ObjHashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
+  def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
+
+  override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
+    case e@ObjHashCode(a) => infix_HashCode(f(a))
+    case _ => super.mirror(e,f)
+  }).asInstanceOf[Exp[A]]
 }
-trait ScalaGenHashCodeOps extends ScalaGenUncheckedOps {
+trait ScalaGenHashCodeOps extends ScalaGenBase {
+  val IR: HashCodeOpsExp
+  import IR._
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case ObjHashCode(o) => emitValDef(sym, src"$o.##")
+    case _ => super.emitNode(sym, rhs)
+  }
 }
-trait CGenHashCodeOps extends CGenUncheckedOps {
+trait CGenHashCodeOps extends CGenBase {
+  val IR: HashCodeOpsExp
+  import IR._
+
+  override def getDataStructureHeaders() = """
+// from http://www.cse.yorku.ca/~oz/hash.html
+unsigned long hash(unsigned char *str)
+{
+  unsigned long hash = 5381;
+  int c;
+
+  while (c = *str++)
+    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+  return hash;
+}
+"""
+
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case ObjHashCode(o) => emitValDef(sym, if (o.tp <:< manifest[String]) src"hash($o)" else src"1/*TODO:improve hash*/")
+    case _ => super.emitNode(sym, rhs)
+  }
 }
 
 trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with HashCodeOps {
@@ -22,7 +57,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExp with HashCodeOpsExp {
+trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with HashCodeOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)

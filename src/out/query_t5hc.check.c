@@ -34,11 +34,11 @@ void Snippet(char*  x0) {
     x3[x25] = x23;
     x4[x25] = x24;
     x6 += 1;
-    //#hash_lookup
-    // generated code for hash lookup
-    int64_t x30 = x22.##;
+    int64_t x30 = hash(x22);
     int32_t x31 = (int32_t)x30;
     int32_t x32 = x31 & 255;
+    //#hash_lookup
+    // generated code for hash lookup
     int32_t x33 = x32;
     for (;;) {
       int32_t x34 = x33;
@@ -76,11 +76,11 @@ void Snippet(char*  x0) {
     char* x67 = NULL/*TODO:ScannerNext*/;
     char* x68 = NULL/*TODO:ScannerNext*/;
     char* x69 = NULL/*TODO:ScannerNext*/;
-    //#hash_lookup
-    // generated code for hash lookup
-    int64_t x70 = x67.##;
+    int64_t x70 = hash(x67);
     int32_t x71 = (int32_t)x70;
     int32_t x72 = x71 & 255;
+    //#hash_lookup
+    // generated code for hash lookup
     int32_t x73 = x72;
     for (;;) {
       int32_t x74 = x73;
