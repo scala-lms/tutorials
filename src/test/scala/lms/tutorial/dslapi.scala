@@ -29,7 +29,8 @@ trait CGenHashCodeOps extends CGenBase {
   val IR: HashCodeOpsExp
   import IR._
 
-  override def getDataStructureHeaders() = """
+/*
+TODO: make available such a hash function in the generated code:
 // from http://www.cse.yorku.ca/~oz/hash.html
 unsigned long hash(unsigned char *str)
 {
@@ -41,7 +42,7 @@ unsigned long hash(unsigned char *str)
 
   return hash;
 }
-"""
+*/
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case ObjHashCode(o) => emitValDef(sym, if (o.tp <:< manifest[String]) src"hash($o)" else src"1/*TODO:improve hash*/")
@@ -132,7 +133,7 @@ trait DslGenC extends CGenNumericOps
     with CGenSeqOps with CGenFunctions with CGenWhile
     with CGenStaticData with CGenVariables
     with CGenObjectOps
-    with CGenHashCodeOps{
+    with CGenHashCodeOps {
   val IR: DslExp
   import IR._
 
