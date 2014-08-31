@@ -7,13 +7,13 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char*  x0) {
   printf("%s\n","Name,Value,Flag,Name");
-  void** x2 = (void**)malloc(65536 * sizeof(void*));
-  void** x3 = (void**)malloc(65536 * sizeof(void*));
-  void** x4 = (void**)malloc(65536 * sizeof(void*));
+  char** x2 = (char**)malloc(65536 * sizeof(char*));
+  char** x3 = (char**)malloc(65536 * sizeof(char*));
+  char** x4 = (char**)malloc(65536 * sizeof(char*));
   int32_t x5 = 0;
   int32_t x6 = 0;
   int32_t* x7 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  void** x8 = (void**)malloc(256 * sizeof(void*));
+  char** x8 = (char**)malloc(256 * sizeof(char*));
   int32_t x9 = 0;
   int32_t* x10 = (int32_t*)malloc(256 * sizeof(int32_t));
   for(int x12=0; x12 < 256; x12++) {
@@ -43,9 +43,9 @@ void Snippet(char*  x0) {
     for (;;) {
       int32_t x34 = x33;
       int32_t x35 = x10[x34];
-      void* *x37 = x8[x34];
-      bool x38 = x37 == x22;
+      char* x37 = x8[x34];
       bool x36 = x35 != 0;
+      bool x38 = x37 == x22;
       bool x39 = true && x38;
       bool x40 = !x39;
       bool x41 = x36 && x40;
@@ -85,9 +85,9 @@ void Snippet(char*  x0) {
     for (;;) {
       int32_t x74 = x73;
       int32_t x75 = x10[x74];
-      void* *x77 = x8[x74];
-      bool x78 = x77 == x67;
+      char* x77 = x8[x74];
       bool x76 = x75 != 0;
+      bool x78 = x77 == x67;
       bool x79 = true && x78;
       bool x80 = !x79;
       bool x81 = x76 && x80;
@@ -105,9 +105,9 @@ void Snippet(char*  x0) {
     int32_t x94 = x93 + x92;
     for(int x96=x93; x96 < x94; x96++) {
       int32_t x97 = x7[x96];
-      void* *x98 = x2[x97];
-      void* *x99 = x3[x97];
-      void* *x100 = x4[x97];
+      char* x98 = x2[x97];
+      char* x99 = x3[x97];
+      char* x100 = x4[x97];
       printf("\"%s,%s,%s,%s\n\"",x98,x99,x100,x67);
     }
   }

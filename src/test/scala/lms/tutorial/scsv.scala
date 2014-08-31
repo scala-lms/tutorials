@@ -21,10 +21,11 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
-  type Fields = Vector[Rep[Any]]
+  type RField = Rep[String]
+  type Fields = Vector[RField]
 
   case class Record(fields: Fields, schema: Schema) {
-    def apply(key: String): Rep[Any] = fields(schema indexOf key)
+    def apply(key: String): RField = fields(schema indexOf key)
     def apply(keys: Schema): Fields = keys.map(this apply _)
   }
 
@@ -207,7 +208,7 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   class ArrayBuffer(dataSize: Int, schema: Schema) {
-    val buf = schema.map(f => NewArray[Any](dataSize)) // array type?
+    val buf = schema.map(f => NewArray[String](dataSize)) // array type?
     var len = 0
     def +=(x: Fields) = {
       this(len) = x

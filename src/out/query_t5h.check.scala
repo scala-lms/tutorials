@@ -4,13 +4,13 @@ Emitting Generated Code
 class Snippet extends ((java.lang.String)=>(Unit)) {
   def apply(x0:java.lang.String): Unit = {
     val x1 = println("Name,Value,Flag,Name")
-    val x2 = new Array[Any](65536)
-    val x3 = new Array[Any](65536)
-    val x4 = new Array[Any](65536)
+    val x2 = new Array[java.lang.String](65536)
+    val x3 = new Array[java.lang.String](65536)
+    val x4 = new Array[java.lang.String](65536)
     var x5: Int = 0
     var x6: Int = 0
     val x7 = new Array[Int](65536)
-    val x8 = new Array[Any](256)
+    val x8 = new Array[java.lang.String](256)
     var x9: Int = 0
     val x10 = new Array[Int](256)
     var x12 : Int = 0
@@ -42,8 +42,8 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
         val x48 = while ({val x34 = x33
           val x35 = x10(x34)
           val x37 = x8(x34)
-          val x38 = x37 == x22
           val x36 = x35 != 0
+          val x38 = x37 == x22
           val x39 = true && x38
           val x40 = !x39
           val x41 = x36 && x40
@@ -86,8 +86,8 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
         val x88 = while ({val x74 = x73
           val x75 = x10(x74)
           val x77 = x8(x74)
-          val x78 = x77 == x67
           val x76 = x75 != 0
+          val x78 = x77 == x67
           val x79 = true && x78
           val x80 = !x79
           val x81 = x76 && x80
