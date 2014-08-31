@@ -15,7 +15,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x10 = x2.next
       val x11 = x10 == "yes"
       val x14 = if (x11) {
-        val x12 = println(x8)
+        val x12 = printf("%s\n",x8)
         x12
       } else {
         ()

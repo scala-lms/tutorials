@@ -50,14 +50,7 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))
 
-  def printFields(fields: Fields) = {
-    def pretty(xs: List[Rep[Any]]): Rep[String] = xs match {
-      case Nil => ""
-      case x::Nil => x.ToString
-      case x::xs => x+defaultFieldDelimiter.toString+pretty(xs)
-    }
-    println(pretty(fields.toList))
-  }
+  def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("\"", defaultFieldDelimiter.toString, "\\n\""), fields: _*)
 
   def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
 

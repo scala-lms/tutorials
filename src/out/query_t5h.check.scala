@@ -71,7 +71,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
     val x62 = x61.next
     val x63 = x61.next
     val x64 = x61.next
-    val x111 = while ({val x65 = x61.hasNext
+    val x105 = while ({val x65 = x61.hasNext
       x65}) {
       val x67 = x61.next
       val x68 = x61.next
@@ -106,23 +106,17 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x93 = x91 * 256
       val x94 = x93 + x92
       var x96 : Int = x93
-      val x109 = while (x96 < x94) {
+      val x103 = while (x96 < x94) {
         val x97 = x7(x96)
         val x98 = x2(x97)
         val x99 = x3(x97)
         val x100 = x4(x97)
-        val x101 = x98+","
-        val x102 = x99+","
-        val x103 = x100+","
-        val x104 = x103+x67
-        val x105 = x102+x104
-        val x106 = x101+x105
-        val x107 = println(x106)
+        val x101 = printf("%s,%s,%s,%s\n",x98,x99,x100,x67)
         x96 = x96 + 1
       }
-      x109
+      x103
     }
-    x111
+    x105
   }
 }
 /*****************************************

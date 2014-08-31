@@ -108,13 +108,7 @@ void Snippet(char*  x0) {
       void* *x98 = x2[x97];
       void* *x99 = x3[x97];
       void* *x100 = x4[x97];
-      x98+","// strcat
-      x99+","// strcat
-      x100+","// strcat
-      x103+x67// strcat
-      x102+x104// strcat
-      x101+x105// strcat
-      printf("%s\n",x106);
+      printf("\"%s,%s,%s,%s\\n\"",x98,x99,x100,x67);
     }
   }
 }

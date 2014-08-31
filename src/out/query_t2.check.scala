@@ -13,7 +13,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x8 = x2.next
       val x9 = x2.next
       val x10 = x2.next
-      val x11 = println(x8)
+      val x11 = printf("%s\n",x8)
       x11
     }
     x13
