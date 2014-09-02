@@ -5,6 +5,8 @@ import scala.virtualization.lms.common._
 object query_staged {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
+  override def version = "query_staged"
+
   // low-level processing
   type RField = Rep[String]
   type Fields = Vector[RField]

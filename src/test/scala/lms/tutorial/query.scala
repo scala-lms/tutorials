@@ -85,6 +85,8 @@ trait QueryProcessor extends QueryAST {
 }
 
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
+  def version: String
+
   override type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
 
@@ -97,7 +99,11 @@ trait StagedQueryProcessor extends QueryProcessor with Dsl {
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
-  abstract class ScalaStagedQueryDriver(name: String, query: String) extends DslDriver[String,Unit] with SQLParser with StagedQueryProcessor with ScannerExp with ExpectedASTs { q =>
+  trait TestDriver {
+    def runtest: Unit
+  }
+
+  abstract class ScalaStagedQueryDriver(name: String, query: String) extends DslDriver[String,Unit] with TestDriver with SQLParser with StagedQueryProcessor with ScannerExp with ExpectedASTs { q =>
     override val codegen = new DslGen with ScalaGenScanner {
       val IR: q.type = q
     }
@@ -120,18 +126,24 @@ class QueryTest extends TutorialFunSuite {
     override def fieldDelimiterFor(tableName: String) =
         if (tableName.contains("gram")) Some('\t')
         else super.fieldDelimiterFor(tableName)
-    def test = {
-      assert(expectedAstForTest(name)==parsedQuery)
-      check(name, code)
-      precompile
-      checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+    override def runtest: Unit = {
+      if (version == "query_staged0" && query.isEmpty) return ()
+      test(version+" "+name) {
+        assert(expectedAstForTest(name)==parsedQuery)
+        check(name, code)
+        precompile
+        checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+      }
     }
   }
 
   def testquery(name: String, query: String = "") {
-    test(name) {
-      (new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler).test
-    }
+    val drivers: List[TestDriver] =
+      List(
+        new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
+        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler
+      )
+    drivers.foreach(_.runtest)
   }
 
   trait ExpectedASTs extends QueryAST {

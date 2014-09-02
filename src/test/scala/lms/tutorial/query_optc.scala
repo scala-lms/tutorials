@@ -6,6 +6,8 @@ object query_optc {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
   with ScannerLowerBase
 {
+  override def version = "query_optc"
+
   // lowering scanner
   class RScanner(name: Rep[String]) {
     val fd = open(name)
