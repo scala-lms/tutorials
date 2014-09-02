@@ -235,16 +235,6 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
   def query(fn: Rep[String]): Operator
 }
 
-abstract class StagedQueryC extends DslDriverC[String,Unit] with StagedCSV with ScannerExp { q =>
-  override val codegen = new DslGenC with CGenScanner {
-    val IR: q.type = q
-  }
-  override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query(fn))
-  def filePath(csv: String) = "src/data/" + csv
-  def testfn: String
-  def query(fn: Rep[String]): Operator
-}
-
 class StagedCSVTest extends TutorialFunSuite {
   val under = "query_"
 
@@ -253,13 +243,6 @@ class StagedCSVTest extends TutorialFunSuite {
       check(name, query.code)
       query.precompile
       checkOut(name, "csv", query.eval(query.testfn))
-    }
-  }
-  def testquery(name: String, query: StagedQueryC) {
-    test(name) {
-      check(name, query.code, suffix = "c")
-      //query.precompile
-      //checkOut(name, "csv", query.eval(query.testfn))
     }
   }
 
@@ -319,16 +302,6 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t5h", new StagedQuery {
-    def testfn = filePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        HashJoin(
-          Scan(testfn),
-          Project(Schema("Name"), Schema("Name"), Scan(testfn))
-      ))
-  })
-
-  testquery("t5hc", new StagedQueryC {
     def testfn = filePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(

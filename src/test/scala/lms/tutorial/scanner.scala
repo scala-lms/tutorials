@@ -47,20 +47,3 @@ trait ScalaGenScanner extends ScalaGenEffect {
     case _ => super.emitNode(sym, rhs)
   }
 }
-
-trait CGenScanner extends CGenEffect {
-  val IR: ScannerExp
-  import IR._
-
-  // FXIME: C impl
-  override def remap[A](m: Manifest[A]): String = m.toString match {
-    case "scala.lms.tutorial.Scanner" => "void*/*TODO:Scanner*/"
-    case _ => super.remap(m)
-  }
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ScannerNew(fn, d) => emitValDef(sym, src"NULL/*TODO:ScannerNew*/")
-    case ScannerNext(s) => emitValDef(sym, src"NULL/*TODO:ScannerNext*/")
-    case ScannerHasNext(s) => emitValDef(sym, src"NULL/*TODO:ScannerHasNext*/")
-    case _ => super.emitNode(sym, rhs)
-  }
-}
