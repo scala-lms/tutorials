@@ -71,9 +71,11 @@ trait QueryAST {
   case class Value(x: String) extends Ref
 }
 
-trait StagedCSV extends Dsl with QueryAST with ScannerBase {
+trait QueryProcessor extends QueryAST {
   def defaultFilenameFor(tableName: String): String
+}
 
+trait QueryCompiler extends Dsl with QueryProcessor with ScannerBase {
   override type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
 
@@ -261,16 +263,14 @@ trait StagedCSV extends Dsl with QueryAST with ScannerBase {
       buf.map(b => b(i))
     }
   }
-
-
 }
 
-class StagedCSVTest extends TutorialFunSuite {
+class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
   def testquery(name: String, query: String = "") {
     test(name) {
-      val snippet = new DslDriver[String,Unit] with SQLParser with StagedCSV with ScannerExp with ExpectedASTs { q =>
+      val snippet = new DslDriver[String,Unit] with SQLParser with QueryCompiler with ScannerExp with ExpectedASTs { q =>
         override val codegen = new DslGen with ScalaGenScanner {
           val IR: q.type = q
         }
