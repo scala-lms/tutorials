@@ -92,7 +92,7 @@ trait ScalaGenScanner extends ScalaGenEffect {
   }
 }
 
-trait ScannerLowerBase extends Base {
+trait ScannerLowerBase extends Base with UncheckedOps {
   def open(name: Rep[String]): Rep[Int]
   def fclose(fd: Rep[Int]): Rep[Unit]
   def filelen(fd: Rep[Int]): Rep[Int]
@@ -102,7 +102,7 @@ trait ScannerLowerBase extends Base {
   def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
 }
 
-trait ScannerLowerExp extends ScannerLowerBase with UncheckedOps {
+trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
   def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name

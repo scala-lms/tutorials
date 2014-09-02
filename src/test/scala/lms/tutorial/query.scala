@@ -138,11 +138,32 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
+  abstract class CStagedQueryDriver(name: String, query: String) extends DslDriverC[String,Unit] with TestDriver with StagedQueryProcessor with ScannerLowerExp with ExpectedASTs { q =>
+    override val codegen = new DslGenC with CGenScannerLower {
+      val IR: q.type = q
+    }
+    def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
+    override def snippet(fn: Rep[String]): Rep[Unit] = {
+      execQuery(PrintCSV(parsedQuery))
+    }
+    override def runtest: Unit = {
+      /*TODO: need to first fix staging expectation of eval for filter in optc
+      test(version+" "+name) {
+        //assert(expectedAstForTest(name)==parsedQuery)
+        check(name, code)
+        //precompile
+        //checkOut(name, "csv", eval(""))
+      }
+      */
+    }
+  }
+
   def testquery(name: String, query: String = "") {
     val drivers: List[TestDriver] =
       List(
         new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
-        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler
+        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler,
+        new CStagedQueryDriver(name, query) with query_optc.QueryCompiler
       )
     drivers.foreach(_.runtest)
   }
