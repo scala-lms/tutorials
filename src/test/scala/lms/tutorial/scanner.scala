@@ -3,6 +3,43 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
+// tests for the non-staged Scanner library
+// provided by scannerlib.scala
+// which is in a separate file so that it can easily be included
+// independently of the whole project
+class ScannerLibTest extends LibSuite {
+  test("low-level first field scanning") {
+    val s = new ScannerLib(dataFilePath("t.csv"))
+    assert(s.next(',')=="Name")
+    s.close
+  }
+  test("low-level first 2 fields scanning") {
+    val s = new ScannerLib(dataFilePath("t.csv"))
+    assert(s.next(',')=="Name")
+    assert(s.next(',')=="Value")
+    s.close
+  }
+  test("low-level first line scanning") {
+    val s = new ScannerLib(dataFilePath("t.csv"))
+    assert(s.next('\n')=="Name,Value,Flag")
+    s.close
+  }
+  test("low-level schema scanning") {
+    val s = new ScannerLib(dataFilePath("t.csv"))
+    val v = s.next('\n').split(',').toVector
+    assert(v==Vector("Name","Value","Flag"))
+    s.close
+  }
+  test("low-level record scanning knowing schema") {
+    val s = new ScannerLib(dataFilePath("t.csv"))
+    val fields = Vector("Name","Value","Flag")
+    val last = fields.last
+    val v = fields.map{x => s.next(if (x==last) '\n' else ',')}
+    assert(v==Vector("Name","Value","Flag"))
+    s.close
+  }
+}
+
 trait ScannerBase extends Base {
   implicit class ScannerOps(s: Rep[Scanner]) {
     def next(implicit pos: SourceContext) = scannerNext(s)

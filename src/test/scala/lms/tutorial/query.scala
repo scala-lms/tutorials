@@ -230,7 +230,6 @@ abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with Sc
     val IR: q.type = q
   }
   override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query(fn))
-  def filePath(csv: String) = "src/data/" + csv
   def testfn: String
   def query(fn: Rep[String]): Operator
 }
@@ -247,7 +246,7 @@ class StagedCSVTest extends TutorialFunSuite {
   }
 
   testquery("t1", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(
         Scan(testfn)
@@ -255,7 +254,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t2", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(Project(Schema("Name"), Schema("Name"),
         Scan(testfn)
@@ -263,7 +262,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t3", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(Project(Schema("Name"), Schema("Name"),
         Filter(Eq(Field("Flag"), Value("yes")),
@@ -272,7 +271,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t4", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(
         Join(
@@ -282,7 +281,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t5", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(
         Join(
@@ -292,7 +291,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t4h", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(
         HashJoin(
@@ -302,7 +301,7 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t5h", new StagedQuery {
-    def testfn = filePath("t.csv")
+    def testfn = dataFilePath("t.csv")
     def query(fn: Rep[String]) =
       PrintCSV(
         HashJoin(
@@ -312,12 +311,12 @@ class StagedCSVTest extends TutorialFunSuite {
   })
 
   testquery("t1gram1", new StagedQuery with NGramQuery {
-    def testfn = filePath("t1gram.csv")
+    def testfn = dataFilePath("t1gram.csv")
     def query(fn: Rep[String]) = query_id(fn)
   })
 
   testquery("t1gram2", new StagedQuery with NGramQuery {
-    def testfn = filePath("t1gram.csv")
+    def testfn = dataFilePath("t1gram.csv")
     def query(fn: Rep[String]) = query_filter("Auswanderung")(fn)
   })
 }

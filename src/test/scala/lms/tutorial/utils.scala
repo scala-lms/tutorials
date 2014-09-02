@@ -3,7 +3,11 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
-trait TutorialFunSuite extends FunSuite {
+trait LibSuite extends FunSuite {
+  def dataFilePath(csv: String) = "src/data/" + csv
+}
+
+trait TutorialFunSuite extends LibSuite {
   val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
 
   val prefix = "src/out/"
