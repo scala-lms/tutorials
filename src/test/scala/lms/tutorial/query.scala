@@ -99,33 +99,34 @@ trait StagedQueryProcessor extends QueryProcessor with Dsl {
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
-  trait TestDriver {
+  trait TestDriver extends SQLParser with QueryProcessor {
     def runtest: Unit
-  }
 
-  abstract class ScalaStagedQueryDriver(name: String, query: String) extends DslDriver[String,Unit] with TestDriver with SQLParser with StagedQueryProcessor with ScannerExp with ExpectedASTs { q =>
-    override val codegen = new DslGen with ScalaGenScanner {
-      val IR: q.type = q
-    }
-    var defaultTable: Table = _
-    override def snippet(fn: Rep[String]): Rep[Unit] = {
-      defaultTable = fn
-      execQuery(PrintCSV(parsedQuery))
-    }
-    def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
     override def defaultFilenameFor(tableName: String) = dataFilePath(tableName+".csv")
-    // this is special-cased to run legacy queries as is
-    // TODO: generalize once it works
-    override def tableFor(tableName: String) = tableName match {
-      case "t1gram" => defaultTable // dynamic
-      case _ => super.tableFor(tableName) // constant
-    }
     override def externalSchemaFor(tableName: String) =
       if (tableName.contains("gram")) Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount"))
       else super.externalSchemaFor(tableName)
     override def fieldDelimiterFor(tableName: String) =
         if (tableName.contains("gram")) Some('\t')
         else super.fieldDelimiterFor(tableName)
+  }
+
+  abstract class ScalaStagedQueryDriver(name: String, query: String) extends DslDriver[String,Unit] with TestDriver with StagedQueryProcessor with ScannerExp with ExpectedASTs { q =>
+    override val codegen = new DslGen with ScalaGenScanner {
+      val IR: q.type = q
+    }
+    def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
+    var defaultTable: Table = _
+    override def snippet(fn: Rep[String]): Rep[Unit] = {
+      defaultTable = fn
+      execQuery(PrintCSV(parsedQuery))
+    }
+    // this is special-cased to run legacy queries as is
+    // TODO: generalize once it works
+    override def tableFor(tableName: String) = tableName match {
+      case "t1gram" => defaultTable // dynamic
+      case _ => super.tableFor(tableName) // constant
+    }
     override def runtest: Unit = {
       if (version == "query_staged0" && query.isEmpty) return ()
       test(version+" "+name) {
