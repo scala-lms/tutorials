@@ -84,39 +84,53 @@ trait QueryProcessor extends QueryAST {
   }
 }
 
+trait StagedQueryProcessor extends QueryProcessor with Dsl {
+  override type Schema = Vector[String]
+  def Schema(schema: String*): Schema = schema.toVector
+
+  type Table = Rep[String] // dynamic filename
+  def tableFor(tableName: String): Table = unit(defaultFilenameFor(tableName))
+
+  def execQuery(q: Operator): Rep[Unit]
+}
+
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
+  abstract class ScalaStagedQueryDriver(name: String, query: String) extends DslDriver[String,Unit] with SQLParser with StagedQueryProcessor with ScannerExp with ExpectedASTs { q =>
+    override val codegen = new DslGen with ScalaGenScanner {
+      val IR: q.type = q
+    }
+    var defaultTable: Table = _
+    override def snippet(fn: Rep[String]): Rep[Unit] = {
+      defaultTable = fn
+      execQuery(PrintCSV(parsedQuery))
+    }
+    def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
+    override def defaultFilenameFor(tableName: String) = dataFilePath(tableName+".csv")
+    // this is special-cased to run legacy queries as is
+    // TODO: generalize once it works
+    override def tableFor(tableName: String) = tableName match {
+      case "t1gram" => defaultTable // dynamic
+      case _ => super.tableFor(tableName) // constant
+    }
+    override def externalSchemaFor(tableName: String) =
+      if (tableName.contains("gram")) Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount"))
+      else super.externalSchemaFor(tableName)
+    override def fieldDelimiterFor(tableName: String) =
+        if (tableName.contains("gram")) Some('\t')
+        else super.fieldDelimiterFor(tableName)
+    def test = {
+      assert(expectedAstForTest(name)==parsedQuery)
+      check(name, code)
+      precompile
+      checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+    }
+  }
+
   def testquery(name: String, query: String = "") {
     test(name) {
-      val snippet = new DslDriver[String,Unit] with SQLParser with query_staged.QueryCompiler with ScannerExp with ExpectedASTs { q =>
-        override val codegen = new DslGen with ScalaGenScanner {
-          val IR: q.type = q
-        }
-        var defaultTable: Table = _
-        def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
-        override def snippet(fn: Rep[String]): Rep[Unit] = {
-          defaultTable = fn
-          execQuery(PrintCSV(parsedQuery))
-        }
-        override def defaultFilenameFor(tableName: String) = dataFilePath(tableName+".csv")
-        // this is special-cased to run legacy queries as is
-        // TODO: generalize once it works
-        override def tableFor(tableName: String) = tableName match {
-          case "t1gram" => defaultTable // dynamic
-          case _ => super.tableFor(tableName) // constant
-        }
-        override def externalSchemaFor(tableName: String) =
-          if (tableName.contains("gram")) Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount"))
-          else super.externalSchemaFor(tableName)
-        override def fieldDelimiterFor(tableName: String) =
-          if (tableName.contains("gram")) Some('\t')
-          else super.fieldDelimiterFor(tableName)
-      }
-      assert(snippet.expectedAstForTest(name)==snippet.parsedQuery)
-      check(name, snippet.code)
-      snippet.precompile
-      checkOut(name, "csv", snippet.eval(snippet.defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+      (new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler).test
     }
   }
 

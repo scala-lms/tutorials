@@ -3,14 +3,8 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 
 object query_staged {
-trait QueryCompiler extends Dsl with QueryProcessor
+trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
-  override type Schema = Vector[String]
-  def Schema(schema: String*): Schema = schema.toVector
-
-  type Table = Rep[String] // dynamic filename
-  def tableFor(tableName: String): Table = unit(defaultFilenameFor(tableName))
-
   // low-level processing
   type RField = Rep[String]
   type Fields = Vector[RField]

@@ -3,12 +3,9 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 
 object query_optc {
-trait QueryCompiler extends Dsl with QueryProcessor
+trait QueryCompiler extends Dsl with StagedQueryProcessor
   with ScannerLowerBase
 {
-  override type Schema = Vector[String]
-  def Schema(schema: String*): Schema = schema.toVector
-
   // lowering scanner
   class RScanner(name: Rep[String]) {
     val fd = open(name)
