@@ -66,7 +66,7 @@ The following tutorials are available:
 - [Automata-Based Regex Matcher](automata.html)
     NFA to DFA conversion using staging
 
-- [SQL Engine](scsv.html)
+- [SQL Engine](query.html)
     Efficient data processing
 
 - [Fast Fourier Transform (FFT)](fft.html)
