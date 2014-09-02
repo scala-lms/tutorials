@@ -18,15 +18,15 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x13 = x10(x12) = 0
       x12 = x12 + 1
     }
-    val x16 = new scala.lms.tutorial.Scanner("src/data/t.csv", ',')
-    val x17 = x16.next
-    val x18 = x16.next
-    val x19 = x16.next
+    val x16 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    val x17 = x16.next(',')
+    val x18 = x16.next(',')
+    val x19 = x16.next('\n')
     val x60 = while ({val x20 = x16.hasNext
       x20}) {
-      val x22 = x16.next
-      val x23 = x16.next
-      val x24 = x16.next
+      val x22 = x16.next(',')
+      val x23 = x16.next(',')
+      val x24 = x16.next('\n')
       val x25 = x6
       val x26 = x2(x25) = x22
       val x27 = x3(x25) = x23
@@ -67,56 +67,58 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       val x58 = x10(x52) = x57
       x58
     }
-    val x61 = new scala.lms.tutorial.Scanner("src/data/t.csv", ',')
-    val x62 = x61.next
-    val x63 = x61.next
-    val x64 = x61.next
-    val x105 = while ({val x65 = x61.hasNext
-      x65}) {
-      val x67 = x61.next
-      val x68 = x61.next
-      val x69 = x61.next
-      val x70 = x67.##
-      val x71 = x70.toInt
-      val x72 = x71 & 255
-      val x91 = {
+    val x61 = x16.close
+    val x62 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    val x63 = x62.next(',')
+    val x64 = x62.next(',')
+    val x65 = x62.next('\n')
+    val x106 = while ({val x66 = x62.hasNext
+      x66}) {
+      val x68 = x62.next(',')
+      val x69 = x62.next(',')
+      val x70 = x62.next('\n')
+      val x71 = x68.##
+      val x72 = x71.toInt
+      val x73 = x72 & 255
+      val x92 = {
         //#hash_lookup
         // generated code for hash lookup
-        var x73: Int = x72
-        val x88 = while ({val x74 = x73
-          val x75 = x10(x74)
-          val x77 = x8(x74)
-          val x76 = x75 != 0
-          val x78 = x77 == x67
-          val x79 = true && x78
-          val x80 = !x79
-          val x81 = x76 && x80
-          x81}) {
-          val x83 = x73
-          val x84 = x83 + 1
-          val x85 = x84 & 255
-          x73 = x85
+        var x74: Int = x73
+        val x89 = while ({val x75 = x74
+          val x76 = x10(x75)
+          val x78 = x8(x75)
+          val x77 = x76 != 0
+          val x79 = x78 == x68
+          val x80 = true && x79
+          val x81 = !x80
+          val x82 = x77 && x81
+          x82}) {
+          val x84 = x74
+          val x85 = x84 + 1
+          val x86 = x85 & 255
+          x74 = x86
           ()
         }
-        val x89 = x73
-        x89
+        val x90 = x74
+        x90
         //#hash_lookup
       }
-      val x92 = x10(x91)
-      val x93 = x91 * 256
-      val x94 = x93 + x92
-      var x96 : Int = x93
-      val x103 = while (x96 < x94) {
-        val x97 = x7(x96)
-        val x98 = x2(x97)
-        val x99 = x3(x97)
-        val x100 = x4(x97)
-        val x101 = printf("%s,%s,%s,%s\n",x98,x99,x100,x67)
-        x96 = x96 + 1
+      val x93 = x10(x92)
+      val x94 = x92 * 256
+      val x95 = x94 + x93
+      var x97 : Int = x94
+      val x104 = while (x97 < x95) {
+        val x98 = x7(x97)
+        val x99 = x2(x98)
+        val x100 = x3(x98)
+        val x101 = x4(x98)
+        val x102 = printf("%s,%s,%s,%s\n",x99,x100,x101,x68)
+        x97 = x97 + 1
       }
-      x103
+      x104
     }
-    x105
+    val x107 = x62.close
+    x107
   }
 }
 /*****************************************

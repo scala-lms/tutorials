@@ -15,9 +15,8 @@ import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
 trait StagedCSV extends Dsl with ScannerBase {
-  val defaultFieldDelimiter = ','
-
   // low-level processing
+  val defaultFieldDelimiter = ','
 
   type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
@@ -30,16 +29,16 @@ trait StagedCSV extends Dsl with ScannerBase {
   }
 
   def loadSchema(filename: String): Schema = {
-    val s = new Scanner(filename, defaultFieldDelimiter)
-    var schema: Schema = Schema() // force present-stage var
-    do (schema :+= s.next) while (s.hasNextInLine)
+    val s = new Scanner(filename)
+    val schema = Schema(s.next('\n').split(defaultFieldDelimiter): _*)
     s.close
     schema
   }
 
   def processCSV(filename: Rep[String], schema: Schema, fieldDelimiter: Char, externalSchema: Boolean)(yld: Record => Rep[Unit]): Rep[Unit] = {
-    val s = newScanner(filename, fieldDelimiter)
-    def nextRecord = Record(schema.map{_ => s.next}, schema)
+    val s = newScanner(filename)
+    val last = schema.last
+    def nextRecord = Record(schema.map{x => s.next(if (x==last) '\n' else fieldDelimiter)}, schema)
     if (!externalSchema) {
       // the right thing would be to dynamically re-check the schema,
       // but it clutters the generated code
@@ -47,6 +46,7 @@ trait StagedCSV extends Dsl with ScannerBase {
       nextRecord // ignore csv header
     }
     while (s.hasNext) yld(nextRecord)
+    s.close
   }
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))
