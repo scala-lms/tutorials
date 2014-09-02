@@ -43,7 +43,7 @@ class ScannerLibTest extends LibSuite {
 }
 
 trait ScannerBase extends Base {
-  implicit class ScannerOps(s: Rep[Scanner]) {
+  implicit class RepScannerOps(s: Rep[Scanner]) {
     def next(d: Char)(implicit pos: SourceContext) = scannerNext(s, d)
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
     def close(implicit pos: SourceContext) = scannerClose(s)
@@ -76,9 +76,8 @@ trait ScannerExp extends ScannerBase with EffectExp {
     case Reflect(ScannerClose(s), u, es) => reflectMirrored(Reflect(ScannerClose(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
-
-
 }
+
 
 trait ScalaGenScanner extends ScalaGenEffect {
   val IR: ScannerExp
@@ -92,3 +91,24 @@ trait ScalaGenScanner extends ScalaGenEffect {
     case _ => super.emitNode(sym, rhs)
   }
 }
+
+trait ScannerLowerBase extends Base {
+  def open(name: Rep[String]): Rep[Int]
+  def fclose(fd: Rep[Int]): Rep[Unit]
+  def filelen(fd: Rep[Int]): Rep[Int]
+  def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
+  def stringFromCharArray(buf: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String]
+  def prints(s: Rep[String]): Rep[Int]
+  def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
+}
+
+trait ScannerLowerExp extends ScannerLowerBase with UncheckedOps {
+  def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
+  def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
+  def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
+  def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
+  def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data,"+",pos)
+  def prints(s: Rep[String]): Rep[Int] = unchecked[Int]("printll(",s,")")
+}
+
+trait CGenScannerLower extends CGenUncheckedOps
