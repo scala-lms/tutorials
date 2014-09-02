@@ -14,12 +14,73 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
-trait StagedCSV extends Dsl with ScannerBase {
-  // low-level processing
-  val defaultFieldDelimiter = ','
+trait SQLParser extends QueryAST {
+  import scala.util.parsing.combinator._
+  object Grammar extends JavaTokenParsers with PackratParsers {
+    def fieldIdent: Parser[String] = """[\w\#]+""".r
+    def tableIdent: Parser[String] = """[\w_\-/\.]+""".r
+    def fieldList: Parser[Schema]  = repsep(fieldIdent,",") ^^ { fs => Schema(fs:_*) }
 
-  type Schema = Vector[String]
+    def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1)))
+    def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
+
+    def fromClause: Parser[Operator] = "from" ~> tableIdent ^^ { table => Scan(table) }
+    def selectClause: Parser[Operator=>Operator] = "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { fs => Project(fs,fs,_:Operator) })
+    def whereClause: Parser[Operator=>Operator] = opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
+
+    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ^^ { case p ~ s ~ f => p(f(s)) }
+  }
+  def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
+}
+
+trait QueryAST {
+  val defaultFieldDelimiter = ','
+  type Schema
+  def Schema(schema: String*): Schema
+  def loadSchemaFor(tableName: String): Schema
+  def externalSchemaFor(tableName: String): Option[Schema] = None
+  def fieldDelimiterFor(tableName: String): Option[Char] = None
+
+  def Scan(tableName: String): Scan = {
+    val (schema, externalSchema) = externalSchemaFor(tableName) match {
+      case Some(schema) => (schema, true)
+      case None => (loadSchemaFor(tableName), false)
+    }
+    val fieldDelimiter = fieldDelimiterFor(tableName) match {
+      case Some(d) => d
+      case None => defaultFieldDelimiter
+    }
+    Scan(tableName, schema, fieldDelimiter, externalSchema)
+  }
+
+  sealed abstract class Operator
+  case class Scan(tableName: String, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
+  case class PrintCSV(parent: Operator) extends Operator
+  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
+  case class Filter(pred: Predicate, parent: Operator) extends Operator
+  case class Join(parent1: Operator, parent2: Operator) extends Operator
+  case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
+  case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
+
+  // for filtering
+  sealed abstract class Predicate
+  case class Eq(a: Ref, b: Ref) extends Predicate
+
+  sealed abstract class Ref
+  case class Field(name: String) extends Ref
+  case class Value(x: String) extends Ref
+}
+
+trait StagedCSV extends Dsl with QueryAST with ScannerBase {
+  def defaultFilenameFor(tableName: String): String
+
+  override type Schema = Vector[String]
   def Schema(schema: String*): Schema = schema.toVector
+
+  type Table = Rep[String] // dynamic filename
+  def tableFor(tableName: String): Table = unit(defaultFilenameFor(tableName))
+
+  // low-level processing
   type RField = Rep[String]
   type Fields = Vector[RField]
 
@@ -28,6 +89,8 @@ trait StagedCSV extends Dsl with ScannerBase {
     def apply(keys: Schema): Fields = keys.map(this apply _)
   }
 
+  override def loadSchemaFor(tableName: String) =
+    loadSchema(defaultFilenameFor(tableName))
   def loadSchema(filename: String): Schema = {
     val s = new Scanner(filename)
     val schema = Schema(s.next('\n').split(defaultFieldDelimiter): _*)
@@ -57,28 +120,6 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
-  // query operators
-
-  sealed abstract class Operator
-  // the definition of operators in order of incremental development
-  def Scan(filename: String) = new Scan(filename, loadSchema(filename), defaultFieldDelimiter, false)
-  def Scan(filename: Rep[String], schema: Schema, fieldDelimiter: Char) = new Scan(filename, schema, fieldDelimiter, true)
-  case class Scan(filename: Rep[String], schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
-  case class PrintCSV(parent: Operator) extends Operator
-  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
-  case class Filter(pred: Predicate, parent: Operator) extends Operator
-  case class Join(parent1: Operator, parent2: Operator) extends Operator
-  case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
-  case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
-
-  // these utilities are (for now) only needed for filtering
-  sealed abstract class Predicate
-  case class Eq(a: Ref, b: Ref) extends Predicate
-
-  sealed abstract class Ref
-  case class Field(name: String) extends Ref
-  case class Value(x: String) extends Ref
-
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }
@@ -87,7 +128,6 @@ trait StagedCSV extends Dsl with ScannerBase {
     case Field(name) => rec(name)
     case Value(x) => x
   }
-  // end of utilities for filtering
 
   def resultSchema(o: Operator): Schema = o match {
     case Scan(_, schema, _, _)   => schema
@@ -101,7 +141,7 @@ trait StagedCSV extends Dsl with ScannerBase {
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema, fieldDelimiter, externalSchema) =>
-      processCSV(filename, schema, fieldDelimiter, externalSchema)(yld)
+      processCSV(tableFor(filename), schema, fieldDelimiter, externalSchema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(newSchema, parentSchema, parent) =>
@@ -225,128 +265,65 @@ trait StagedCSV extends Dsl with ScannerBase {
 
 }
 
-abstract class StagedQuery extends DslDriver[String,Unit] with StagedCSV with ScannerExp { q =>
-  override val codegen = new DslGen with ScalaGenScanner {
-    val IR: q.type = q
-  }
-  override def snippet(fn: Rep[String]): Rep[Unit] = execQuery(query(fn))
-  def testfn: String
-  def query(fn: Rep[String]): Operator
-}
-
 class StagedCSVTest extends TutorialFunSuite {
   val under = "query_"
 
-  def testquery(name: String, query: StagedQuery) {
+  def testquery(name: String, query: String = "") {
     test(name) {
-      check(name, query.code)
-      query.precompile
-      checkOut(name, "csv", query.eval(query.testfn))
+      val snippet = new DslDriver[String,Unit] with SQLParser with StagedCSV with ScannerExp with ExpectedASTs { q =>
+        override val codegen = new DslGen with ScalaGenScanner {
+          val IR: q.type = q
+        }
+        var defaultTable: Table = _
+        def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
+        override def snippet(fn: Rep[String]): Rep[Unit] = {
+          defaultTable = fn
+          execQuery(PrintCSV(parsedQuery))
+        }
+        override def defaultFilenameFor(tableName: String) = dataFilePath(tableName+".csv")
+        // this is special-cased to run legacy queries as is
+        // TODO: generalize once it works
+        override def tableFor(tableName: String) = tableName match {
+          case "t1gram" => defaultTable // dynamic
+          case _ => super.tableFor(tableName) // constant
+        }
+        override def externalSchemaFor(tableName: String) =
+          if (tableName.contains("gram")) Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount"))
+          else super.externalSchemaFor(tableName)
+        override def fieldDelimiterFor(tableName: String) =
+          if (tableName.contains("gram")) Some('\t')
+          else super.fieldDelimiterFor(tableName)
+      }
+      assert(snippet.expectedAstForTest(name)==snippet.parsedQuery)
+      check(name, snippet.code)
+      snippet.precompile
+      checkOut(name, "csv", snippet.eval(snippet.defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
     }
   }
 
-  testquery("t1", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        Scan(testfn)
-      )
-  })
+  trait ExpectedASTs extends QueryAST {
+    val expectedAstForTest = Map(
+      "t1" -> Scan("t"),
+      "t2" -> Project(Schema("Name"), Schema("Name"), Scan("t")),
+      "t3" -> Project(Schema("Name"), Schema("Name"),
+                      Filter(Eq(Field("Flag"), Value("yes")),
+                             Scan("t"))),
+      "t4" -> Join(Scan("t"),
+                   Project(Schema("Name1"), Schema("Name"), Scan("t"))),
+      "t5" -> Join(Scan("t"),
+                   Project(Schema("Name"), Schema("Name"), Scan("t"))),
 
-  testquery("t2", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(Project(Schema("Name"), Schema("Name"),
-        Scan(testfn)
-      ))
-  })
-
-  testquery("t3", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(Project(Schema("Name"), Schema("Name"),
-        Filter(Eq(Field("Flag"), Value("yes")),
-          Scan(testfn)
-      )))
-  })
-
-  testquery("t4", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        Join(
-          Scan(testfn),
-          Project(Schema("Name1"), Schema("Name"), Scan(testfn))
-      ))
-  })
-
-  testquery("t5", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        Join(
-          Scan(testfn),
-          Project(Schema("Name"), Schema("Name"), Scan(testfn))
-      ))
-  })
-
-  testquery("t4h", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        HashJoin(
-          Scan(testfn),
-          Project(Schema("Name1"), Schema("Name"), Scan(testfn))
-      ))
-  })
-
-  testquery("t5h", new StagedQuery {
-    def testfn = dataFilePath("t.csv")
-    def query(fn: Rep[String]) =
-      PrintCSV(
-        HashJoin(
-          Scan(testfn),
-          Project(Schema("Name"), Schema("Name"), Scan(testfn))
-      ))
-  })
-
-  testquery("t1gram1", new StagedQuery with NGramQuery {
-    def testfn = dataFilePath("t1gram.csv")
-    def query(fn: Rep[String]) = query_id(fn)
-  })
-
-  testquery("t1gram2", new StagedQuery with NGramQuery {
-    def testfn = dataFilePath("t1gram.csv")
-    def query(fn: Rep[String]) = query_filter("Auswanderung")(fn)
-  })
-}
-
-
-trait NGramQuery extends StagedCSV {
-  val ngramSchema = Schema("Phrase", "Year", "MatchCount", "VolumeCount")
-  def ScanNGram(fn: Rep[String]) = Scan(fn, ngramSchema, '\t')
-  def query_id(fn: Rep[String]) =  PrintCSV(ScanNGram(fn))
-  def query_filter(v: String)(fn: Rep[String]) =
-    PrintCSV(
-      Filter(Eq(Field("Phrase"), Value(v)),
-       ScanNGram(fn)
-  ))
-}
-
-object RunQuery {
-  def run(fn: String) = {
-    val query = new StagedQuery with NGramQuery {
-      def testfn = fn
-      def query(fn: Rep[String]) = query_filter("Auswanderung")(fn)
-    }
-    query.precompileSilently
-    query.eval(fn)
+      "t1gram1" -> Scan("t1gram"),
+      "t1gram2" -> Filter(Eq(Field("Phrase"), Value("Auswanderung")), Scan("t1gram"))
+    )
   }
-  def main(args: Array[String]): Unit = {
-    if (args.length != 1) {
-      println("usage: query <filename>")
-    } else {
-      run(args(0))
-    }
-  }
+
+  testquery("t1", "select * from t")
+  testquery("t2", "select Name from t")
+  testquery("t3", "select Name from t where Flag='yes'")
+  testquery("t4")
+  testquery("t5")
+
+  testquery("t1gram1", "select * from t1gram")
+  testquery("t1gram2", "select * from t1gram where Phrase='Auswanderung'")
 }
