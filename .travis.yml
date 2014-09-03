@@ -2,6 +2,9 @@ language: scala
 scala:
    - 2.10.2
 
+install:
+   - cc
+
 before_install:
     - git clone git://github.com/TiarkRompf/virtualization-lms-core.git
     - (cd virtualization-lms-core; sbt publish-local)
