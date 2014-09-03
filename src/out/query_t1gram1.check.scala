@@ -15,7 +15,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       x9
     }
     val x12 = x2.close
-    x12
+    ()
   }
 }
 /*****************************************

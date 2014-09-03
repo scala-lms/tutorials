@@ -36,7 +36,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       x27
     }
     val x30 = x2.close
-    x30
+    ()
   }
 }
 /*****************************************

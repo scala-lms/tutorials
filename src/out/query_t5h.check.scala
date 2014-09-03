@@ -118,7 +118,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
       x104
     }
     val x107 = x62.close
-    x107
+    ()
   }
 }
 /*****************************************

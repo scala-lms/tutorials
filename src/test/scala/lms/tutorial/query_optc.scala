@@ -161,7 +161,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
       printSchema(schema)
       execOp(parent) { rec => printFields(rec.fields) }
   }
-  def execQuery(q: Operator): Rep[Unit] = execOp(q) { _ => }
+  def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
   // data structure implementations
 

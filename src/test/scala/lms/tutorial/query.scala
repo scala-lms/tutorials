@@ -84,12 +84,13 @@ trait QueryProcessor extends QueryAST {
     s.close
     schema
   }
+
+  def execQuery(q: Operator): Unit
 }
 
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
   def dynamicFilePath(table: String) = filePath(table)
-  def execQuery(q: Operator): Unit
 }
 
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
@@ -97,7 +98,6 @@ trait StagedQueryProcessor extends QueryProcessor with Dsl {
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
   def dynamicFileName: Table
   def dynamicFilePath(table: String) = if (table == "?") dynamicFileName else unit(filePath(table))
-  def execQuery(q: Operator): Rep[Unit]
 }
 
 class QueryTest extends TutorialFunSuite {
