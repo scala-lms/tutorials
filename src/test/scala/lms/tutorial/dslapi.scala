@@ -200,6 +200,9 @@ trait DslGenC extends CGenNumericOps
       #include <sys/stat.h>
       #include <stdio.h>
       #include <stdint.h>
+      #ifndef MAP_FILE
+      #define MAP_FILE MAP_SHARED
+      #endif
       int fsize(int fd) {
         struct stat stat;
         int res = fstat(fd,&stat); 
