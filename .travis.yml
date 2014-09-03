@@ -2,9 +2,8 @@ language: scala
 scala:
    - 2.10.2
 
-install:
-   - cc
-
 before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -y build-essentials
     - git clone git://github.com/TiarkRompf/virtualization-lms-core.git
     - (cd virtualization-lms-core; sbt publish-local)
