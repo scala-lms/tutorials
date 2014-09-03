@@ -39,31 +39,16 @@ trait SQLParser extends QueryAST {
 }
 
 trait QueryAST {
-  val defaultFieldDelimiter = ','
-  type Schema
-  def Schema(schema: String*): Schema
-  def loadSchemaFor(tableName: String): Schema
-  def externalSchemaFor(tableName: String): Option[Schema] = None
-  def fieldDelimiterFor(tableName: String): Option[Char] = None
+  def tableFor(s: Table) = s // remove
 
-  def Scan(tableName: String): Scan = {
-    val (schema, externalSchema) = externalSchemaFor(tableName) match {
-      case Some(schema) => (schema, true)
-      case None => (loadSchemaFor(tableName), false)
-    }
-    val fieldDelimiter = fieldDelimiterFor(tableName) match {
-      case Some(d) => d
-      case None => defaultFieldDelimiter
-    }
-    Scan(tableName, schema, fieldDelimiter, externalSchema)
-  }
-  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan = {
-    val (schema1:Schema, externalSchema) = schema.map(s=>(s,true)).getOrElse((loadSchemaFor(tableName),false))
-    Scan(tableName, schema1, delim.getOrElse(defaultFieldDelimiter), externalSchema)
-  }
+  type Schema = Vector[String]
+  def Schema(schema: String*): Schema = schema.toVector
+  type Table
+  def Scan(tableName: String): Scan = Scan(tableName, None, None)
+  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan // defined in QueryProcessor
 
   sealed abstract class Operator
-  case class Scan(tableName: String, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
+  case class Scan(tableName: Table, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
   case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
@@ -82,18 +67,17 @@ trait QueryAST {
 
 trait QueryProcessor extends QueryAST {
   def version: String
+  val defaultFieldDelimiter = ','
 
-  def defaultFilenameFor(tableName: String): String
+  def filePath(table: String): String = table
+  def dynamicFilePath(table: String): Table
 
-  type Schema = Vector[String]
-  def Schema(schema: String*): Schema = schema.toVector
+  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan = {
+    val dfile = dynamicFilePath(tableName)
+    val (schema1, externalSchema) = schema.map(s=>(s,true)).getOrElse((loadSchema(filePath(tableName)),false))
+    Scan(dfile, schema1, delim.getOrElse(defaultFieldDelimiter), externalSchema)
+  }
 
-  type Table
-  def tableFor(tableName: String): Table
-
-
-  override def loadSchemaFor(tableName: String) =
-    loadSchema(defaultFilenameFor(tableName))
   def loadSchema(filename: String): Schema = {
     val s = new Scanner(filename)
     val schema = Schema(s.next('\n').split(defaultFieldDelimiter): _*)
@@ -104,16 +88,15 @@ trait QueryProcessor extends QueryAST {
 
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
-  def tableFor(tableName: String): Table = defaultFilenameFor(tableName)
-
+  def dynamicFilePath(table: String) = filePath(table)
   def execQuery(q: Operator): Unit
 }
 
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
-
   type Table = Rep[String] // dynamic filename
-  def tableFor(tableName: String): Table = unit(defaultFilenameFor(tableName))
-
+  override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
+  def dynamicFileName: Table
+  def dynamicFilePath(table: String) = if (table == "?") dynamicFileName else unit(filePath(table))
   def execQuery(q: Operator): Rep[Unit]
 }
 
@@ -122,20 +105,13 @@ class QueryTest extends TutorialFunSuite {
 
   trait TestDriver extends SQLParser with QueryProcessor with ExpectedASTs {
     def runtest: Unit
+    override def filePath(table: String) = {
+      "src/data/" + table
+    }
 
-    override def defaultFilenameFor(tableName: String) = dataFilePath(tableName+".csv")
-    override def externalSchemaFor(tableName: String) =
-      if (tableName.contains("gram")) Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount"))
-      else super.externalSchemaFor(tableName)
-    override def fieldDelimiterFor(tableName: String) =
-        if (tableName.contains("gram")) Some('\t')
-        else super.fieldDelimiterFor(tableName)
-
-    type Table
     def name: String
     def query: String
     def parsedQuery: Operator = if (query.isEmpty) expectedAstForTest(name) else parseSql(query)
-
   }
 
   trait PlainTestDriver extends TestDriver with PlainQueryProcessor {
@@ -143,15 +119,9 @@ class QueryTest extends TutorialFunSuite {
   }
 
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
-    // this is special-cased to run legacy queries as is
-    // TODO: generalize once it works
-    override def tableFor(tableName: String) = tableName match {
-      case "t1gram" => defaultTable // dynamic
-      case _ => super.tableFor(tableName) // constant
-    }
-    var defaultTable: Table = _
+    var dynamicFileName: Table = _
     def snippet(fn: Table): Rep[Unit] = {
-      defaultTable = fn
+      dynamicFileName = fn
       execQuery(PrintCSV(parsedQuery))
     }
   }
@@ -160,7 +130,7 @@ class QueryTest extends TutorialFunSuite {
     override def runtest: Unit = {
       test(version+" "+name) {
         assert(expectedAstForTest(name)==parsedQuery)
-        checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+        checkOut(name, "csv", eval("DUMMY"))
       }
     }
   }
@@ -177,7 +147,7 @@ class QueryTest extends TutorialFunSuite {
         if (!parsedQuery.toString.contains("Group(")) {
           check(name, code)
           precompile
-          checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+          checkOut(name, "csv", eval("DUMMY"))
         }
       }
     }
@@ -192,7 +162,7 @@ class QueryTest extends TutorialFunSuite {
         assert(expectedAstForTest(name)==parsedQuery)
         check(name, code, "c")
         //precompile
-        checkOut(name, "csv", eval(defaultFilenameFor(if (query.contains("gram")) "t1gram" else "t")))
+        checkOut(name, "csv", eval("DUMMY"))
       }
     }
   }
@@ -204,44 +174,49 @@ class QueryTest extends TutorialFunSuite {
         new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
         new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler,
         new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
-            // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
-            override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
+          // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
+          override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
         }
       )
     drivers.foreach(_.runtest)
   }
 
+  // NOTE: we can use "select * from ?" to 
+
   trait ExpectedASTs extends QueryAST {
+    val scan_t = Scan("t.csv")
+    val scan_t1gram = Scan("t1gram.csv",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
+
     val expectedAstForTest = Map(
-      "t1" -> Scan("t"),
-      "t2" -> Project(Schema("Name"), Schema("Name"), Scan("t")),
+      "t1" -> scan_t,
+      "t2" -> Project(Schema("Name"), Schema("Name"), scan_t),
       "t3" -> Project(Schema("Name"), Schema("Name"),
                       Filter(Eq(Field("Flag"), Value("yes")),
-                             Scan("t"))),
-      "t4" -> Join(Scan("t"),
-                   Project(Schema("Name1"), Schema("Name"), Scan("t"))),
-      "t5" -> Join(Scan("t"),
-                   Project(Schema("Name"), Schema("Name"), Scan("t"))),
-      "t4h" -> HashJoin(Scan("t"),
-                   Project(Schema("Name1"), Schema("Name"), Scan("t"))),
-      "t5h" -> HashJoin(Scan("t"),
-                   Project(Schema("Name"), Schema("Name"), Scan("t"))),
-      "t6"  -> Group(Schema("Name"),Schema("Value"), Scan("t")),
+                             scan_t)),
+      "t4" -> Join(scan_t,
+                   Project(Schema("Name1"), Schema("Name"), scan_t)),
+      "t5" -> Join(scan_t,
+                   Project(Schema("Name"), Schema("Name"), scan_t)),
+      "t4h" -> HashJoin(scan_t,
+                   Project(Schema("Name1"), Schema("Name"), scan_t)),
+      "t5h" -> HashJoin(scan_t,
+                   Project(Schema("Name"), Schema("Name"), scan_t)),
+      "t6"  -> Group(Schema("Name"),Schema("Value"), scan_t),
 
-      "t1gram1" -> Scan("t1gram"),
-      "t1gram2" -> Filter(Eq(Field("Phrase"), Value("Auswanderung")), Scan("t1gram"))
+      "t1gram1" -> scan_t1gram,
+      "t1gram2" -> Filter(Eq(Field("Phrase"), Value("Auswanderung")), scan_t1gram)
     )
   }
 
-  testquery("t1", "select * from t")
-  testquery("t2", "select Name from t")
-  testquery("t3", "select Name from t where Flag='yes'")
+  testquery("t1", "select * from t.csv")
+  testquery("t2", "select Name from t.csv")
+  testquery("t3", "select Name from t.csv where Flag='yes'")
   testquery("t4")
   testquery("t5")
   testquery("t4h")
   testquery("t5h")
   testquery("t6")
 
-  testquery("t1gram1", "select * from t1gram schema Phrase, Year, MatchCount, VolumeCount delim \\t")
-  testquery("t1gram2", "select * from t1gram schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
+  testquery("t1gram1", "select * from t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t")
+  testquery("t1gram2", "select * from t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
 }

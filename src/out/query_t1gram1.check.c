@@ -47,7 +47,7 @@ Emitting C Generated Code
 void Snippet(char*  x0) {
   printf("%s\n","Phrase,Year,MatchCount,VolumeCount");
   int32_t x5 = 0;
-  int32_t x2 = open(x0,0);
+  int32_t x2 = open("src/data/t1gram.csv",0);
   int32_t x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
   for (;;) {
