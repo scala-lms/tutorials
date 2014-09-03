@@ -29,21 +29,6 @@ trait CGenHashCodeOps extends CGenBase {
   val IR: HashCodeOpsExp
   import IR._
 
-/*
-TODO: make available such a hash function in the generated code:
-// from http://www.cse.yorku.ca/~oz/hash.html
-unsigned long hash(unsigned char *str)
-{
-  unsigned long hash = 5381;
-  int c;
-
-  while (c = *str++)
-    hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-  return hash;
-}
-*/
-
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case ObjHashCode(o) => emitValDef(sym, if (o.tp <:< manifest[String]) src"hash($o)" else src"1/*TODO:improve hash*/")
     case _ => super.emitNode(sym, rhs)
@@ -126,6 +111,7 @@ trait DslImpl extends DslExp { q =>
   }
 }
 
+// TODO: currently part of this is specific to the query tests. generalize? move?
 trait DslGenC extends CGenNumericOps
     with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse
     with CGenEqual with CGenRangeOps with CGenOrderingOps
@@ -137,13 +123,13 @@ trait DslGenC extends CGenNumericOps
   val IR: DslExp
   import IR._
 
-  // FIXME
   def getMemoryAllocString(count: String, memType: String): String = {
       "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
   }
   override def remap[A](m: Manifest[A]): String = m.toString match {
     case "java.lang.String" => "char*"
-    case "Any" => "void*"
+    case "Array[Char]" => "char*"
+    case "Char" => "char"
     case _ => super.remap(m)
   }
   def format(s: Exp[Any]): String = {
@@ -154,6 +140,8 @@ trait DslGenC extends CGenNumericOps
       case "float" | "double" => "%f"
       case "string" => "%s" 
       case "char*" => "%s"
+      case "char" => "%c"
+      case "void" => "%c"
       case _ => 
         import scala.virtualization.lms.internal.GenerationFailedException
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
@@ -170,12 +158,16 @@ trait DslGenC extends CGenNumericOps
   override def isPrimitiveType(tpe: String) : Boolean = {
     tpe match {
       case "char*" => true
+      case "char" => true
       case _ => super.isPrimitiveType(tpe)
     }
   }
   
   override def quote(x: Exp[Any]) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"")+"\"" // TODO: more escapes?
+    case Const('\n') if x.tp == manifest[Char] => "'\\n'"
+    case Const('\t') if x.tp == manifest[Char] => "'\\t'"
+    case Const('\0') if x.tp == manifest[Char] => "'\\0'"
     case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -185,8 +177,7 @@ trait DslGenC extends CGenNumericOps
     case ArrayApply(x,n) => emitValDef(sym, quote(x) + "[" + quote(n) + "]")
     case ArrayUpdate(x,n,y) => stream.println(quote(x) + "[" + quote(n) + "] = " + quote(y) + ";")
     case PrintLn(s) => stream.println("printf(\"" + format(s) + "\\n\"," + quoteRawString(s) + ");")
-    case StringPlus(a,b) =>
-      stream.println(quote(a) + "+" + quote(b) + "// strcat")
+    case StringCharAt(s,i) => emitValDef(sym, "%s[%s]".format(quote(s), quote(i)))
     case Comment(s, verbose, b) =>
       stream.println("//#" + s)
       if (verbose) {
@@ -198,7 +189,53 @@ trait DslGenC extends CGenNumericOps
       emitValDef(sym, quote(getBlockResult(b)))
       stream.println("//#" + s)
     case _ => super.emitNode(sym,rhs)
-  }}
+  }
+  override def emitSource[A:Manifest](args: List[Sym[_]], body: Block[A], functionName: String, out: java.io.PrintWriter) = {
+    withStream(out) {
+      stream.println("""
+      #include <fcntl.h>
+      #include <errno.h>
+      #include <err.h>
+      #include <sys/mman.h>
+      #include <sys/stat.h>
+      #include <stdio.h>
+      int fsize(int fd) {
+        struct stat stat;
+        int res = fstat(fd,&stat); 
+        return stat.st_size;
+      }
+      int printll(char* s) {
+        while (*s != '\n' && *s != ',' && *s != '\t') {
+          putchar(*s++);
+        }
+        return 0;
+      }
+      unsigned long hash(unsigned char *str) // FIXME: need to take length!
+      {
+        unsigned long hash = 5381;
+        int c;
+
+        while ((c = *str++))
+          hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+        return hash;
+      }
+      void Snippet(char*);
+      int main(int argc, char *argv[])
+      {
+        if (argc != 2) {
+          printf("usage: query <filename>\n");
+          return 0;
+        }
+        Snippet(argv[1]);
+        return 0;
+      }
+
+      """)
+    }
+    super.emitSource[A](args, body, functionName, out)
+  }
+}
 
 
 abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
@@ -225,5 +262,14 @@ abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Ds
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString
+  }
+  def eval(a:A): Unit = { // TBD: should read result of type B?
+    val out = new java.io.PrintWriter("/tmp/snippet.c")
+    out.println(code)
+    out.close
+    (new java.io.File("/tmp/snippet")).delete
+    import scala.sys.process._
+    (s"cc -O3 /tmp/snippet.c -o /tmp/snippet":ProcessBuilder).lines.foreach(Console.println _)
+    (s"/tmp/snippet $a":ProcessBuilder).lines.foreach(Console.println _)
   }
 }

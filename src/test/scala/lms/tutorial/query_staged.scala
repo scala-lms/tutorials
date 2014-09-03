@@ -42,9 +42,9 @@ with ScannerBase {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }
 
-  def evalRef(r: Ref)(rec: Record): Rep[Any] = r match {
+  def evalRef(r: Ref)(rec: Record): RField = r match {
     case Field(name) => rec(name)
-    case Value(x) => x
+    case Value(x) => x.toString
   }
 
   def resultSchema(o: Operator): Schema = o match {

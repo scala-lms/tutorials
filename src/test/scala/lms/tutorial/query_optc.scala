@@ -106,12 +106,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     case Eq(a1, a2) => evalRef(a1)(rec) compare evalRef(a2)(rec)
   }
 
-  // TODO: disrep
-  // case class Value(x: RField) extends Ref
-  // def Value(x: String) = new Value(RString(x,x.length))
   def evalRef(r: Ref)(rec: Record): RField = r match {
     case Field(name) => rec(name)
-    case Value(x) => ???
+    case Value(x:Int) => RInt(x)
+    case Value(x) => RString(x.toString,x.toString.length)
   }
 
   def resultSchema(o: Operator): Schema = o match {
@@ -126,7 +124,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema, fieldDelimiter, externalSchema) =>
-      processCSV(filename, schema, fieldDelimiter, externalSchema)(yld)
+      processCSV(tableFor(filename), schema, fieldDelimiter, externalSchema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(newSchema, parentSchema, parent) =>
