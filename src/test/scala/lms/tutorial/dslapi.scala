@@ -199,6 +199,7 @@ trait DslGenC extends CGenNumericOps
       #include <sys/mman.h>
       #include <sys/stat.h>
       #include <stdio.h>
+      #include <stdint.h>
       int fsize(int fd) {
         struct stat stat;
         int res = fstat(fd,&stat); 
