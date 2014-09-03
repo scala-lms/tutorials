@@ -181,7 +181,7 @@ class QueryTest extends TutorialFunSuite {
     drivers.foreach(_.runtest)
   }
 
-  // NOTE: we can use "select * from ?" to 
+  // NOTE: we can use "select * from ?" to use dynamic file names (not used here right now)
 
   trait ExpectedASTs extends QueryAST {
     val scan_t = Scan("t.csv")
