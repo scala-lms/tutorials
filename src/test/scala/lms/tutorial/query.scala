@@ -24,9 +24,14 @@ trait SQLParser extends QueryAST {
     def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
     def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |       
           """[0-9]+""".r ^^ (s => Value(s.toInt))
-    def fromClause: Parser[Operator] = "from" ~> tableIdent ^^ { table => Scan(table) }
-    def selectClause: Parser[Operator=>Operator] = "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { fs => Project(fs,fs,_:Operator) })
-    def whereClause: Parser[Operator=>Operator] = opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
+    def fromClause: Parser[Operator] = 
+      "from" ~> tableIdent ~ opt("schema" ~> fieldList) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ { 
+        case table ~ schema ~ delim => Scan(table, schema, delim)
+      }
+    def selectClause: Parser[Operator=>Operator] = 
+      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { fs => Project(fs,fs,_:Operator) })
+    def whereClause: Parser[Operator=>Operator] = 
+      opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
 
     def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ^^ { case p ~ s ~ f => p(f(s)) }
   }
@@ -51,6 +56,10 @@ trait QueryAST {
       case None => defaultFieldDelimiter
     }
     Scan(tableName, schema, fieldDelimiter, externalSchema)
+  }
+  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan = {
+    val (schema1:Schema, externalSchema) = schema.map(s=>(s,true)).getOrElse((loadSchemaFor(tableName),false))
+    Scan(tableName, schema1, delim.getOrElse(defaultFieldDelimiter), externalSchema)
   }
 
   sealed abstract class Operator
@@ -233,6 +242,6 @@ class QueryTest extends TutorialFunSuite {
   testquery("t5h")
   testquery("t6")
 
-  testquery("t1gram1", "select * from t1gram")
-  testquery("t1gram2", "select * from t1gram where Phrase='Auswanderung'")
+  testquery("t1gram1", "select * from t1gram schema Phrase, Year, MatchCount, VolumeCount delim \\t")
+  testquery("t1gram2", "select * from t1gram schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
 }
