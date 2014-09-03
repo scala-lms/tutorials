@@ -140,7 +140,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     case Group(keys, agg, parent) =>
       val hm = new HashMapAgg(keys, agg)
       execOp(parent) { rec =>
-        hm += (rec(keys), rec(agg))
+        hm(rec(keys)) += rec(agg)
       }
       hm foreach { (k,a) =>
         yld(Record(k ++ a, keys ++ agg))
@@ -149,7 +149,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
       val keys = resultSchema(left) intersect resultSchema(right)
       val hm = new HashMapBuffer(keys, resultSchema(left))
       execOp(left) { rec1 =>
-        hm += (rec1(keys), rec1.fields)
+        hm(rec1(keys)) += rec1.fields
       }
       execOp(right) { rec2 =>
         hm(rec2(keys)) foreach { rec1 =>
@@ -165,14 +165,18 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
   // data structure implementations
 
-  // TODO: factor out commonalities of group and join hash tables
+  // common base class to factor out commonalities of group and join hash tables
 
-  class HashMapAgg(keySchema: Schema, schema: Schema) {
+  class HashMapBase(keySchema: Schema, schema: Schema) {
+
+  }
+
+  class HashMapAgg(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
 
     val hashSize = (1 << 8)
     val dataSize = hashSize
 
-    val data = new ArrayBuffer(dataSize, keySchema)
+    val keys = new ArrayBuffer(dataSize, keySchema)
     val dataCount = var_new(0)
 
     val values = new ArrayBuffer(dataSize, schema) // assuming all summation fields are numeric
@@ -189,13 +193,13 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     def lookup(put: Boolean)(k: Fields): Rep[Int] = comment[Int]("hash_lookup") {
         val h = fieldsHash(k).toInt
         var bucket = h & hashMask
-        while (bucketCounts(bucket) != -1 && !fieldsEqual(data(bucketCounts(bucket)),k)) {
+        while (bucketCounts(bucket) != -1 && !fieldsEqual(keys(bucketCounts(bucket)),k)) {
           bucket = (bucket + 1) & hashMask
         }
         if (put && bucketCounts(bucket) == -1) {
           val pos = dataCount: Rep[Int] // force read
           bucketCounts(bucket) = pos
-          data(pos) = k
+          keys(pos) = k
           values(pos) = schema.map(_ => RInt(0))
           dataCount += 1
           pos
@@ -204,20 +208,22 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
         }
     }
 
-    def +=(k: Fields, v: Fields) = {
-      val dataPos = lookup(put = true)(k)
-      values(dataPos) = (values(dataPos) zip v) map { case (RInt(x), RInt(y)) => RInt(x + y) }
+    def apply(k: Fields) = new {
+      def +=(v: Fields) = {
+        val dataPos = lookup(put = true)(k)
+        values(dataPos) = (values(dataPos) zip v) map { case (RInt(x), RInt(y)) => RInt(x + y) }
+      }
     }
 
     def foreach(f: (Fields,Fields) => Rep[Unit]): Rep[Unit] = {
       for (i <- 0 until dataCount) {
-        f(data(i),values(i))
+        f(keys(i),values(i))
       }
     }
 
   }
 
-  class HashMapBuffer(keySchema: Schema, schema: Schema) {
+  class HashMapBuffer(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
 
     // FIXME: hard coded data sizes
     val hashSize = (1 << 8)
@@ -249,18 +255,18 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
         bucket: Rep[Int]
     }
 
-    def +=(k: Fields, v: Fields) = {
-      val dataPos = dataCount: Rep[Int] // force read
-      data(dataPos) = v
-      dataCount += 1
-
-      val bucket = lookup(put = true)(k)
-      val bucketPos = bucketCounts(bucket)
-      buckets(bucket * bucketSize + bucketPos) = dataPos
-      bucketCounts(bucket) = bucketPos + 1
-    }
-
     def apply(k: Fields) = new {
+      def +=(v: Fields) = {
+        val dataPos = dataCount: Rep[Int] // force read
+        data(dataPos) = v
+        dataCount += 1
+
+        val bucket = lookup(put = true)(k)
+        val bucketPos = bucketCounts(bucket)
+        buckets(bucket * bucketSize + bucketPos) = dataPos
+        bucketCounts(bucket) = bucketPos + 1
+      }
+
       def foreach(f: Record => Rep[Unit]): Rep[Unit] = {
         val bucket = lookup(put = false)(k)
 
