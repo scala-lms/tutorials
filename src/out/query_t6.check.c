@@ -150,66 +150,71 @@ void Snippet(char*  x0) {
     for (;;) {
       int32_t x107 = x106;
       int32_t x108 = x6[x107];
-      char* x110 = x2[x108];
-      int32_t x111 = x3[x108];
-      bool x109 = x108 != -1;
-      bool x113 = x111 == x70;
-      bool x128;
-      if (x113) {
-        int32_t x114 = 0;
-        for (;;) {
-          int32_t x115 = x114;
-          bool x116 = x115 < x111;
-          char x117 = x110[x115];
-          char x118 = x72[x115];
-          bool x119 = x117 == x118;
-          bool x120 = x116 && x119;
-          if (!x120) break;
-          x114 += 1;
-        }
-        int32_t x125 = x114;
-        bool x126 = x125 == x111;
-        x128 = x126;
+      bool x110 = x108 == -1;
+      bool x132;
+      if (x110) {
+        x132 = false;
       } else {
-        x128 = false;
+        char* x111 = x2[x108];
+        int32_t x112 = x3[x108];
+        bool x114 = x112 == x70;
+        bool x129;
+        if (x114) {
+          int32_t x115 = 0;
+          for (;;) {
+            int32_t x116 = x115;
+            bool x117 = x116 < x112;
+            char x118 = x111[x116];
+            char x119 = x72[x116];
+            bool x120 = x118 == x119;
+            bool x121 = x117 && x120;
+            if (!x121) break;
+            x115 += 1;
+          }
+          int32_t x126 = x115;
+          bool x127 = x126 == x112;
+          x129 = x127;
+        } else {
+          x129 = false;
+        }
+        bool x130 = !x129;
+        x132 = x130;
       }
-      bool x129 = !x128;
-      bool x130 = x109 && x129;
-      if (!x130) break;
-      int32_t x132 = x106;
-      int32_t x133 = x132 + 1;
-      int32_t x134 = x133 & 255;
-      x106 = x134;
+      if (!x132) break;
+      int32_t x134 = x106;
+      int32_t x135 = x134 + 1;
+      int32_t x136 = x135 & 255;
+      x106 = x136;
     }
-    int32_t x138 = x106;
-    int32_t x139 = x6[x138];
-    bool x140 = x139 == -1;
-    int32_t x148;
-    if (x140) {
-      int32_t x141 = x5;
-      x2[x141] = x72;
-      x3[x141] = x70;
+    int32_t x140 = x106;
+    int32_t x141 = x6[x140];
+    bool x142 = x141 == -1;
+    int32_t x150;
+    if (x142) {
+      int32_t x143 = x5;
+      x2[x143] = x72;
+      x3[x143] = x70;
       x5 += 1;
-      x6[x138] = x141;
-      x12[x141] = 0;
-      x148 = x141;
+      x6[x140] = x143;
+      x12[x143] = 0;
+      x150 = x143;
     } else {
-      x148 = x139;
+      x150 = x141;
     }
-    int32_t x150 = x148;
+    int32_t x152 = x150;
     //#hash_lookup
-    int32_t x151 = x12[x150];
-    int32_t x152 = x151 + x90;
-    x12[x150] = x152;
+    int32_t x153 = x12[x152];
+    int32_t x154 = x153 + x90;
+    x12[x152] = x154;
   }
-  int32_t x156 = x5;
-  for(int x158=0; x158 < x156; x158++) {
-    char* x159 = x2[x158];
-    int32_t x160 = x3[x158];
-    int32_t x161 = x12[x158];
-    int32_t x162 = printll(x159);
+  int32_t x158 = x5;
+  for(int x160=0; x160 < x158; x160++) {
+    char* x161 = x2[x160];
+    int32_t x162 = x3[x160];
+    int32_t x163 = x12[x160];
+    int32_t x164 = printll(x161);
     printf(",");
-    printf("%d",x161);
+    printf("%d",x163);
     printf("%s\n","");
   }
 }

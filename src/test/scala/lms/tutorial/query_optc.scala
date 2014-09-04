@@ -203,36 +203,33 @@ Data Structure Implementations
     val keys = new ArrayBuffer(keysSize, keySchema)
     val keyCount = var_new(0)
 
-    val htable = NewArray[Int](hashSize)
-
-    for (i <- 0 until hashSize) {
-        htable(i) = -1
-    }
-
     val hashMask = hashSize - 1
+    val htable = NewArray[Int](hashSize)
+    for (i <- 0 until hashSize) { htable(i) = -1 }
 
-    def lookup(k: Fields): Rep[Int] = lookupInternal(k,None)
-    def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]): Rep[Int] = lookupInternal(k,Some(init))
-    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = comment[Int]("hash_lookup") {
-        val h = fieldsHash(k).toInt
-        var pos = h & hashMask
-        while (htable(pos) != -1 && !fieldsEqual(keys(htable(pos)),k)) {
-          pos = (pos + 1) & hashMask
-        }
-        if (init.isDefined) {
-          if (htable(pos) == -1) {
-            val keyPos = keyCount: Rep[Int] // force read
-            keys(keyPos) = k
-            keyCount += 1
-            htable(pos) = keyPos
-            init.get(keyPos)
-            keyPos
-          } else {
-            htable(pos)
-          }
+    def lookup(k: Fields) = lookupInternal(k,None)
+    def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))
+    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = 
+    comment[Int]("hash_lookup") {
+      val h = fieldsHash(k).toInt
+      var pos = h & hashMask
+      while (htable(pos) != -1 &&& !fieldsEqual(keys(htable(pos)),k)) {
+        pos = (pos + 1) & hashMask
+      }
+      if (init.isDefined) {
+        if (htable(pos) == -1) {
+          val keyPos = keyCount: Rep[Int] // force read
+          keys(keyPos) = k
+          keyCount += 1
+          htable(pos) = keyPos
+          init.get(keyPos)
+          keyPos
         } else {
           htable(pos)
         }
+      } else {
+        htable(pos)
+      }
     }
   }
 

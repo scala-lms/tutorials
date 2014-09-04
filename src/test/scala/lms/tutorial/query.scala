@@ -197,12 +197,9 @@ class QueryTest extends TutorialFunSuite {
       if (version == "query_staged0" && query.isEmpty) return ()
       test(version+" "+name) {
         assert(expectedAstForTest(name)==parsedQuery)
-        /* FIXME: group by currently not supported in staged Scala version*/
-        if (!parsedQuery.toString.contains("Group(")) {
-          check(name, code)
-          precompile
-          checkOut(name, "csv", eval(defaultEvalTable))
-        }
+        check(name, code)
+        precompile
+        checkOut(name, "csv", eval(defaultEvalTable))
       }
     }
   }
