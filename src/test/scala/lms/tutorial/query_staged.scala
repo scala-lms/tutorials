@@ -15,7 +15,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
   override def version = "query_staged"
 
-/*
+/**
 Low-Level Processing Logic
 --------------------------
 */
@@ -49,7 +49,7 @@ Low-Level Processing Logic
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
-/*
+/**
 Query Interpretation
 --------------------
 */
@@ -113,7 +113,7 @@ Query Interpretation
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
-/*
+/**
 Data Structure Implementations
 ------------------------------
 */

@@ -14,7 +14,7 @@ object query_unstaged {
 trait QueryInterpreter extends PlainQueryProcessor {
   override def version = "query_unstaged"
 
-/*
+/**
 Low-Level Processing Logic
 --------------------------
 */
@@ -46,7 +46,7 @@ Low-Level Processing Logic
 
   def fieldsHash(a: Fields) = a.foldLeft(0L) { _ * 41L + _.hashCode }
 
-/*
+/**
 Query Interpretation
 --------------------
 */

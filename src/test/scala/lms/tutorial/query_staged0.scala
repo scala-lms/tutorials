@@ -15,7 +15,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
   override def version = "query_staged0"
 
-/*
+/**
 Low-Level Processing Logic
 --------------------------
 */
@@ -45,7 +45,7 @@ Low-Level Processing Logic
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("\"", defaultFieldDelimiter.toString, "\\n\""), fields: _*)
 
-/*
+/**
 Query Interpretation
 --------------------
 */

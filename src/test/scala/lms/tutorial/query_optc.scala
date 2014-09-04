@@ -1,6 +1,6 @@
 /**
-Query Compiler III (C)
-======================
+Query Compiler III (C Code)
+===========================
 
 Outline:
 <div id="tableofcontents"></div>
@@ -16,7 +16,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 {
   override def version = "query_optc"
 
-/*
+/**
 Input File Tokenizer
 --------------------
 */
@@ -49,7 +49,7 @@ Input File Tokenizer
     def close = fclose(fd)
   }
 
-/*
+/**
 Low-Level Processing Logic
 --------------------------
 */
@@ -116,7 +116,7 @@ Low-Level Processing Logic
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.hash }
 
-/*
+/**
 Query Interpretation
 --------------------
 */
@@ -181,7 +181,7 @@ Query Interpretation
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
-/*
+/**
 Data Structure Implementations
 ------------------------------
 */
