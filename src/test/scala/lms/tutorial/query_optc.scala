@@ -1,3 +1,11 @@
+/**
+Query Compiler III (C)
+======================
+
+Outline:
+<div id="tableofcontents"></div>
+
+*/
 package scala.lms.tutorial
 
 import scala.virtualization.lms.common._

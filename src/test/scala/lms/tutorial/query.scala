@@ -50,7 +50,8 @@ trait SQLParser extends QueryAST {
 Relational Algebra AST
 ----------------------
 
-The parser takes a string and convers it to an AST.
+The parser takes a SQL string and converts it to tree of relational
+algebra operators.
 */
 trait QueryAST {
   def tableFor(s: Table) = s // remove
@@ -112,7 +113,7 @@ trait QueryProcessor extends QueryAST {
 }
 
 /**
-### A (plain) Query Interpreter
+### A (Plain) Query Interpreter
 
 We start with a plain query processor: an interpreter.
 
@@ -127,11 +128,17 @@ trait PlainQueryProcessor extends QueryProcessor {
 
 ### A Staged Query Interpreter (= Compiler)
 
-- [query_staged0](query_staged0.scala)
+Staging our query interpreter yields a query compiler. 
+In the first iteration we generate Scala code:
 
-- [query_staged](query_staged.scala)
+- [query_staged0](query_staged0.html)
 
-- [query_optc](query_optc.scala)
+- [query_staged](query_staged.html)
+
+For additional low-level optimizations we switch to
+generating C code:
+
+- [query_optc](query_optc.html)
 
 */
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
