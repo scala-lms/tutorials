@@ -14,6 +14,14 @@ package scala.lms.tutorial
 import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
+/**
+Parser
+------
+
+We start with a parser for a SQL(-like) language.
+
+*/
+
 trait SQLParser extends QueryAST {
   import scala.util.parsing.combinator._
   object Grammar extends JavaTokenParsers with PackratParsers {
@@ -38,6 +46,12 @@ trait SQLParser extends QueryAST {
   def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
 }
 
+/**
+AST
+---
+
+The parser takes a string and convers it to an AST.
+*/
 trait QueryAST {
   def tableFor(s: Table) = s // remove
 
@@ -65,6 +79,15 @@ trait QueryAST {
   case class Value(x: Any) extends Ref
 }
 
+/**
+Iterative Development of a Query Processor
+------------------------------------------
+
+We develop our SQL engine in multiple steps. Each steps leads to a
+working processor, and each successive step either adds a feature or
+optimization. We define a common interface for each processor.
+
+*/
 trait QueryProcessor extends QueryAST {
   def version: String
   val defaultFieldDelimiter = ','
@@ -88,11 +111,30 @@ trait QueryProcessor extends QueryAST {
   def execQuery(q: Operator): Unit
 }
 
+/**
+### a (plain) Query Interpreter
+
+We start with a plain query processor: an interpreter.
+
+- [query_unstaged.scala](query_unstaged.html)
+
+*/
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
   def dynamicFilePath(table: String) = filePath(table)
 }
 
+/**
+
+### a Staged Query Interpreter (= Compiler)
+
+- [query_staged0](query_staged0.scala)
+
+- [query_staged](query_staged.scala)
+
+- [query_optc](query_optc.scala)
+
+*/
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
   type Table = Rep[String] // dynamic filename
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
@@ -100,6 +142,12 @@ trait StagedQueryProcessor extends QueryProcessor with Dsl {
   def dynamicFilePath(table: String) = if (table == "?") dynamicFileName else unit(filePath(table))
 }
 
+/**
+
+Unit Tests
+-----
+
+*/
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
