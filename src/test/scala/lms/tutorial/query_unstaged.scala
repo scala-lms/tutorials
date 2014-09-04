@@ -36,6 +36,7 @@ Low-Level Processing Logic
       nextRecord // ignore csv header
     }
     while (s.hasNext) yld(nextRecord)
+    s.close
   }
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))

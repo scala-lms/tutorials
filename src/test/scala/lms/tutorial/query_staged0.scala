@@ -92,5 +92,4 @@ Query Interpretation = Compilation
       execOp(parent) { rec => printFields(rec.fields) }
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
-}
-}
+}}

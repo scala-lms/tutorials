@@ -207,14 +207,14 @@ void Snippet(char*  x0) {
     int32_t x154 = x153 + x90;
     x12[x152] = x154;
   }
-  int32_t x158 = x5;
-  for(int x160=0; x160 < x158; x160++) {
-    char* x161 = x2[x160];
-    int32_t x162 = x3[x160];
-    int32_t x163 = x12[x160];
-    int32_t x164 = printll(x161);
+  int32_t x159 = x5;
+  for(int x161=0; x161 < x159; x161++) {
+    char* x162 = x2[x161];
+    int32_t x163 = x3[x161];
+    int32_t x164 = x12[x161];
+    int32_t x165 = printll(x162);
     printf(",");
-    printf("%d",x163);
+    printf("%d",x164);
     printf("%s\n","");
   }
 }

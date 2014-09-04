@@ -12,8 +12,7 @@ import scala.virtualization.lms.common._
 
 object query_optc {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
-  with ScannerLowerBase
-{
+with ScannerLowerBase {
   override def version = "query_optc"
 
 /**
@@ -100,6 +99,7 @@ Low-Level Processing Logic
       nextRecord // ignore csv header
     }
     while (s.hasNext) yld(nextRecord)
+    s.close
   }
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))
@@ -319,5 +319,4 @@ Data Structure Implementations
       case StringColBuffer(b,l) => RString(b(i),l(i))
     }
   }
-}
-}
+}}
