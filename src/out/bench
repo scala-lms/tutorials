@@ -17,13 +17,20 @@ ext="${fn##*.}"
 data="$2"
 
 if [ -z "$3" ]; then
-    hostname=`hostname`
+    if [ -z "$HOSTNAME" ]; then
+        hostname=`hostname`
+    else
+        hostname="$HOSTNAME"
+    fi
     benchlog="log/$hostname.txt"
 else
     benchlog="$3"
 fi
 
 echo "$@"
+echo "logging to $benchlog"
+echo >>$benchlog
+echo >>$benchlog
 echo "$@" >>$benchlog
 
 if [ "$ext" == "scala" ]; then
