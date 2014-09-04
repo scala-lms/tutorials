@@ -268,3 +268,30 @@ class QueryTest extends TutorialFunSuite {
   testquery("t1gram1", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t")
   testquery("t1gram2", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
 }
+
+object Run {
+  def time[A](a: => A) = {
+    val now = System.nanoTime
+    val result = a
+    val micros = (System.nanoTime - now) / 1000
+    println("%d microseconds".format(micros))
+    result
+  }
+  def main(args: Array[String]) {
+    val query = args(0)
+    lazy val fn = args(1)
+
+    trait Engine {
+      def eval: Unit
+    }
+    val engine =
+      new Engine with SQLParser with QueryProcessor with query_unstaged.QueryInterpreter {
+        override def dynamicFilePath(table: String): Table =
+          if (table == "?") fn else filePath(table)
+        override def eval: Unit =
+          execQuery(PrintCSV(parseSql(query)))
+      }
+
+    time(engine.eval)
+  }
+}
