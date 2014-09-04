@@ -4,10 +4,10 @@ import scala.virtualization.lms.common._
 import scala.reflect.SourceContext
 
 // TODO: clean up at least, maybe add to LMS?
-trait HashCodeOps extends Base {
+trait UtilOps extends Base {
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
 }
-trait HashCodeOpsExp extends HashCodeOps with BaseExp {
+trait UtilOpsExp extends UtilOps with BaseExp {
   case class ObjHashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
 
@@ -16,8 +16,8 @@ trait HashCodeOpsExp extends HashCodeOps with BaseExp {
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
 }
-trait ScalaGenHashCodeOps extends ScalaGenBase {
-  val IR: HashCodeOpsExp
+trait ScalaGenUtilOps extends ScalaGenBase {
+  val IR: UtilOpsExp
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -25,8 +25,8 @@ trait ScalaGenHashCodeOps extends ScalaGenBase {
     case _ => super.emitNode(sym, rhs)
   }
 }
-trait CGenHashCodeOps extends CGenBase {
-  val IR: HashCodeOpsExp
+trait CGenUtilOps extends CGenBase {
+  val IR: UtilOpsExp
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -35,7 +35,8 @@ trait CGenHashCodeOps extends CGenBase {
   }
 }
 
-trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with HashCodeOps {
+
+trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   def infix_&&&(lhs: Rep[Boolean], rhs: => Rep[Boolean]): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
@@ -43,10 +44,14 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with HashCodeOpsExp {
+trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
+  }
+  override def boolean_and(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
+    case Const(true) => rhs
+    case _ => super.boolean_and(lhs, rhs)
   }
 
   case class GenerateComment(l: String) extends Def[Unit]
@@ -80,7 +85,7 @@ trait DslGen extends ScalaGenNumericOps
     with ScalaGenSeqOps with ScalaGenFunctions with ScalaGenWhile
     with ScalaGenStaticData with ScalaGenVariables
     with ScalaGenObjectOps
-    with ScalaGenHashCodeOps {
+    with ScalaGenUtilOps {
   val IR: DslExp
 
   import IR._
@@ -125,7 +130,7 @@ trait DslGenC extends CGenNumericOps
     with CGenSeqOps with CGenFunctions with CGenWhile
     with CGenStaticData with CGenVariables
     with CGenObjectOps
-    with CGenHashCodeOps {
+    with CGenUtilOps {
   val IR: DslExp
   import IR._
 

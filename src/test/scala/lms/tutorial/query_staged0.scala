@@ -1,8 +1,6 @@
 /**
-A SQL Query Compiler
-====================
-
-Abstraction without regret for efficient data processing.
+Query Compiler I (Scala)
+========================
 
 Outline:
 <div id="tableofcontents"></div>
@@ -17,12 +15,14 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
   override def version = "query_staged0"
 
-  // low-level processing
-  type RField = Rep[String]
-  type Fields = Vector[RField]
+/**
+Low-Level Processing Logic
+--------------------------
+*/
+  type Fields = Vector[Rep[String]]
 
   case class Record(fields: Fields, schema: Schema) {
-    def apply(key: String): RField = fields(schema indexOf key)
+    def apply(key: String): Rep[String] = fields(schema indexOf key)
     def apply(keys: Schema): Fields = keys.map(this apply _)
   }
 
@@ -44,11 +44,17 @@ with ScannerBase {
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("\"", defaultFieldDelimiter.toString, "\\n\""), fields: _*)
 
+  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
+
+/**
+Query Interpretation = Compilation
+----------------------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }
 
-  def evalRef(r: Ref)(rec: Record): RField = r match {
+  def evalRef(r: Ref)(rec: Record): Rep[String] = r match {
     case Field(name) => rec(name)
     case Value(x) => x.toString
   }
@@ -57,6 +63,9 @@ with ScannerBase {
     case Scan(_, schema, _, _)   => schema
     case Filter(pred, parent)    => resultSchema(parent)
     case Project(schema, _, _)   => schema
+    case Join(left, right)       => resultSchema(left) ++ resultSchema(right)
+    case Group(keys, agg, parent)=> keys ++ agg
+    case HashJoin(left, right)   => resultSchema(left) ++ resultSchema(right)
     case PrintCSV(parent)        => Schema()
   }
 
@@ -67,11 +76,20 @@ with ScannerBase {
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(newSchema, parentSchema, parent) =>
       execOp(parent) { rec => yld(Record(rec(parentSchema), newSchema)) }
+    case Join(left, right) =>
+      execOp(left) { rec1 =>
+        execOp(right) { rec2 =>
+          val keys = rec1.schema intersect rec2.schema
+          if (fieldsEqual(rec1(keys), rec2(keys)))
+            yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
+        }
+      }
+    case Group(keys, agg, parent) => ???
+    case HashJoin(left, right) => ???
     case PrintCSV(parent) =>
       val schema = resultSchema(parent)
       printSchema(schema)
       execOp(parent) { rec => printFields(rec.fields) }
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
-}
-}
+}}

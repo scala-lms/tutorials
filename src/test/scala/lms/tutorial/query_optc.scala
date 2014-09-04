@@ -1,6 +1,6 @@
 /**
-Query Compiler III (C)
-======================
+Query Compiler III (C Code)
+===========================
 
 Outline:
 <div id="tableofcontents"></div>
@@ -12,12 +12,14 @@ import scala.virtualization.lms.common._
 
 object query_optc {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
-  with ScannerLowerBase
-{
+with ScannerLowerBase {
   override def version = "query_optc"
 
-  // lowering scanner
-  class RScanner(name: Rep[String]) {
+/**
+Input File Tokenizer
+--------------------
+*/
+  class Scanner(name: Rep[String]) {
     val fd = open(name)
     val fl = filelen(fd)
     val data = mmap[Char](fd,fl)
@@ -46,7 +48,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     def close = fclose(fd)
   }
 
-  // low-level processing
+/**
+Low-Level Processing Logic
+--------------------------
+*/
   abstract class RField {
     def print()
     def compare(o: RField): Rep[Boolean]
@@ -80,7 +85,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
   }
 
   def processCSV(filename: Rep[String], schema: Schema, fieldDelimiter: Char, externalSchema: Boolean)(yld: Record => Rep[Unit]): Rep[Unit] = {
-    val s = new RScanner(filename)
+    val s = new Scanner(filename)
     val last = schema.last
     def nextField(name: String) = {
       val d = if (name==last) '\n' else fieldDelimiter
@@ -94,6 +99,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
       nextRecord // ignore csv header
     }
     while (s.hasNext) yld(nextRecord)
+    s.close
   }
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))
@@ -110,6 +116,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.hash }
 
+/**
+Query Interpretation = Compilation
+----------------------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) compare evalRef(a2)(rec)
   }
@@ -171,7 +181,12 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
-  // data structure implementations
+/**
+Data Structure Implementations
+------------------------------
+*/
+
+  // defaults for hash sizes etc
 
   object hashDefaults {
     val hashSize   = (1 << 8)
@@ -188,36 +203,33 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     val keys = new ArrayBuffer(keysSize, keySchema)
     val keyCount = var_new(0)
 
-    val htable = NewArray[Int](hashSize)
-
-    for (i <- 0 until hashSize) {
-        htable(i) = -1
-    }
-
     val hashMask = hashSize - 1
+    val htable = NewArray[Int](hashSize)
+    for (i <- 0 until hashSize) { htable(i) = -1 }
 
-    def lookup(k: Fields): Rep[Int] = lookupInternal(k,None)
-    def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]): Rep[Int] = lookupInternal(k,Some(init))
-    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = comment[Int]("hash_lookup") {
-        val h = fieldsHash(k).toInt
-        var pos = h & hashMask
-        while (htable(pos) != -1 && !fieldsEqual(keys(htable(pos)),k)) {
-          pos = (pos + 1) & hashMask
-        }
-        if (init.isDefined) {
-          if (htable(pos) == -1) {
-            val keyPos = keyCount: Rep[Int] // force read
-            keys(keyPos) = k
-            keyCount += 1
-            htable(pos) = keyPos
-            init.get(keyPos)
-            keyPos
-          } else {
-            htable(pos)
-          }
+    def lookup(k: Fields) = lookupInternal(k,None)
+    def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))
+    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = 
+    comment[Int]("hash_lookup") {
+      val h = fieldsHash(k).toInt
+      var pos = h & hashMask
+      while (htable(pos) != -1 &&& !fieldsEqual(keys(htable(pos)),k)) {
+        pos = (pos + 1) & hashMask
+      }
+      if (init.isDefined) {
+        if (htable(pos) == -1) {
+          val keyPos = keyCount: Rep[Int] // force read
+          keys(keyPos) = k
+          keyCount += 1
+          htable(pos) = keyPos
+          init.get(keyPos)
+          keyPos
         } else {
           htable(pos)
         }
+      } else {
+        htable(pos)
+      }
     }
   }
 
@@ -307,5 +319,4 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
       case StringColBuffer(b,l) => RString(b(i),l(i))
     }
   }
-}
-}
+}}

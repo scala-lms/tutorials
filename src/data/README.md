@@ -15,6 +15,9 @@ Creating, Importing and Querying the Data in MySql
 
 * `create table 1gram_a (n_gram text, year int(11) default null, match_count int(11) default null, volume_count int(11) default null);`
 * `mysqlimport --local -u $USER -p $DB 1gram_a.csv`
+
+  (5 minutes 49 seconds on `lampsrv10`)
+
 * `select * from 1gram_a where n_gram = 'Auswanderung'`
 * `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
