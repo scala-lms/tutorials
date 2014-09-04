@@ -27,21 +27,38 @@ trait SQLParser extends QueryAST {
   object Grammar extends JavaTokenParsers with PackratParsers {
     def fieldIdent: Parser[String] = """[\w\#]+""".r
     def tableIdent: Parser[String] = """[\w_\-/\.]+""".r | "?"
-    def fieldList: Parser[Schema]  = repsep(fieldIdent,",") ^^ { fs => Schema(fs:_*) }
+    def fieldList:  Parser[(Schema,Schema)] = 
+      repsep(fieldIdent ~ opt("as" ~> fieldIdent), ",") ^^ { fs2s => 
+        val (fs,fs1) = fs2s.map { case a~b => (b.getOrElse(a),a) }.unzip
+        (Schema(fs:_*),Schema(fs1:_*))
+      }
+    def fieldList1:  Parser[Schema] = repsep(fieldIdent,",") ^^ (fs => Schema(fs:_*))
 
     def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
     def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |       
           """[0-9]+""".r ^^ (s => Value(s.toInt))
-    def fromClause: Parser[Operator] = 
-      "from" ~> tableIdent ~ opt("schema" ~> fieldList) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ { 
+    def tableClause: Parser[Operator] = 
+      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ { 
         case table ~ schema ~ delim => Scan(table, schema, delim)
-      }
+      } |
+      ("(" ~> stm <~ ")")
+    def fromClause: Parser[Operator] = 
+      "from" ~> joinClause
+    def joinClause: Parser[Operator] = 
+      ("nestedloops" ~> repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => Join(a,b)) }) |
+      (repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => HashJoin(a,b)) })
+
     def selectClause: Parser[Operator=>Operator] = 
-      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { fs => Project(fs,fs,_:Operator) })
+      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { case (fs,fs1) => Project(fs,fs1,_:Operator) })
     def whereClause: Parser[Operator=>Operator] = 
       opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
 
-    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ^^ { case p ~ s ~ f => p(f(s)) }
+    def groupClause: Parser[Operator=>Operator] = 
+      opt("group" ~> "by" ~> fieldList1 ~ ("sum" ~> fieldList1) ^^ { case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
+
+    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ { 
+      case p ~ s ~ f ~ g => g(p(f(s)))
+    }
   }
   def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
 }
@@ -195,7 +212,7 @@ class QueryTest extends TutorialFunSuite {
     }
 
     override def runtest: Unit = {
-      if (version == "query_staged0" && query.isEmpty) return ()
+      if (version == "query_staged0" && List("Group","HashJoin").exists(parsedQuery.toString contains _)) return ()
       test(version+" "+name) {
         assert(expectedAstForTest(name)==parsedQuery)
         check(name, code)
@@ -263,11 +280,11 @@ class QueryTest extends TutorialFunSuite {
   testquery("t1", "select * from t.csv")
   testquery("t2", "select Name from t.csv")
   testquery("t3", "select Name from t.csv where Flag='yes'")
-  testquery("t4")
-  testquery("t5")
-  testquery("t4h")
-  testquery("t5h")
-  testquery("t6")
+  testquery("t4", "select * from nestedloops t.csv join (select Name as Name1 from t.csv)")
+  testquery("t5", "select * from nestedloops t.csv join (select Name from t.csv)")
+  testquery("t4h","select * from t.csv join (select Name as Name1 from t.csv)")
+  testquery("t5h","select * from t.csv join (select Name from t.csv)")
+  testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...
 
   val defaultEvalTable = dataFilePath("t1gram.csv")
   testquery("t1gram1", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t")
