@@ -1,12 +1,18 @@
 query_t1gram2.check.c ../data/1gram_a.csv
 c
 
-real	0m2.499s
-user	0m2.004s
-sys	0m0.492s
+real	0m2.598s
+user	0m2.054s
+sys	0m0.531s
+query_t1gram2.hand.c ../data/1gram_a.csv
+c
+
+real	0m16.879s
+user	0m16.278s
+sys	0m0.579s
 query_t1gram2.check.scala ../data/1gram_a.csv
 scala
 
-real	0m39.630s
-user	0m39.547s
-sys	0m1.449s
+real	0m38.947s
+user	0m39.175s
+sys	0m1.374s
