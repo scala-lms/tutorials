@@ -26,7 +26,7 @@ trait SQLParser extends QueryAST {
   import scala.util.parsing.combinator._
   object Grammar extends JavaTokenParsers with PackratParsers {
     def fieldIdent: Parser[String] = """[\w\#]+""".r
-    def tableIdent: Parser[String] = """[\w_\-/\.]+""".r
+    def tableIdent: Parser[String] = """[\w_\-/\.]+""".r | "?"
     def fieldList: Parser[Schema]  = repsep(fieldIdent,",") ^^ { fs => Schema(fs:_*) }
 
     def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
@@ -121,7 +121,6 @@ We start with a plain query processor: an interpreter.
 */
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
-  def dynamicFilePath(table: String) = filePath(table)
 }
 
 /**
@@ -138,8 +137,6 @@ trait PlainQueryProcessor extends QueryProcessor {
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
   type Table = Rep[String] // dynamic filename
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
-  def dynamicFileName: Table
-  def dynamicFilePath(table: String) = if (table == "?") dynamicFileName else unit(filePath(table))
 }
 
 /**
@@ -153,9 +150,7 @@ class QueryTest extends TutorialFunSuite {
 
   trait TestDriver extends SQLParser with QueryProcessor with ExpectedASTs {
     def runtest: Unit
-    override def filePath(table: String) = {
-      "src/data/" + table
-    }
+    override def filePath(table: String) = dataFilePath(table)
 
     def name: String
     def query: String
@@ -163,11 +158,15 @@ class QueryTest extends TutorialFunSuite {
   }
 
   trait PlainTestDriver extends TestDriver with PlainQueryProcessor {
-    def eval(fn: Table): Unit = execQuery(PrintCSV(parsedQuery))
+    override def dynamicFilePath(table: String): Table = if (table == "?") defaultEvalTable else filePath(table)
+    def eval(fn: Table): Unit = {
+      execQuery(PrintCSV(parsedQuery))
+    }
   }
 
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
     var dynamicFileName: Table = _
+    override def dynamicFilePath(table: String): Table = if (table == "?") dynamicFileName else unit(filePath(table))
     def snippet(fn: Table): Rep[Unit] = {
       dynamicFileName = fn
       execQuery(PrintCSV(parsedQuery))
@@ -195,7 +194,7 @@ class QueryTest extends TutorialFunSuite {
         if (!parsedQuery.toString.contains("Group(")) {
           check(name, code)
           precompile
-          checkOut(name, "csv", eval("DUMMY"))
+          checkOut(name, "csv", eval(defaultEvalTable))
         }
       }
     }
@@ -210,7 +209,7 @@ class QueryTest extends TutorialFunSuite {
         assert(expectedAstForTest(name)==parsedQuery)
         check(name, code, "c")
         //precompile
-        checkOut(name, "csv", eval("DUMMY"))
+        checkOut(name, "csv", eval(defaultEvalTable))
       }
     }
   }
@@ -233,7 +232,7 @@ class QueryTest extends TutorialFunSuite {
 
   trait ExpectedASTs extends QueryAST {
     val scan_t = Scan("t.csv")
-    val scan_t1gram = Scan("t1gram.csv",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
+    val scan_t1gram = Scan("?",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
 
     val expectedAstForTest = Map(
       "t1" -> scan_t,
@@ -265,6 +264,7 @@ class QueryTest extends TutorialFunSuite {
   testquery("t5h")
   testquery("t6")
 
-  testquery("t1gram1", "select * from t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t")
-  testquery("t1gram2", "select * from t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
+  val defaultEvalTable = dataFilePath("t1gram.csv")
+  testquery("t1gram1", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t")
+  testquery("t1gram2", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
 }
