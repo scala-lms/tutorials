@@ -184,7 +184,7 @@ class QueryTest extends TutorialFunSuite {
     override def runtest: Unit = {
       test(version+" "+name) {
         assert(expectedAstForTest(name)==parsedQuery)
-        checkOut(name, "csv", eval("DUMMY"))
+        checkOut(name, "csv", eval(defaultEvalTable))
       }
     }
   }
@@ -193,6 +193,7 @@ class QueryTest extends TutorialFunSuite {
     override val codegen = new DslGen with ScalaGenScanner {
       val IR: q.type = q
     }
+
     override def runtest: Unit = {
       if (version == "query_staged0" && query.isEmpty) return ()
       test(version+" "+name) {
@@ -285,17 +286,41 @@ object Run {
     val query = args(0)
     lazy val fn = args(1)
 
-    trait Engine {
+    trait Engine extends QueryProcessor with SQLParser {
+      def liftTable(n: String): Table
       def eval: Unit
+      def prepare: Unit = {}
+      def run: Unit = execQuery(PrintCSV(parseSql(query)))
+      override def dynamicFilePath(table: String): Table =
+        liftTable(if (table == "?") fn else filePath(table))
     }
     val engine =
-      new Engine with SQLParser with QueryProcessor with query_unstaged.QueryInterpreter {
-        override def dynamicFilePath(table: String): Table =
-          if (table == "?") fn else filePath(table)
-        override def eval: Unit =
-          execQuery(PrintCSV(parseSql(query)))
+      new Engine with query_unstaged.QueryInterpreter {
+        override def liftTable(n: Table) = n
+        override def eval = run
       }
 
-    time(engine.eval)
+    // weird class error here
+    // in class file scala/lms/tutorial/Run$$anon$4
+    // java.lang.ClassFormatError: Duplicate field name&signature in class file scala/lms/tutorial/Run$$anon$4
+    // val staged_engine =
+    //   new DslDriver[String,Unit] with StagedQueryProcessor with ScannerExp
+    //   with Engine with query_staged.QueryCompiler { q =>
+    //     override val codegen = new DslGen with ScalaGenScanner {
+    //       val IR: q.type = q
+    //     }
+    //     override def liftTable(n: String) = unit(n)
+    //     override def snippet(fn: Table): Rep[Unit] = run
+    //     override def prepare: Unit = precompile
+    //     override def eval: Unit = eval(fn)
+    //   }
+
+    val engines = List(engine)
+    for (eg <- engines) {
+      println("begin version "+eg.version)
+      eg.prepare
+      time(eg.eval)
+      println("end version "+eg.version)
+    }
   }
 }
