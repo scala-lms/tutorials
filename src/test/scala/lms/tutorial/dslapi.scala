@@ -144,11 +144,11 @@ trait DslGenC extends CGenNumericOps
       case "bool" | "int8_t" | "int16_t" | "int32_t" => "%d"
       case "int64_t" => "%ld"
       case "float" | "double" => "%f"
-      case "string" => "%s" 
+      case "string" => "%s"
       case "char*" => "%s"
       case "char" => "%c"
       case "void" => "%c"
-      case _ => 
+      case _ =>
         import scala.virtualization.lms.internal.GenerationFailedException
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
@@ -168,7 +168,7 @@ trait DslGenC extends CGenNumericOps
       case _ => super.isPrimitiveType(tpe)
     }
   }
-  
+
   override def quote(x: Exp[Any]) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"")+"\"" // TODO: more escapes?
     case Const('\n') if x.tp == manifest[Char] => "'\\n'"
@@ -211,7 +211,7 @@ trait DslGenC extends CGenNumericOps
       #endif
       int fsize(int fd) {
         struct stat stat;
-        int res = fstat(fd,&stat); 
+        int res = fstat(fd,&stat);
         return stat.st_size;
       }
       int printll(char* s) {

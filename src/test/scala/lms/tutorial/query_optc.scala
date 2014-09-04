@@ -286,7 +286,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
   case class StringColBuffer(data: Rep[Array[String]], len: Rep[Array[Int]]) extends ColBuffer
 
   class ArrayBuffer(dataSize: Int, schema: Schema) {
-    val buf = schema.map { 
+    val buf = schema.map {
       case hd if isNumericCol(hd) => IntColBuffer(NewArray[Int](dataSize))
       case _ => StringColBuffer(NewArray[String](dataSize), NewArray[Int](dataSize))
     }
@@ -295,8 +295,8 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
       this(len) = x
       len += 1
     }
-    def update(i: Rep[Int], x: Fields) = (buf,x).zipped.foreach { 
-      case (IntColBuffer(b), RInt(x)) => b(i) = x 
+    def update(i: Rep[Int], x: Fields) = (buf,x).zipped.foreach {
+      case (IntColBuffer(b), RInt(x)) => b(i) = x
       case (StringColBuffer(b,l), RString(x,y)) => b(i) = x; l(i) = y
     }
     def apply(i: Rep[Int]) = buf.map {
