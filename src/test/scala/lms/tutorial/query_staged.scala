@@ -50,8 +50,8 @@ Low-Level Processing Logic
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
 /**
-Query Interpretation
---------------------
+Query Interpretation = Compilation
+----------------------------------
 */
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)

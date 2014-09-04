@@ -46,8 +46,8 @@ Low-Level Processing Logic
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("\"", defaultFieldDelimiter.toString, "\\n\""), fields: _*)
 
 /**
-Query Interpretation
---------------------
+Query Interpretation = Compilation
+----------------------------------
 */
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)

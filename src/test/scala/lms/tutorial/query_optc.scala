@@ -20,7 +20,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 Input File Tokenizer
 --------------------
 */
-  class RScanner(name: Rep[String]) {
+  class Scanner(name: Rep[String]) {
     val fd = open(name)
     val fl = filelen(fd)
     val data = mmap[Char](fd,fl)
@@ -86,7 +86,7 @@ Low-Level Processing Logic
   }
 
   def processCSV(filename: Rep[String], schema: Schema, fieldDelimiter: Char, externalSchema: Boolean)(yld: Record => Rep[Unit]): Rep[Unit] = {
-    val s = new RScanner(filename)
+    val s = new Scanner(filename)
     val last = schema.last
     def nextField(name: String) = {
       val d = if (name==last) '\n' else fieldDelimiter
