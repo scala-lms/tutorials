@@ -47,8 +47,8 @@ trait SQLParser extends QueryAST {
 }
 
 /**
-AST
----
+Relational Algebra AST
+----------------------
 
 The parser takes a string and convers it to an AST.
 */
@@ -112,7 +112,7 @@ trait QueryProcessor extends QueryAST {
 }
 
 /**
-### a (plain) Query Interpreter
+### A (plain) Query Interpreter
 
 We start with a plain query processor: an interpreter.
 
@@ -125,7 +125,7 @@ trait PlainQueryProcessor extends QueryProcessor {
 
 /**
 
-### a Staged Query Interpreter (= Compiler)
+### A Staged Query Interpreter (= Compiler)
 
 - [query_staged0](query_staged0.scala)
 
@@ -142,7 +142,7 @@ trait StagedQueryProcessor extends QueryProcessor with Dsl {
 /**
 
 Unit Tests
------
+----------
 
 */
 class QueryTest extends TutorialFunSuite {
