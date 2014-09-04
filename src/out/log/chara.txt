@@ -1,0 +1,40 @@
+
+
+query_t1gram2.check.c ../data/1gram_a.csv
+c
+
+real	0m2.393s
+user	0m1.963s
+sys	0m0.423s
+
+
+query_t1gram2.hand.c ../data/1gram_a.csv
+c
+
+real	0m16.790s
+user	0m16.088s
+sys	0m0.687s
+
+
+query_t1gram2.check.scala ../data/1gram_a.csv
+scala
+
+real	0m30.349s
+user	0m29.574s
+sys	0m1.969s
+
+
+query_t1gram2.hand0.scala ../data/1gram_a.csv
+scala
+
+real	0m31.350s
+user	0m30.863s
+sys	0m2.026s
+
+
+query_t1gram2.hand.scala ../data/1gram_a.csv
+scala
+
+real	0m18.920s
+user	0m18.127s
+sys	0m1.850s
