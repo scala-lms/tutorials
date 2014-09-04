@@ -165,23 +165,22 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
   // data structure implementations
 
+  object hashDefaults {
+    val hashSize   = (1 << 8)
+    val keysSize   = hashSize
+    val bucketSize = (1 << 8)
+    val dataSize   = keysSize * bucketSize
+  }
+
   // common base class to factor out commonalities of group and join hash tables
 
   class HashMapBase(keySchema: Schema, schema: Schema) {
+    import hashDefaults._
+    
+    val keys = new ArrayBuffer(keysSize, keySchema)
+    val keyCount = var_new(0)
 
-  }
-
-  class HashMapAgg(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
-
-    val hashSize = (1 << 8)
-    val dataSize = hashSize
-
-    val keys = new ArrayBuffer(dataSize, keySchema)
-    val dataCount = var_new(0)
-
-    val values = new ArrayBuffer(dataSize, schema) // assuming all summation fields are numeric
-
-    val htable = NewArray[Int](dataSize)
+    val htable = NewArray[Int](hashSize)
 
     for (i <- 0 until hashSize) {
         htable(i) = -1
@@ -189,70 +188,65 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
     val hashMask = hashSize - 1
 
-    def lookup(put: Boolean)(k: Fields): Rep[Int] = comment[Int]("hash_lookup") {
+    def lookup(k: Fields): Rep[Int] = lookupInternal(k,None)
+    def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]): Rep[Int] = lookupInternal(k,Some(init))
+    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = comment[Int]("hash_lookup") {
         val h = fieldsHash(k).toInt
         var pos = h & hashMask
         while (htable(pos) != -1 && !fieldsEqual(keys(htable(pos)),k)) {
           pos = (pos + 1) & hashMask
         }
-        if (put && htable(pos) == -1) {
-          val keyPos = dataCount: Rep[Int] // force read
-          keys(keyPos) = k
-          values(keyPos) = schema.map(_ => RInt(0))
-          dataCount += 1
-          htable(pos) = keyPos
-          keyPos
+        if (init.isDefined) {
+          if (htable(pos) == -1) {
+            val keyPos = keyCount: Rep[Int] // force read
+            keys(keyPos) = k
+            keyCount += 1
+            htable(pos) = keyPos
+            init.get(keyPos)
+            keyPos
+          } else {
+            htable(pos)
+          }
         } else {
           htable(pos)
         }
     }
+  }
+
+  // hash table for groupBy, storing sums
+
+  class HashMapAgg(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
+    import hashDefaults._
+
+    val values = new ArrayBuffer(keysSize, schema) // assuming all summation fields are numeric
 
     def apply(k: Fields) = new {
       def +=(v: Fields) = {
-        val dataPos = lookup(put = true)(k)
-        values(dataPos) = (values(dataPos) zip v) map { case (RInt(x), RInt(y)) => RInt(x + y) }
+        val keyPos = lookupOrUpdate(k) { keyPos => 
+          values(keyPos) = schema.map(_ => RInt(0))
+        }
+        values(keyPos) = (values(keyPos) zip v) map { case (RInt(x), RInt(y)) => RInt(x + y) }
       }
     }
 
     def foreach(f: (Fields,Fields) => Rep[Unit]): Rep[Unit] = {
-      for (i <- 0 until dataCount) {
+      for (i <- 0 until keyCount) {
         f(keys(i),values(i))
       }
     }
 
   }
 
+  // hash table for joins, storing lists of records
+
   class HashMapBuffer(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
-
-    // FIXME: hard coded data sizes
-    val hashSize = (1 << 8)
-    val bucketSize = (1 << 8)
-    val dataSize = hashSize * bucketSize
-
-    // TODO: implement resizing and/or initial size heuristic based on file size
+    import hashDefaults._
 
     val data = new ArrayBuffer(dataSize, schema)
     val dataCount = var_new(0)
 
     val buckets = NewArray[Int](dataSize)
-    val bucketKey = new ArrayBuffer(hashSize, keySchema)
-    val bucketCounts = NewArray[Int](hashSize)
-
-    for (i <- 0 until hashSize) {
-        bucketCounts(i) = 0
-    }
-
-    val hashMask = hashSize - 1
-
-    def lookup(put: Boolean)(k: Fields): Rep[Int] = comment[Int]("hash_lookup") {
-        val h = fieldsHash(k).toInt
-        var bucket = h & hashMask
-        while (bucketCounts(bucket) != 0 && !fieldsEqual(bucketKey(bucket),k)) {
-          bucket = (bucket + 1) & hashMask
-        }
-        if (put) bucketKey(bucket) = k
-        bucket: Rep[Int]
-    }
+    val bucketCounts = NewArray[Int](keysSize)
 
     def apply(k: Fields) = new {
       def +=(v: Fields) = {
@@ -260,14 +254,14 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
         data(dataPos) = v
         dataCount += 1
 
-        val bucket = lookup(put = true)(k)
+        val bucket = lookupOrUpdate(k)(bucket => bucketCounts(bucket) = 0)
         val bucketPos = bucketCounts(bucket)
         buckets(bucket * bucketSize + bucketPos) = dataPos
         bucketCounts(bucket) = bucketPos + 1
       }
 
       def foreach(f: Record => Rep[Unit]): Rep[Unit] = {
-        val bucket = lookup(put = false)(k)
+        val bucket = lookup(k)
 
         val bucketLen = bucketCounts(bucket)
         val bucketStart = bucket * bucketSize
@@ -279,6 +273,8 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     }
   }
 
+  // column-oriented array buffer, with a row-oriented interface,
+  // specialized to data representation
 
   abstract class ColBuffer
   case class IntColBuffer(data: Rep[Array[Int]]) extends ColBuffer
