@@ -33,3 +33,9 @@ From the `../out` directory, pick a `$QUERY` and some `$DATA`:
 * `cat ../test/scala/lms/tutorial/scannerlib.scala $QUERY query.scala >run.scala`
 * `scalac run.scala`
 * `scala scala.lms.tutorial.query $DATA`
+
+Run the Benchmarks
+------------------
+
+First run `./download` from this `data` directory. Then run `./benchall` from the `../out` directory. The result will be in `../out/log/<hostname>.txt`.
+
