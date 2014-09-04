@@ -10,3 +10,21 @@ scala
 real	1m8.088s
 user	2m11.146s
 sys	0m5.323s
+query_t1gram2.check.c ../data/1gram_a.csv
+c
+
+real	0m2.102s
+user	0m1.907s
+sys	0m0.192s
+query_t1gram2.hand.c ../data/1gram_a.csv
+c
+
+real	0m15.126s
+user	0m14.538s
+sys	0m0.593s
+query_t1gram2.check.scala ../data/1gram_a.csv
+scala
+
+real	1m9.873s
+user	2m14.431s
+sys	0m5.395s
