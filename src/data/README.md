@@ -22,6 +22,7 @@ Creating, Importing and Querying the Data in MySql
 * `select * from 1gram_a where n_gram = 'Auswanderung'`
 
   (56.88 seconds on `lampsrv10`)
+  (47.87 seconds on `namin_mbp_laptop`)
 
 * `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
