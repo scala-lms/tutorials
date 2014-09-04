@@ -51,11 +51,11 @@ void Snippet(char*  x0) {
   int32_t x4 = 0;
   int32_t x5 = 0;
   int32_t* x6 = (int32_t*)malloc(256 * sizeof(int32_t));
-  int32_t x7 = 0;
-  int32_t* x8 = (int32_t*)malloc(256 * sizeof(int32_t));
-  for(int x10=0; x10 < 256; x10++) {
-    x8[x10] = -1;
+  for(int x8=0; x8 < 256; x8++) {
+    x6[x8] = -1;
   }
+  int32_t* x12 = (int32_t*)malloc(256 * sizeof(int32_t));
+  int32_t x13 = 0;
   int32_t x17 = 0;
   int32_t x14 = open("src/data/t.csv",0);
   int32_t x15 = fsize(x14);
@@ -149,7 +149,7 @@ void Snippet(char*  x0) {
     int32_t x106 = x105;
     for (;;) {
       int32_t x107 = x106;
-      int32_t x108 = x8[x107];
+      int32_t x108 = x6[x107];
       char* x110 = x2[x108];
       int32_t x111 = x3[x108];
       bool x109 = x108 != -1;
@@ -182,35 +182,34 @@ void Snippet(char*  x0) {
       x106 = x134;
     }
     int32_t x138 = x106;
-    int32_t x139 = x8[x138];
+    int32_t x139 = x6[x138];
     bool x140 = x139 == -1;
-    bool x141 = true && x140;
-    int32_t x149;
-    if (x141) {
-      int32_t x142 = x5;
-      x2[x142] = x72;
-      x3[x142] = x70;
-      x6[x142] = 0;
+    int32_t x148;
+    if (x140) {
+      int32_t x141 = x5;
+      x2[x141] = x72;
+      x3[x141] = x70;
       x5 += 1;
-      x8[x138] = x142;
-      x149 = x142;
+      x6[x138] = x141;
+      x12[x141] = 0;
+      x148 = x141;
     } else {
-      x149 = x139;
+      x148 = x139;
     }
-    int32_t x151 = x149;
+    int32_t x150 = x148;
     //#hash_lookup
-    int32_t x152 = x6[x151];
-    int32_t x153 = x152 + x90;
-    x6[x151] = x153;
+    int32_t x151 = x12[x150];
+    int32_t x152 = x151 + x90;
+    x12[x150] = x152;
   }
-  int32_t x157 = x5;
-  for(int x159=0; x159 < x157; x159++) {
-    char* x160 = x2[x159];
-    int32_t x161 = x3[x159];
-    int32_t x162 = x6[x159];
-    int32_t x163 = printll(x160);
+  int32_t x156 = x5;
+  for(int x158=0; x158 < x156; x158++) {
+    char* x159 = x2[x158];
+    int32_t x160 = x3[x158];
+    int32_t x161 = x12[x158];
+    int32_t x162 = printll(x159);
     printf(",");
-    printf("%d",x162);
+    printf("%d",x161);
     printf("%s\n","");
   }
 }
