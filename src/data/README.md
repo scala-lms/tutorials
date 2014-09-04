@@ -19,6 +19,9 @@ Creating, Importing and Querying the Data in MySql
   (5 minutes 49 seconds on `lampsrv10`)
 
 * `select * from 1gram_a where n_gram = 'Auswanderung'`
+
+  (56.88 seconds on `lampsrv10`)
+
 * `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
 Running Compiled Queries
@@ -30,3 +33,9 @@ From the `../out` directory, pick a `$QUERY` and some `$DATA`:
 * `cat ../test/scala/lms/tutorial/scannerlib.scala $QUERY query.scala >run.scala`
 * `scalac run.scala`
 * `scala scala.lms.tutorial.query $DATA`
+
+Run the Benchmarks
+------------------
+
+First run `./download` from this `data` directory. Then run `./benchall` from the `../out` directory. The result will be in `../out/log/<hostname>.txt`.
+
