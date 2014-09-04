@@ -19,6 +19,9 @@ Creating, Importing and Querying the Data in MySql
   (5 minutes 49 seconds on `lampsrv10`)
 
 * `select * from 1gram_a where n_gram = 'Auswanderung'`
+
+  (56.88 seconds on `lampsrv10`)
+
 * `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
 Running Compiled Queries
