@@ -15,7 +15,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
   override def version = "query_staged"
 
-  // low-level processing
+/*
+Low-Level Processing Logic
+--------------------------
+*/
   type RField = Rep[String]
   type Fields = Vector[RField]
 
@@ -46,6 +49,10 @@ with ScannerBase {
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
+/*
+Query Interpretation
+--------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }
@@ -106,8 +113,10 @@ with ScannerBase {
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
-  // data structure implementations
-
+/*
+Data Structure Implementations
+------------------------------
+*/
   class HashMapAgg(keySchema: Schema, schema: Schema) {
 
     // TODO: finish

@@ -1,8 +1,6 @@
 /**
-A SQL Query Compiler
-====================
-
-Abstraction without regret for efficient data processing.
+Query Compiler I (Scala)
+========================
 
 Outline:
 <div id="tableofcontents"></div>
@@ -17,7 +15,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
   override def version = "query_staged0"
 
-  // low-level processing
+/*
+Low-Level Processing Logic
+--------------------------
+*/
   type RField = Rep[String]
   type Fields = Vector[RField]
 
@@ -44,6 +45,10 @@ with ScannerBase {
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("\"", defaultFieldDelimiter.toString, "\\n\""), fields: _*)
 
+/*
+Query Interpretation
+--------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }

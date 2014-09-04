@@ -14,7 +14,10 @@ object query_unstaged {
 trait QueryInterpreter extends PlainQueryProcessor {
   override def version = "query_unstaged"
 
-  // low-level processing
+/*
+Low-Level Processing Logic
+--------------------------
+*/
   type Fields = Vector[String]
 
   case class Record(fields: Fields, schema: Schema) {
@@ -43,7 +46,10 @@ trait QueryInterpreter extends PlainQueryProcessor {
 
   def fieldsHash(a: Fields) = a.foldLeft(0L) { _ * 41L + _.hashCode }
 
-
+/*
+Query Interpretation
+--------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Boolean = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) == evalRef(a2)(rec)
   }

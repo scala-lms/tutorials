@@ -16,7 +16,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 {
   override def version = "query_optc"
 
-  // lowering scanner
+/*
+Input File Tokenizer
+--------------------
+*/
   class RScanner(name: Rep[String]) {
     val fd = open(name)
     val fl = filelen(fd)
@@ -46,7 +49,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
     def close = fclose(fd)
   }
 
-  // low-level processing
+/*
+Low-Level Processing Logic
+--------------------------
+*/
   abstract class RField {
     def print()
     def compare(o: RField): Rep[Boolean]
@@ -110,6 +116,10 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.hash }
 
+/*
+Query Interpretation
+--------------------
+*/
   def evalPred(p: Predicate)(rec: Record): Rep[Boolean] = p match {
     case Eq(a1, a2) => evalRef(a1)(rec) compare evalRef(a2)(rec)
   }
@@ -171,7 +181,12 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
   }
   def execQuery(q: Operator): Unit = execOp(q) { _ => }
 
-  // data structure implementations
+/*
+Data Structure Implementations
+------------------------------
+*/
+
+  // defaults for hash sizes etc
 
   object hashDefaults {
     val hashSize   = (1 << 8)
