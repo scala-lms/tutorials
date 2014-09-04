@@ -181,30 +181,29 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor
 
     val values = new ArrayBuffer(dataSize, schema) // assuming all summation fields are numeric
 
-    val buckets = NewArray[Int](dataSize)
-    val bucketCounts = NewArray[Int](hashSize)
+    val htable = NewArray[Int](dataSize)
 
     for (i <- 0 until hashSize) {
-        bucketCounts(i) = -1
+        htable(i) = -1
     }
 
     val hashMask = hashSize - 1
 
     def lookup(put: Boolean)(k: Fields): Rep[Int] = comment[Int]("hash_lookup") {
         val h = fieldsHash(k).toInt
-        var bucket = h & hashMask
-        while (bucketCounts(bucket) != -1 && !fieldsEqual(keys(bucketCounts(bucket)),k)) {
-          bucket = (bucket + 1) & hashMask
+        var pos = h & hashMask
+        while (htable(pos) != -1 && !fieldsEqual(keys(htable(pos)),k)) {
+          pos = (pos + 1) & hashMask
         }
-        if (put && bucketCounts(bucket) == -1) {
-          val pos = dataCount: Rep[Int] // force read
-          bucketCounts(bucket) = pos
-          keys(pos) = k
-          values(pos) = schema.map(_ => RInt(0))
+        if (put && htable(pos) == -1) {
+          val keyPos = dataCount: Rep[Int] // force read
+          keys(keyPos) = k
+          values(keyPos) = schema.map(_ => RInt(0))
           dataCount += 1
-          pos
+          htable(pos) = keyPos
+          keyPos
         } else {
-          bucketCounts(bucket)
+          htable(pos)
         }
     }
 
