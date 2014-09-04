@@ -17,6 +17,7 @@ Creating, Importing and Querying the Data in MySql
 * `mysqlimport --local -u $USER -p $DB 1gram_a.csv`
 
   (5 minutes 49 seconds on `lampsrv10`)
+  (4 minutes 50 seconds on `namin_mbp_laptop`)
 
 * `select * from 1gram_a where n_gram = 'Auswanderung'`
 
