@@ -200,7 +200,9 @@ class QueryTest extends TutorialFunSuite {
   abstract class ScalaPlainQueryDriver(val name: String, val query: String) extends PlainTestDriver with QueryProcessor { q =>
     override def runtest: Unit = {
       test(version+" "+name) {
-        assert(expectedAstForTest(name)==parsedQuery)
+        for (expectedParsedQuery <- expectedAstForTest.get(name)) {
+          assert(expectedParsedQuery==parsedQuery)
+        }
         checkOut(name, "csv", eval(defaultEvalTable))
       }
     }
@@ -214,7 +216,9 @@ class QueryTest extends TutorialFunSuite {
     override def runtest: Unit = {
       if (version == "query_staged0" && List("Group","HashJoin").exists(parsedQuery.toString contains _)) return ()
       test(version+" "+name) {
-        assert(expectedAstForTest(name)==parsedQuery)
+        for (expectedParsedQuery <- expectedAstForTest.get(name)) {
+          assert(expectedParsedQuery==parsedQuery)
+        }
         check(name, code)
         precompile
         checkOut(name, "csv", eval(defaultEvalTable))
@@ -228,7 +232,9 @@ class QueryTest extends TutorialFunSuite {
     }
     override def runtest: Unit = {
       test(version+" "+name) {
-        assert(expectedAstForTest(name)==parsedQuery)
+        for (expectedParsedQuery <- expectedAstForTest.get(name)) {
+          assert(expectedParsedQuery==parsedQuery)
+        }
         check(name, code, "c")
         //precompile
         checkOut(name, "csv", eval(defaultEvalTable))
@@ -287,8 +293,11 @@ class QueryTest extends TutorialFunSuite {
   testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...
 
   val defaultEvalTable = dataFilePath("t1gram.csv")
-  testquery("t1gram1", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t")
-  testquery("t1gram2", "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'")
+  val t1gram = "? schema Phrase, Year, MatchCount, VolumeCount delim \\t"
+  testquery("t1gram1", s"select * from $t1gram")
+  testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
+  testquery("t1gram3", s"select * from nestedloops $t1gram join (select VolumeCount as VolumeCount1 from words.csv)")
+  testquery("t1gram4", s"select * from $t1gram join (select VolumeCount as VolumeCount1 from words.csv)")
 }
 
 object Run {
