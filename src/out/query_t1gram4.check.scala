@@ -3,7 +3,7 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Unit)) {
   def apply(x0:java.lang.String): Unit = {
-    val x1 = println("Phrase,Year,MatchCount,VolumeCount,Word,Value")
+    val x1 = println("Phrase,Year,MatchCount,VolumeCount,Phrase")
     val x2 = new scala.lms.tutorial.Scanner(x0)
     val x24 = while ({val x3 = x2.hasNext
       x3}) {
@@ -18,9 +18,9 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
         x12}) {
         val x14 = x9.next(',')
         val x15 = x9.next('\n')
-        val x16 = x14 == x5
+        val x16 = x5 == x14
         val x19 = if (x16) {
-          val x17 = printf("%s,%s,%s,%s,%s,%s\n",x5,x6,x7,x8,x14,x15)
+          val x17 = printf("%s,%s,%s,%s,%s\n",x5,x6,x7,x8,x14)
           x17
         } else {
           ()

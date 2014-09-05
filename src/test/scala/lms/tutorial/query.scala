@@ -298,8 +298,8 @@ class QueryTest extends TutorialFunSuite {
   testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
   testquery("t1gram3", s"select * from nestedloops $t1gram join (select * from words.csv)")
   testquery("t1gram3h", s"select * from $t1gram join (select * from words.csv)")
-  testquery("t1gram4", s"select * from nestedloops $t1gram join (select * from words.csv) where Word=Phrase")
-  testquery("t1gram4h", s"select * from $t1gram join (select * from words.csv) where Word=Phrase")
+  testquery("t1gram4", s"select * from nestedloops $t1gram join (select Word as Phrase from words.csv)")
+  testquery("t1gram4h", s"select * from $t1gram join (select Word as Phrase from words.csv)")
 }
 
 object Run {

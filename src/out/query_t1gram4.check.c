@@ -45,7 +45,7 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,Word,Value");
+  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,Phrase");
   int32_t x5 = 0;
   int32_t x2 = open(x0,0);
   int32_t x3 = fsize(x2);
@@ -163,23 +163,23 @@ void Snippet(char*  x0) {
       x60 += 1;
       int32_t x121 = x105;
       int32_t x101 = x100 - x92;
-      bool x123 = x101 == x18;
+      bool x123 = x18 == x101;
       bool x138;
       if (x123) {
         int32_t x124 = 0;
         char* x103 = x59+x92;
         for (;;) {
           int32_t x125 = x124;
-          bool x126 = x125 < x101;
-          char x127 = x103[x125];
-          char x128 = x20[x125];
+          bool x126 = x125 < x18;
+          char x127 = x20[x125];
+          char x128 = x103[x125];
           bool x129 = x127 == x128;
           bool x130 = x126 && x129;
           if (!x130) break;
           x124 += 1;
         }
         int32_t x135 = x124;
-        bool x136 = x135 == x101;
+        bool x136 = x135 == x18;
         x138 = x136;
       } else {
         x138 = false;
@@ -195,8 +195,6 @@ void Snippet(char*  x0) {
         printf(",");
         char* x103 = x59+x92;
         int32_t x147 = printll(x103);
-        printf(",");
-        printf("%d",x121);
         printf("%s\n","");
       } else {
       }
