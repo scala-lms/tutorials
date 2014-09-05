@@ -19,7 +19,7 @@ Relational Algebra AST
 ----------------------
 
 The core of any query processing engine is an AST representation of
-relational algebra operations.
+relational algebra operators.
 */
 trait QueryAST {
   def tableFor(s: Table) = s // remove
