@@ -43,9 +43,11 @@ fi
 if [ "$ext" == "c" ]; then
     echo "c" >>$benchlog
     cc -std=c99 -O3 $fn
+    # yuck
     cd ../..
-    cmd="./src/out/a.out $data"
+    cmd="./src/out/a.out src/data/$data"
     { time ($cmd) } 2>>src/out/$benchlog
+    cd src/out
 fi
 
 if [ -z "$cmd" ]; then
