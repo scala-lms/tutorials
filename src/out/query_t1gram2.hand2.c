@@ -9,6 +9,10 @@
 #include <err.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <stdint.h>
+#ifndef MAP_FILE
+#define MAP_FILE MAP_SHARED
+#endif
 
 #define MAX_LINE_LENGTH 1024*257
 
