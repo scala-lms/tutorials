@@ -296,8 +296,10 @@ class QueryTest extends TutorialFunSuite {
   val t1gram = "? schema Phrase, Year, MatchCount, VolumeCount delim \\t"
   testquery("t1gram1", s"select * from $t1gram")
   testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
-  testquery("t1gram3", s"select * from nestedloops $t1gram join (select VolumeCount as VolumeCount1 from words.csv)")
-  testquery("t1gram4", s"select * from $t1gram join (select VolumeCount as VolumeCount1 from words.csv)")
+  testquery("t1gram3", s"select * from nestedloops $t1gram join (select * from words.csv)")
+  testquery("t1gram3h", s"select * from $t1gram join (select * from words.csv)")
+  testquery("t1gram4", s"select * from nestedloops $t1gram join (select * from words.csv) where Word=Phrase")
+  testquery("t1gram4h", s"select * from $t1gram join (select * from words.csv) where Word=Phrase")
 }
 
 object Run {

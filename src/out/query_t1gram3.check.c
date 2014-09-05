@@ -45,7 +45,7 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,VolumeCount1");
+  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,Word,Value");
   int32_t x5 = 0;
   int32_t x2 = open(x0,0);
   int32_t x3 = fsize(x2);
@@ -108,53 +108,71 @@ void Snippet(char*  x0) {
     int32_t x68 = x60;
     x60 += 1;
     int32_t x71 = x60;
+    int32_t x72 = 0;
     for (;;) {
-      int32_t x72 = x60;
-      char x73 = x59[x72];
-      bool x74 = x73 != '\n';
-      if (!x74) break;
+      int32_t x73 = x60;
+      char x74 = x59[x73];
+      bool x75 = x74 != '\n';
+      if (!x75) break;
+      int32_t x77 = x72;
+      int32_t x79 = x60;
+      int32_t x78 = x77 * 10;
+      char x80 = x59[x79];
+      char x81 = x80 - '0';
+      int32_t x82 = x78 + x81;
+      x72 = x82;
       x60 += 1;
     }
-    int32_t x79 = x60;
     x60 += 1;
+    int32_t x88 = x72;
     char* x20 = x4+x9;
     char* x32 = x4+x21;
     char* x44 = x4+x33;
     char* x56 = x4+x45;
     for (;;) {
-      int32_t x83 = x60;
-      bool x84 = x83 < x58;
-      if (!x84) break;
-      int32_t x86 = x60;
+      int32_t x89 = x60;
+      bool x90 = x89 < x58;
+      if (!x90) break;
+      int32_t x92 = x60;
       for (;;) {
-        int32_t x87 = x60;
-        char x88 = x59[x87];
-        bool x89 = x88 != ',';
-        if (!x89) break;
+        int32_t x93 = x60;
+        char x94 = x59[x93];
+        bool x95 = x94 != ',';
+        if (!x95) break;
         x60 += 1;
       }
-      int32_t x94 = x60;
+      int32_t x100 = x60;
       x60 += 1;
-      int32_t x98 = x60;
+      int32_t x104 = x60;
+      int32_t x105 = 0;
       for (;;) {
-        int32_t x99 = x60;
-        char x100 = x59[x99];
-        bool x101 = x100 != '\n';
-        if (!x101) break;
+        int32_t x106 = x60;
+        char x107 = x59[x106];
+        bool x108 = x107 != '\n';
+        if (!x108) break;
+        int32_t x110 = x105;
+        int32_t x112 = x60;
+        int32_t x111 = x110 * 10;
+        char x113 = x59[x112];
+        char x114 = x113 - '0';
+        int32_t x115 = x111 + x114;
+        x105 = x115;
         x60 += 1;
       }
-      int32_t x106 = x60;
       x60 += 1;
-      int32_t x110 = printll(x20);
+      int32_t x121 = x105;
+      int32_t x122 = printll(x20);
       printf(",");
-      int32_t x112 = printll(x32);
+      int32_t x124 = printll(x32);
       printf(",");
-      int32_t x114 = printll(x44);
+      int32_t x126 = printll(x44);
       printf(",");
-      int32_t x116 = printll(x56);
+      int32_t x128 = printll(x56);
       printf(",");
-      char* x109 = x59+x98;
-      int32_t x118 = printll(x109);
+      char* x103 = x59+x92;
+      int32_t x130 = printll(x103);
+      printf(",");
+      printf("%d",x121);
       printf("%s\n","");
     }
   }
