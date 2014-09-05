@@ -19,8 +19,9 @@ int printll(char* s) {
   }
   return 0;
 }
-unsigned long hash(unsigned char *str, int len) // FIXME: need to take length!
+long hash(char *str0, int len)
 {
+  unsigned char* str = (unsigned char*)str0;
   unsigned long hash = 5381;
   int c;
   while ((c = *str++) && len--)
