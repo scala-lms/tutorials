@@ -19,11 +19,11 @@ int printll(char* s) {
   }
   return 0;
 }
-unsigned long hash(unsigned char *str) // FIXME: need to take length!
+unsigned long hash(unsigned char *str, int len) // FIXME: need to take length!
 {
   unsigned long hash = 5381;
   int c;
-  while ((c = *str++))
+  while ((c = *str++) && len--)
   hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   return hash;
 }
@@ -131,7 +131,7 @@ void Snippet(char*  x0) {
     x13[x84] = x63;
     x14[x84] = x83;
     x16 += 1;
-    char x89 = x65[0];
+    int64_t x89 = hash(x65,x63);
     int32_t x90 = (int32_t)x89;
     int32_t x91 = x90 & 255;
     //#hash_lookup
@@ -248,11 +248,11 @@ void Snippet(char*  x0) {
     }
     int32_t x199 = x151;
     x151 += 1;
+    int32_t x164 = x163 - x155;
     char* x166 = x150+x155;
-    char x203 = x166[0];
+    int64_t x203 = hash(x166,x164);
     int32_t x204 = (int32_t)x203;
     int32_t x205 = x204 & 255;
-    int32_t x164 = x163 - x155;
     //#hash_lookup
     // generated code for hash lookup
     int32_t x206 = x205;
