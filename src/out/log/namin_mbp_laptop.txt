@@ -1,5 +1,13 @@
 
 
+query_t1gram2.check.c ../data/1gram_a.csv
+c
+
+real	0m2.445s
+user	0m2.019s
+sys	0m0.417s
+
+
 query_t1gram2.hand.c ../data/1gram_a.csv
 c
 
