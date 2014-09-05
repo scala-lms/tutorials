@@ -378,3 +378,30 @@ object Run {
     time(engine.eval)
   }
 }
+
+/**
+Suggestions for Exercises
+-------------------------
+
+- Implement a scanner that reads on demand from a URL.
+
+  (Cool with: a new operator that only prints the first N results.)
+
+- (easy) Implement a typed schema in the Scala version, so that the
+  types of columns are statically known, while the values are not.
+
+  (Hint: the C version already does this, but is also more involved
+  because of the custom type representations.)
+
+- Implement more predicates (e.g. `LessThan`) and predicate
+  combinators (e.g. `And`, `Or`) in order to run more interesting
+  queries.
+
+- (medium) Implement a real column-oriented database, where each column has its
+  own file so that it can be read independently.
+
+- Implement an optimizer on the relational algebra before generating code.
+
+  (Hint: smart constructors might help.)
+
+*/
