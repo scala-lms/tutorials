@@ -351,7 +351,7 @@ object Run {
 
   def main(args: Array[String]) {
     query = args(0)
-    if (args.length > 0)
+    if (args.length > 1)
       fn = args(1)
 
     val engines = List(engine, staged_engine)
