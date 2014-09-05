@@ -315,6 +315,27 @@ Examples:
     test:run unstaged "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
     test:run c        "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
 */
+trait Engine extends QueryProcessor with SQLParser {
+  def query: String
+  def filename: String
+  def liftTable(n: String): Table
+  def eval: Unit
+  def prepare: Unit = {}
+  def run: Unit = execQuery(PrintCSV(parseSql(query)))
+  override def dynamicFilePath(table: String): Table =
+    liftTable(if (table == "?") filename else filePath(table))
+  def evalString = {
+      val source = new java.io.ByteArrayOutputStream()
+      utils.withOutputFull(new java.io.PrintStream(source)) {
+        eval
+      }
+      source.toString
+    }
+}
+trait StagedEngine extends Engine with StagedQueryProcessor {
+  override def liftTable(n: String) = unit(n)
+}
+
 object Run {
   def time[A](a: => A) = {
     val now = System.nanoTime
@@ -324,45 +345,38 @@ object Run {
     result
   }
 
-    var query: String = _
+    var qu: String = _
     var fn: String = _
 
+    trait MainEngine extends Engine {
+      override def query = qu
+      override def filename =  fn
+    }
 
-    trait Engine extends QueryProcessor with SQLParser {
-      def liftTable(n: String): Table
-      def eval: Unit
-      def prepare: Unit = {}
-      def run: Unit = execQuery(PrintCSV(parseSql(query)))
-      override def dynamicFilePath(table: String): Table =
-        liftTable(if (table == "?") fn else filePath(table))
-    }
-    trait StagedEngine extends Engine with StagedQueryProcessor {
-      override def liftTable(n: String) = unit(n)
-    }
     def unstaged_engine: Engine =
-      new Engine with query_unstaged.QueryInterpreter {
+      new Engine with MainEngine with query_unstaged.QueryInterpreter {
         override def liftTable(n: Table) = n
         override def eval = run
       }
     def scala_engine =
       new DslDriver[String,Unit] with ScannerExp
-      with StagedEngine with query_staged.QueryCompiler { q =>
+      with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
         override val codegen = new DslGen with ScalaGenScanner {
           val IR: q.type = q
         }
         override def snippet(fn: Table): Rep[Unit] = run
         override def prepare: Unit = precompile
-        override def eval: Unit = eval(fn)
+        override def eval: Unit = eval(filename)
       }
     def c_engine =
       new DslDriverC[String,Unit] with ScannerLowerExp
-      with StagedEngine with query_optc.QueryCompiler { q =>
+      with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
         override val codegen = new DslGenC with CGenScannerLower {
           val IR: q.type = q
         }
         override def snippet(fn: Table): Rep[Unit] = run
         override def prepare: Unit = {}
-        override def eval: Unit = eval(fn)
+        override def eval: Unit = eval(filename)
       }
 
   def main(args: Array[String]) {
@@ -374,7 +388,7 @@ object Run {
       case _ => println("warning: unexecpted engine, using 'unstaged' by default")
         unstaged_engine
     }
-    query = args(1)
+    qu = args(1)
     if (args.length > 2)
       fn = args(2)
 

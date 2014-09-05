@@ -94,9 +94,9 @@ trait TutorialFunSuite extends LibSuite {
     assert (indent==0, "indentation sanity check")
   }
 
-  def exec(label: String, code: String) = {
+  def exec(label: String, code: String, suffix: String = "scala") = {
     val fileprefix = prefix+under+label
-    val aname = fileprefix+".actual.scala"
+    val aname = fileprefix+".actual."+suffix
     writeFileIndented(aname, code)
   }
 }
@@ -113,4 +113,18 @@ object utils {
     override def write(b: Array[Byte]) = {}
     override def write(b: Array[Byte], off: Int, len: Int) = {}
   })
+  def withOutputFull(out: PrintStream)(func: => Unit): Unit = {
+    val oldStdOut = System.out
+    val oldStdErr = System.err
+    try {
+      System.setOut(out)
+      System.setErr(out)
+      scala.Console.withOut(out)(scala.Console.withErr(out)(func))
+    } finally {
+      out.flush()
+      out.close()
+      System.setOut(oldStdOut)
+      System.setErr(oldStdErr)
+    }
+  }
 }
