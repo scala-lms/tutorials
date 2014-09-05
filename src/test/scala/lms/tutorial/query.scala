@@ -312,9 +312,10 @@ object Run {
     println("%d microseconds".format(micros))
     result
   }
-  def main(args: Array[String]) {
-    val query = args(0)
-    lazy val fn = args(1)
+
+    var query: String = _
+    var fn: String = _
+
 
     trait Engine extends QueryProcessor with SQLParser {
       def liftTable(n: String): Table
@@ -324,6 +325,7 @@ object Run {
       override def dynamicFilePath(table: String): Table =
         liftTable(if (table == "?") fn else filePath(table))
     }
+
     val engine =
       new Engine with query_unstaged.QueryInterpreter {
         override def liftTable(n: Table) = n
@@ -333,19 +335,26 @@ object Run {
     // weird class error here
     // in class file scala/lms/tutorial/Run$$anon$4
     // java.lang.ClassFormatError: Duplicate field name&signature in class file scala/lms/tutorial/Run$$anon$4
-    // val staged_engine =
-    //   new DslDriver[String,Unit] with StagedQueryProcessor with ScannerExp
-    //   with Engine with query_staged.QueryCompiler { q =>
-    //     override val codegen = new DslGen with ScalaGenScanner {
-    //       val IR: q.type = q
-    //     }
-    //     override def liftTable(n: String) = unit(n)
-    //     override def snippet(fn: Table): Rep[Unit] = run
-    //     override def prepare: Unit = precompile
-    //     override def eval: Unit = eval(fn)
-    //   }
+    val staged_engine =
+      new DslDriver[String,Unit] with StagedQueryProcessor with ScannerExp
+      with Engine with query_staged.QueryCompiler { q =>
+        override val codegen = new DslGen with ScalaGenScanner {
+          val IR: q.type = q
+        }
+        override def liftTable(n: String) = unit(n)
+        override def snippet(fn: Table): Rep[Unit] = run
+        override def prepare: Unit = precompile
+        override def eval: Unit = eval(fn)
+      }
 
-    val engines = List(engine)
+
+
+  def main(args: Array[String]) {
+    query = args(0)
+    if (args.length > 0)
+      fn = args(1)
+
+    val engines = List(engine, staged_engine)
     for (eg <- engines) {
       println("begin version "+eg.version)
       eg.prepare
