@@ -67,7 +67,7 @@ Low-Level Processing Logic
       }
       i == len
     }}
-    def hash = data.charAt(0).asInstanceOf[Rep[Long]] // first char ... FIXME
+    def hash = data.HashCode(len)
   }
   case class RInt(value: Rep[Int]) extends RField {
     def print() = printf("%d",value)

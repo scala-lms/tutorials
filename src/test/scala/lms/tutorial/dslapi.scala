@@ -6,13 +6,17 @@ import scala.reflect.SourceContext
 // TODO: clean up at least, maybe add to LMS?
 trait UtilOps extends Base {
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
+  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
 }
 trait UtilOpsExp extends UtilOps with BaseExp {
   case class ObjHashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
+  case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
+  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) = StrSubHashCode(o,len)
 
   override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
     case e@ObjHashCode(a) => infix_HashCode(f(a))
+    case e@StrSubHashCode(o,len) => infix_HashCode(f(o),f(len))
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
 }
@@ -30,7 +34,7 @@ trait CGenUtilOps extends CGenBase {
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ObjHashCode(o) => emitValDef(sym, if (o.tp <:< manifest[String]) src"hash($o)" else src"1/*TODO:improve hash*/")
+    case StrSubHashCode(o,len) => emitValDef(sym, src"hash($o,$len)")
     case _ => super.emitNode(sym, rhs)
   }
 }
@@ -225,12 +229,12 @@ trait DslGenC extends CGenNumericOps
         }
         return 0;
       }
-      unsigned long hash(unsigned char *str) // FIXME: need to take length!
+      unsigned long hash(unsigned char *str, int len) // FIXME: need to take length!
       {
         unsigned long hash = 5381;
         int c;
 
-        while ((c = *str++))
+        while ((c = *str++) && len--)
           hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
         return hash;
