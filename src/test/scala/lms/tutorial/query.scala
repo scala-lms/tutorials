@@ -15,11 +15,45 @@ import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
 /**
+Relational Algebra AST
+----------------------
+
+The core of any query processing engine is an AST representation of
+relational algebra operators.
+*/
+trait QueryAST {
+  def tableFor(s: Table) = s // remove
+
+  type Schema = Vector[String]
+  def Schema(schema: String*): Schema = schema.toVector
+  type Table
+  def Scan(tableName: String): Scan = Scan(tableName, None, None)
+  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan // defined in QueryProcessor
+
+  sealed abstract class Operator
+  case class Scan(tableName: Table, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
+  case class PrintCSV(parent: Operator) extends Operator
+  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
+  case class Filter(pred: Predicate, parent: Operator) extends Operator
+  case class Join(parent1: Operator, parent2: Operator) extends Operator
+  case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
+  case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
+
+  // for filtering
+  sealed abstract class Predicate
+  case class Eq(a: Ref, b: Ref) extends Predicate
+
+  sealed abstract class Ref
+  case class Field(name: String) extends Ref
+  case class Value(x: Any) extends Ref
+}
+
+
+/**
 Parser
 ------
 
-We start with a parser for a SQL(-like) language.
-
+We add a parser that takes a SQL(-like) string and converts it to tree of operators.
 */
 
 trait SQLParser extends QueryAST {
@@ -63,39 +97,7 @@ trait SQLParser extends QueryAST {
   def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
 }
 
-/**
-Relational Algebra AST
-----------------------
 
-The parser takes a SQL string and converts it to tree of relational
-algebra operators.
-*/
-trait QueryAST {
-  def tableFor(s: Table) = s // remove
-
-  type Schema = Vector[String]
-  def Schema(schema: String*): Schema = schema.toVector
-  type Table
-  def Scan(tableName: String): Scan = Scan(tableName, None, None)
-  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan // defined in QueryProcessor
-
-  sealed abstract class Operator
-  case class Scan(tableName: Table, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
-  case class PrintCSV(parent: Operator) extends Operator
-  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
-  case class Filter(pred: Predicate, parent: Operator) extends Operator
-  case class Join(parent1: Operator, parent2: Operator) extends Operator
-  case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
-  case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
-
-  // for filtering
-  sealed abstract class Predicate
-  case class Eq(a: Ref, b: Ref) extends Predicate
-
-  sealed abstract class Ref
-  case class Field(name: String) extends Ref
-  case class Value(x: Any) extends Ref
-}
 
 /**
 Iterative Development of a Query Processor
