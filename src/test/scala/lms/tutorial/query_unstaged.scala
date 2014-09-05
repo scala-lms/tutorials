@@ -43,10 +43,6 @@ Low-Level Processing Logic
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("", defaultFieldDelimiter.toString, "\n"), fields: _*)
 
-  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(true) { (a,b) => a && b._1 == b._2 }
-
-  def fieldsHash(a: Fields) = a.foldLeft(0L) { _ * 41L + _.hashCode }
-
 /**
 Query Interpretation
 --------------------
@@ -83,7 +79,7 @@ Query Interpretation
       execOp(left) { rec1 =>
         execOp(right) { rec2 =>
           val keys = rec1.schema intersect rec2.schema
-          if (fieldsEqual(rec1(keys), rec2(keys)))
+          if (rec1(keys) == rec2(keys))
             yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
         }
       }
