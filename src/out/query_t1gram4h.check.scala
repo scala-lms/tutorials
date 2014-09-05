@@ -3,7 +3,7 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends ((java.lang.String)=>(Unit)) {
   def apply(x0:java.lang.String): Unit = {
-    val x1 = println("Word,Value,Word")
+    val x1 = println("Word,Value,Word,Year,MatchCount,VolumeCount")
     val x2 = new Array[java.lang.String](256)
     var x3: Int = 0
     var x4: Int = 0
@@ -129,7 +129,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
           val x107 = x15(x106)
           val x108 = x11(x107)
           val x109 = x12(x107)
-          val x110 = printf("%s,%s,%s\n",x108,x109,x72)
+          val x110 = printf("%s,%s,%s,%s,%s,%s\n",x108,x109,x72,x73,x74,x75)
           x106 = x106 + 1
         }
         x112

@@ -46,7 +46,7 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Word,Value,Word");
+  printf("%s\n","Word,Value,Word,Year,MatchCount,VolumeCount");
   int32_t x5 = 0;
   int32_t x2 = open("src/data/words.csv",0);
   int32_t x3 = fsize(x2);
@@ -189,6 +189,15 @@ void Snippet(char*  x0) {
         printf(",");
         char* x85 = x69+x74;
         int32_t x143 = printll(x85);
+        printf(",");
+        char* x97 = x69+x86;
+        int32_t x145 = printll(x97);
+        printf(",");
+        char* x109 = x69+x98;
+        int32_t x147 = printll(x109);
+        printf(",");
+        char* x121 = x69+x110;
+        int32_t x149 = printll(x121);
         printf("%s\n","");
       } else {
       }

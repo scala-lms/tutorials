@@ -46,7 +46,7 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Word,Value,Word");
+  printf("%s\n","Word,Value,Word,Year,MatchCount,VolumeCount");
   char** x2 = (char**)malloc(256 * sizeof(char*));
   int32_t* x3 = (int32_t*)malloc(256 * sizeof(int32_t));
   int32_t x4 = 0;
@@ -306,6 +306,9 @@ void Snippet(char*  x0) {
       int32_t x246 = x18[x243];
       int32_t x247 = x243 * 256;
       int32_t x248 = x247 + x246;
+      char* x178 = x150+x167;
+      char* x190 = x150+x179;
+      char* x202 = x150+x191;
       for(int x250=x247; x250 < x248; x250++) {
         int32_t x251 = x17[x250];
         char* x252 = x12[x251];
@@ -316,6 +319,12 @@ void Snippet(char*  x0) {
         printf("%d",x254);
         printf(",");
         int32_t x259 = printll(x166);
+        printf(",");
+        int32_t x261 = printll(x178);
+        printf(",");
+        int32_t x263 = printll(x190);
+        printf(",");
+        int32_t x265 = printll(x202);
         printf("%s\n","");
       }
     }
