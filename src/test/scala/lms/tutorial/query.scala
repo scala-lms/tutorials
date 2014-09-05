@@ -325,41 +325,49 @@ object Run {
       override def dynamicFilePath(table: String): Table =
         liftTable(if (table == "?") fn else filePath(table))
     }
-
-    val engine =
+    trait StagedEngine extends Engine with StagedQueryProcessor {
+      override def liftTable(n: String) = unit(n)
+    }
+    def unstaged_engine: Engine =
       new Engine with query_unstaged.QueryInterpreter {
         override def liftTable(n: Table) = n
         override def eval = run
       }
-
-    // weird class error here
-    // in class file scala/lms/tutorial/Run$$anon$4
-    // java.lang.ClassFormatError: Duplicate field name&signature in class file scala/lms/tutorial/Run$$anon$4
-    val staged_engine =
-      new DslDriver[String,Unit] with StagedQueryProcessor with ScannerExp
-      with Engine with query_staged.QueryCompiler { q =>
+    def scala_engine =
+      new DslDriver[String,Unit] with ScannerExp
+      with StagedEngine with query_staged.QueryCompiler { q =>
         override val codegen = new DslGen with ScalaGenScanner {
           val IR: q.type = q
         }
-        override def liftTable(n: String) = unit(n)
         override def snippet(fn: Table): Rep[Unit] = run
         override def prepare: Unit = precompile
         override def eval: Unit = eval(fn)
       }
-
-
+    def c_engine =
+      new DslDriverC[String,Unit] with ScannerLowerExp
+      with StagedEngine with query_optc.QueryCompiler { q =>
+        override val codegen = new DslGenC with CGenScannerLower {
+          val IR: q.type = q
+        }
+        override def snippet(fn: Table): Rep[Unit] = run
+        override def prepare: Unit = {}
+        override def eval: Unit = eval(fn)
+      }
 
   def main(args: Array[String]) {
-    query = args(0)
-    if (args.length > 1)
-      fn = args(1)
-
-    val engines = List(engine, staged_engine)
-    for (eg <- engines) {
-      println("begin version "+eg.version)
-      eg.prepare
-      time(eg.eval)
-      println("end version "+eg.version)
+    val version = args(0)
+    val engine = version match {
+      case "c" => c_engine
+      case "scala" => scala_engine
+      case "unstaged" => unstaged_engine
+      case _ => println("warning: unexecpted engine, using 'unstaged' by default")
+        unstaged_engine
     }
+    query = args(1)
+    if (args.length > 2)
+      fn = args(2)
+
+    engine.prepare
+    time(engine.eval)
   }
 }
