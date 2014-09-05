@@ -304,6 +304,11 @@ class QueryTest extends TutorialFunSuite {
   testquery("t1gram4h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
 }
 
+// example runs from sbt console
+/*
+test:run unstaged "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
+test:run c "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/1gram_a.csv
+*/
 object Run {
   def time[A](a: => A) = {
     val now = System.nanoTime
