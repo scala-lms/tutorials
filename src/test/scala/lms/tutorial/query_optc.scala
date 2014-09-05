@@ -199,7 +199,7 @@ Data Structure Implementations
 
   class HashMapBase(keySchema: Schema, schema: Schema) {
     import hashDefaults._
-    
+
     val keys = new ArrayBuffer(keysSize, keySchema)
     val keyCount = var_new(0)
 
@@ -209,7 +209,7 @@ Data Structure Implementations
 
     def lookup(k: Fields) = lookupInternal(k,None)
     def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))
-    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] = 
+    def lookupInternal(k: Fields, init: Option[Rep[Int]=>Rep[Unit]]): Rep[Int] =
     comment[Int]("hash_lookup") {
       val h = fieldsHash(k).toInt
       var pos = h & hashMask
@@ -242,7 +242,7 @@ Data Structure Implementations
 
     def apply(k: Fields) = new {
       def +=(v: Fields) = {
-        val keyPos = lookupOrUpdate(k) { keyPos => 
+        val keyPos = lookupOrUpdate(k) { keyPos =>
           values(keyPos) = schema.map(_ => RInt(0))
         }
         values(keyPos) = (values(keyPos) zip v) map { case (RInt(x), RInt(y)) => RInt(x + y) }

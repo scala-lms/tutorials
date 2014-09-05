@@ -27,36 +27,36 @@ trait SQLParser extends QueryAST {
   object Grammar extends JavaTokenParsers with PackratParsers {
     def fieldIdent: Parser[String] = """[\w\#]+""".r
     def tableIdent: Parser[String] = """[\w_\-/\.]+""".r | "?"
-    def fieldList:  Parser[(Schema,Schema)] = 
-      repsep(fieldIdent ~ opt("as" ~> fieldIdent), ",") ^^ { fs2s => 
+    def fieldList:  Parser[(Schema,Schema)] =
+      repsep(fieldIdent ~ opt("as" ~> fieldIdent), ",") ^^ { fs2s =>
         val (fs,fs1) = fs2s.map { case a~b => (b.getOrElse(a),a) }.unzip
         (Schema(fs:_*),Schema(fs1:_*))
       }
     def fieldList1:  Parser[Schema] = repsep(fieldIdent,",") ^^ (fs => Schema(fs:_*))
 
     def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
-    def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |       
+    def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
           """[0-9]+""".r ^^ (s => Value(s.toInt))
-    def tableClause: Parser[Operator] = 
-      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ { 
+    def tableClause: Parser[Operator] =
+      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ {
         case table ~ schema ~ delim => Scan(table, schema, delim)
       } |
       ("(" ~> stm <~ ")")
-    def fromClause: Parser[Operator] = 
+    def fromClause: Parser[Operator] =
       "from" ~> joinClause
-    def joinClause: Parser[Operator] = 
+    def joinClause: Parser[Operator] =
       ("nestedloops" ~> repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => Join(a,b)) }) |
       (repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => HashJoin(a,b)) })
 
-    def selectClause: Parser[Operator=>Operator] = 
+    def selectClause: Parser[Operator=>Operator] =
       "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { case (fs,fs1) => Project(fs,fs1,_:Operator) })
-    def whereClause: Parser[Operator=>Operator] = 
+    def whereClause: Parser[Operator=>Operator] =
       opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
 
-    def groupClause: Parser[Operator=>Operator] = 
+    def groupClause: Parser[Operator=>Operator] =
       opt("group" ~> "by" ~> fieldList1 ~ ("sum" ~> fieldList1) ^^ { case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
 
-    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ { 
+    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ {
       case p ~ s ~ f ~ g => g(p(f(s)))
     }
   }
@@ -145,7 +145,7 @@ trait PlainQueryProcessor extends QueryProcessor {
 
 ### A Staged Query Interpreter (= Compiler)
 
-Staging our query interpreter yields a query compiler. 
+Staging our query interpreter yields a query compiler.
 In the first iteration we generate Scala code:
 
 - [query_staged0](query_staged0.html)
