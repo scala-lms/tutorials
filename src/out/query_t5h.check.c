@@ -357,24 +357,28 @@ void Snippet(char*  x0) {
     int32_t x299 = x6[x298];
     int32_t x301 = x299;
     //#hash_lookup
-    int32_t x302 = x20[x301];
-    int32_t x303 = x301 * 256;
-    int32_t x304 = x303 + x302;
-    for(int x306=x303; x306 < x304; x306++) {
-      int32_t x307 = x19[x306];
-      char* x308 = x12[x307];
-      int32_t x309 = x13[x307];
-      int32_t x310 = x14[x307];
-      char* x311 = x15[x307];
-      int32_t x312 = x16[x307];
-      int32_t x313 = printll(x308);
-      printf(",");
-      printf("%d",x310);
-      printf(",");
-      int32_t x317 = printll(x311);
-      printf(",");
-      int32_t x319 = printll(x230);
-      printf("%s\n","");
+    bool x303 = x301 == -1;
+    if (x303) {
+    } else {
+      int32_t x304 = x20[x301];
+      int32_t x305 = x301 * 256;
+      int32_t x306 = x305 + x304;
+      for(int x308=x305; x308 < x306; x308++) {
+        int32_t x309 = x19[x308];
+        char* x310 = x12[x309];
+        int32_t x311 = x13[x309];
+        int32_t x312 = x14[x309];
+        char* x313 = x15[x309];
+        int32_t x314 = x16[x309];
+        int32_t x315 = printll(x310);
+        printf(",");
+        printf("%d",x312);
+        printf(",");
+        int32_t x319 = printll(x313);
+        printf(",");
+        int32_t x321 = printll(x230);
+        printf("%s\n","");
+      }
     }
   }
 }

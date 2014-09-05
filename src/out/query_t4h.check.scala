@@ -83,7 +83,7 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
     val x68 = x67.next(',')
     val x69 = x67.next(',')
     val x70 = x67.next('\n')
-    val x106 = while ({val x71 = x67.hasNext
+    val x110 = while ({val x71 = x67.hasNext
       x71}) {
       val x73 = x67.next(',')
       val x74 = x67.next(',')
@@ -112,21 +112,27 @@ class Snippet extends ((java.lang.String)=>(Unit)) {
         x90
         //#hash_lookup
       }
-      val x93 = x16(x92)
-      val x94 = x92 * 256
-      val x95 = x94 + x93
-      var x97 : Int = x94
-      val x104 = while (x97 < x95) {
-        val x98 = x15(x97)
-        val x99 = x10(x98)
-        val x100 = x11(x98)
-        val x101 = x12(x98)
-        val x102 = printf("%s,%s,%s,%s\n",x99,x100,x101,x73)
-        x97 = x97 + 1
+      val x94 = x92 == -1
+      val x108 = if (x94) {
+        ()
+      } else {
+        val x95 = x16(x92)
+        val x96 = x92 * 256
+        val x97 = x96 + x95
+        var x99 : Int = x96
+        val x106 = while (x99 < x97) {
+          val x100 = x15(x99)
+          val x101 = x10(x100)
+          val x102 = x11(x100)
+          val x103 = x12(x100)
+          val x104 = printf("%s,%s,%s,%s\n",x101,x102,x103,x73)
+          x99 = x99 + 1
+        }
+        x106
       }
-      x104
+      x108
     }
-    val x107 = x67.close
+    val x111 = x67.close
     ()
   }
 }

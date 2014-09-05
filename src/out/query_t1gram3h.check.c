@@ -45,7 +45,7 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,Word,Value");
+  printf("%s\n","Word,Value,Phrase,Year,MatchCount,VolumeCount");
   int32_t x2 = 0;
   int32_t x3 = 0;
   int32_t* x4 = (int32_t*)malloc(256 * sizeof(int32_t));
@@ -54,85 +54,84 @@ void Snippet(char*  x0) {
   }
   char** x10 = (char**)malloc(65536 * sizeof(char*));
   int32_t* x11 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  char** x12 = (char**)malloc(65536 * sizeof(char*));
-  int32_t* x13 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  char** x14 = (char**)malloc(65536 * sizeof(char*));
+  int32_t* x12 = (int32_t*)malloc(65536 * sizeof(int32_t));
+  int32_t x13 = 0;
+  int32_t x14 = 0;
   int32_t* x15 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  char** x16 = (char**)malloc(65536 * sizeof(char*));
-  int32_t* x17 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  int32_t x18 = 0;
-  int32_t x19 = 0;
-  int32_t* x20 = (int32_t*)malloc(65536 * sizeof(int32_t));
-  int32_t* x21 = (int32_t*)malloc(256 * sizeof(int32_t));
-  int32_t x25 = 0;
-  int32_t x22 = open(x0,0);
-  int32_t x23 = fsize(x22);
-  char* x24 = mmap(0, x23, PROT_READ, MAP_FILE | MAP_SHARED, x22, 0);
+  int32_t* x16 = (int32_t*)malloc(256 * sizeof(int32_t));
+  int32_t x20 = 0;
+  int32_t x17 = open("src/data/words.csv",0);
+  int32_t x18 = fsize(x17);
+  char* x19 = mmap(0, x18, PROT_READ, MAP_FILE | MAP_SHARED, x17, 0);
+  for (;;) {
+    int32_t x21 = x20;
+    char x22 = x19[x21];
+    bool x23 = x22 != ',';
+    if (!x23) break;
+    x20 += 1;
+  }
+  int32_t x28 = x20;
+  x20 += 1;
+  int32_t x31 = x20;
+  int32_t x32 = 0;
+  for (;;) {
+    int32_t x33 = x20;
+    char x34 = x19[x33];
+    bool x35 = x34 != '\n';
+    if (!x35) break;
+    int32_t x37 = x32;
+    int32_t x39 = x20;
+    int32_t x38 = x37 * 10;
+    char x40 = x19[x39];
+    char x41 = x40 - '0';
+    int32_t x42 = x38 + x41;
+    x32 = x42;
+    x20 += 1;
+  }
+  x20 += 1;
+  int32_t x48 = x32;
   int32_t x87 = (int32_t)0L;
   int32_t x88 = x87 & 255;
   bool x94 = !true;
   for (;;) {
-    int32_t x26 = x25;
-    bool x27 = x26 < x23;
-    if (!x27) break;
-    int32_t x29 = x25;
+    int32_t x49 = x20;
+    bool x50 = x49 < x18;
+    if (!x50) break;
+    int32_t x52 = x20;
     for (;;) {
-      int32_t x30 = x25;
-      char x31 = x24[x30];
-      bool x32 = x31 != '\t';
-      if (!x32) break;
-      x25 += 1;
+      int32_t x53 = x20;
+      char x54 = x19[x53];
+      bool x55 = x54 != ',';
+      if (!x55) break;
+      x20 += 1;
     }
-    int32_t x37 = x25;
-    x25 += 1;
-    int32_t x41 = x25;
+    int32_t x60 = x20;
+    x20 += 1;
+    int32_t x64 = x20;
+    int32_t x65 = 0;
     for (;;) {
-      int32_t x42 = x25;
-      char x43 = x24[x42];
-      bool x44 = x43 != '\t';
-      if (!x44) break;
-      x25 += 1;
-    }
-    int32_t x49 = x25;
-    x25 += 1;
-    int32_t x53 = x25;
-    for (;;) {
-      int32_t x54 = x25;
-      char x55 = x24[x54];
-      bool x56 = x55 != '\t';
-      if (!x56) break;
-      x25 += 1;
-    }
-    int32_t x61 = x25;
-    x25 += 1;
-    int32_t x65 = x25;
-    for (;;) {
-      int32_t x66 = x25;
-      char x67 = x24[x66];
+      int32_t x66 = x20;
+      char x67 = x19[x66];
       bool x68 = x67 != '\n';
       if (!x68) break;
-      x25 += 1;
+      int32_t x70 = x65;
+      int32_t x72 = x20;
+      int32_t x71 = x70 * 10;
+      char x73 = x19[x72];
+      char x74 = x73 - '0';
+      int32_t x75 = x71 + x74;
+      x65 = x75;
+      x20 += 1;
     }
-    int32_t x73 = x25;
-    x25 += 1;
-    int32_t x77 = x19;
-    char* x40 = x24+x29;
-    x10[x77] = x40;
-    int32_t x38 = x37 - x29;
-    x11[x77] = x38;
-    char* x52 = x24+x41;
-    x12[x77] = x52;
-    int32_t x50 = x49 - x41;
-    x13[x77] = x50;
-    char* x64 = x24+x53;
-    x14[x77] = x64;
-    int32_t x62 = x61 - x53;
-    x15[x77] = x62;
-    char* x76 = x24+x65;
-    x16[x77] = x76;
-    int32_t x74 = x73 - x65;
-    x17[x77] = x74;
-    x19 += 1;
+    x20 += 1;
+    int32_t x81 = x65;
+    int32_t x82 = x14;
+    char* x63 = x19+x52;
+    x10[x82] = x63;
+    int32_t x61 = x60 - x52;
+    x11[x82] = x61;
+    x12[x82] = x81;
+    x14 += 1;
     //#hash_lookup
     // generated code for hash lookup
     int32_t x89 = x88;
@@ -160,132 +159,119 @@ void Snippet(char*  x0) {
       int32_t x106 = x3;
       x3 += 1;
       x4[x103] = x106;
-      x21[x106] = 0;
+      x16[x106] = 0;
       x111 = x106;
     } else {
       x111 = x104;
     }
     int32_t x113 = x111;
     //#hash_lookup
-    int32_t x114 = x21[x113];
+    int32_t x114 = x16[x113];
     int32_t x115 = x113 * 256;
     int32_t x116 = x115 + x114;
-    x20[x116] = x77;
+    x15[x116] = x82;
     int32_t x118 = x114 + 1;
-    x21[x113] = x118;
+    x16[x113] = x118;
   }
   int32_t x126 = 0;
-  int32_t x123 = open("src/data/words.csv",0);
+  int32_t x123 = open(x0,0);
   int32_t x124 = fsize(x123);
   char* x125 = mmap(0, x124, PROT_READ, MAP_FILE | MAP_SHARED, x123, 0);
   for (;;) {
     int32_t x127 = x126;
-    char x128 = x125[x127];
-    bool x129 = x128 != ',';
-    if (!x129) break;
-    x126 += 1;
-  }
-  int32_t x134 = x126;
-  x126 += 1;
-  int32_t x137 = x126;
-  int32_t x138 = 0;
-  for (;;) {
-    int32_t x139 = x126;
-    char x140 = x125[x139];
-    bool x141 = x140 != '\n';
-    if (!x141) break;
-    int32_t x143 = x138;
-    int32_t x145 = x126;
-    int32_t x144 = x143 * 10;
-    char x146 = x125[x145];
-    char x147 = x146 - '0';
-    int32_t x148 = x144 + x147;
-    x138 = x148;
-    x126 += 1;
-  }
-  x126 += 1;
-  int32_t x154 = x138;
-  for (;;) {
-    int32_t x155 = x126;
-    bool x156 = x155 < x124;
-    if (!x156) break;
-    int32_t x158 = x126;
+    bool x128 = x127 < x124;
+    if (!x128) break;
+    int32_t x130 = x126;
     for (;;) {
-      int32_t x159 = x126;
-      char x160 = x125[x159];
-      bool x161 = x160 != ',';
-      if (!x161) break;
+      int32_t x131 = x126;
+      char x132 = x125[x131];
+      bool x133 = x132 != '\t';
+      if (!x133) break;
       x126 += 1;
     }
+    int32_t x138 = x126;
+    x126 += 1;
+    int32_t x142 = x126;
+    for (;;) {
+      int32_t x143 = x126;
+      char x144 = x125[x143];
+      bool x145 = x144 != '\t';
+      if (!x145) break;
+      x126 += 1;
+    }
+    int32_t x150 = x126;
+    x126 += 1;
+    int32_t x154 = x126;
+    for (;;) {
+      int32_t x155 = x126;
+      char x156 = x125[x155];
+      bool x157 = x156 != '\t';
+      if (!x157) break;
+      x126 += 1;
+    }
+    int32_t x162 = x126;
+    x126 += 1;
     int32_t x166 = x126;
-    x126 += 1;
-    int32_t x170 = x126;
-    int32_t x171 = 0;
     for (;;) {
-      int32_t x172 = x126;
-      char x173 = x125[x172];
-      bool x174 = x173 != '\n';
-      if (!x174) break;
-      int32_t x176 = x171;
-      int32_t x178 = x126;
-      int32_t x177 = x176 * 10;
-      char x179 = x125[x178];
-      char x180 = x179 - '0';
-      int32_t x181 = x177 + x180;
-      x171 = x181;
+      int32_t x167 = x126;
+      char x168 = x125[x167];
+      bool x169 = x168 != '\n';
+      if (!x169) break;
       x126 += 1;
     }
+    int32_t x174 = x126;
     x126 += 1;
-    int32_t x187 = x171;
     //#hash_lookup
     // generated code for hash lookup
-    int32_t x188 = x88;
+    int32_t x178 = x88;
     for (;;) {
-      int32_t x189 = x188;
-      int32_t x190 = x4[x189];
-      bool x192 = x190 == -1;
-      bool x193;
-      if (x192) {
-        x193 = false;
+      int32_t x179 = x178;
+      int32_t x180 = x4[x179];
+      bool x182 = x180 == -1;
+      bool x183;
+      if (x182) {
+        x183 = false;
       } else {
-        x193 = x94;
+        x183 = x94;
       }
-      if (!x193) break;
-      int32_t x195 = x188;
-      int32_t x196 = x195 + 1;
-      int32_t x197 = x196 & 255;
-      x188 = x197;
+      if (!x183) break;
+      int32_t x185 = x178;
+      int32_t x186 = x185 + 1;
+      int32_t x187 = x186 & 255;
+      x178 = x187;
     }
-    int32_t x201 = x188;
-    int32_t x202 = x4[x201];
-    int32_t x204 = x202;
+    int32_t x191 = x178;
+    int32_t x192 = x4[x191];
+    int32_t x194 = x192;
     //#hash_lookup
-    int32_t x205 = x21[x204];
-    int32_t x206 = x204 * 256;
-    int32_t x207 = x206 + x205;
-    char* x169 = x125+x158;
-    for(int x209=x206; x209 < x207; x209++) {
-      int32_t x210 = x20[x209];
-      char* x211 = x10[x210];
-      int32_t x212 = x11[x210];
-      char* x213 = x12[x210];
-      int32_t x214 = x13[x210];
-      char* x215 = x14[x210];
-      int32_t x216 = x15[x210];
-      char* x217 = x16[x210];
-      int32_t x218 = x17[x210];
-      int32_t x219 = printll(x211);
-      printf(",");
-      int32_t x221 = printll(x213);
-      printf(",");
-      int32_t x223 = printll(x215);
-      printf(",");
-      int32_t x225 = printll(x217);
-      printf(",");
-      int32_t x227 = printll(x169);
-      printf(",");
-      printf("%d",x187);
-      printf("%s\n","");
+    bool x196 = x194 == -1;
+    if (x196) {
+    } else {
+      int32_t x197 = x16[x194];
+      int32_t x198 = x194 * 256;
+      int32_t x199 = x198 + x197;
+      char* x141 = x125+x130;
+      char* x153 = x125+x142;
+      char* x165 = x125+x154;
+      char* x177 = x125+x166;
+      for(int x201=x198; x201 < x199; x201++) {
+        int32_t x202 = x15[x201];
+        char* x203 = x10[x202];
+        int32_t x204 = x11[x202];
+        int32_t x205 = x12[x202];
+        int32_t x206 = printll(x203);
+        printf(",");
+        printf("%d",x205);
+        printf(",");
+        int32_t x210 = printll(x141);
+        printf(",");
+        int32_t x212 = printll(x153);
+        printf(",");
+        int32_t x214 = printll(x165);
+        printf(",");
+        int32_t x216 = printll(x177);
+        printf("%s\n","");
+      }
     }
   }
 }

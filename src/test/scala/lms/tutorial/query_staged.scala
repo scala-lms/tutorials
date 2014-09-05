@@ -214,11 +214,13 @@ Data Structure Implementations
       def foreach(f: Record => Rep[Unit]): Rep[Unit] = {
         val bucket = lookup(k)
 
-        val bucketLen = bucketCounts(bucket)
-        val bucketStart = bucket * bucketSize
+        if (bucket != -1) {
+          val bucketLen = bucketCounts(bucket)
+          val bucketStart = bucket * bucketSize
 
-        for (i <- bucketStart until (bucketStart + bucketLen)) {
-          f(Record(data(buckets(i)),schema))
+          for (i <- bucketStart until (bucketStart + bucketLen)) {
+            f(Record(data(buckets(i)),schema))
+          }
         }
       }
     }

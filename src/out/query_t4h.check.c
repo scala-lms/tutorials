@@ -302,25 +302,29 @@ void Snippet(char*  x0) {
     int32_t x250 = x4[x249];
     int32_t x252 = x250;
     //#hash_lookup
-    int32_t x253 = x18[x252];
-    int32_t x254 = x252 * 256;
-    int32_t x255 = x254 + x253;
-    char* x205 = x21+x194;
-    for(int x257=x254; x257 < x255; x257++) {
-      int32_t x258 = x17[x257];
-      char* x259 = x10[x258];
-      int32_t x260 = x11[x258];
-      int32_t x261 = x12[x258];
-      char* x262 = x13[x258];
-      int32_t x263 = x14[x258];
-      int32_t x264 = printll(x259);
-      printf(",");
-      printf("%d",x261);
-      printf(",");
-      int32_t x268 = printll(x262);
-      printf(",");
-      int32_t x270 = printll(x205);
-      printf("%s\n","");
+    bool x254 = x252 == -1;
+    if (x254) {
+    } else {
+      int32_t x255 = x18[x252];
+      int32_t x256 = x252 * 256;
+      int32_t x257 = x256 + x255;
+      char* x205 = x21+x194;
+      for(int x259=x256; x259 < x257; x259++) {
+        int32_t x260 = x17[x259];
+        char* x261 = x10[x260];
+        int32_t x262 = x11[x260];
+        int32_t x263 = x12[x260];
+        char* x264 = x13[x260];
+        int32_t x265 = x14[x260];
+        int32_t x266 = printll(x261);
+        printf(",");
+        printf("%d",x263);
+        printf(",");
+        int32_t x270 = printll(x264);
+        printf(",");
+        int32_t x272 = printll(x205);
+        printf("%s\n","");
+      }
     }
   }
 }

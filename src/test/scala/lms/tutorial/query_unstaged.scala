@@ -105,9 +105,9 @@ Query Interpretation
         buf += rec1
       }
       execOp(right) { rec2 =>
-        hm(rec2(keys)) foreach { rec1 =>
+        hm.get(rec2(keys)) foreach { _.foreach { rec1 =>
           yld(Record(rec1.fields ++ rec2.fields, rec1.schema ++ rec2.schema))
-        }
+        }}
       }
     case PrintCSV(parent) =>
       val schema = resultSchema(parent)

@@ -45,156 +45,149 @@ Emitting C Generated Code
 #include <string.h>
 #include <stdbool.h>
 void Snippet(char*  x0) {
-  printf("%s\n","Phrase,Year,MatchCount,VolumeCount,Phrase");
+  printf("%s\n","Word,Value,Word");
   int32_t x5 = 0;
-  int32_t x2 = open(x0,0);
+  int32_t x2 = open("src/data/words.csv",0);
   int32_t x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  int32_t x57 = open("src/data/words.csv",0);
-  int32_t x58 = fsize(x57);
-  char* x59 = mmap(0, x58, PROT_READ, MAP_FILE | MAP_SHARED, x57, 0);
   for (;;) {
     int32_t x6 = x5;
-    bool x7 = x6 < x3;
-    if (!x7) break;
-    int32_t x9 = x5;
+    char x7 = x4[x6];
+    bool x8 = x7 != ',';
+    if (!x8) break;
+    x5 += 1;
+  }
+  int32_t x13 = x5;
+  x5 += 1;
+  int32_t x16 = x5;
+  int32_t x17 = 0;
+  for (;;) {
+    int32_t x18 = x5;
+    char x19 = x4[x18];
+    bool x20 = x19 != '\n';
+    if (!x20) break;
+    int32_t x22 = x17;
+    int32_t x24 = x5;
+    int32_t x23 = x22 * 10;
+    char x25 = x4[x24];
+    char x26 = x25 - '0';
+    int32_t x27 = x23 + x26;
+    x17 = x27;
+    x5 += 1;
+  }
+  x5 += 1;
+  int32_t x33 = x17;
+  int32_t x67 = open(x0,0);
+  int32_t x68 = fsize(x67);
+  char* x69 = mmap(0, x68, PROT_READ, MAP_FILE | MAP_SHARED, x67, 0);
+  for (;;) {
+    int32_t x34 = x5;
+    bool x35 = x34 < x3;
+    if (!x35) break;
+    int32_t x37 = x5;
     for (;;) {
-      int32_t x10 = x5;
-      char x11 = x4[x10];
-      bool x12 = x11 != '\t';
-      if (!x12) break;
+      int32_t x38 = x5;
+      char x39 = x4[x38];
+      bool x40 = x39 != ',';
+      if (!x40) break;
       x5 += 1;
     }
-    int32_t x17 = x5;
-    x5 += 1;
-    int32_t x21 = x5;
-    for (;;) {
-      int32_t x22 = x5;
-      char x23 = x4[x22];
-      bool x24 = x23 != '\t';
-      if (!x24) break;
-      x5 += 1;
-    }
-    int32_t x29 = x5;
-    x5 += 1;
-    int32_t x33 = x5;
-    for (;;) {
-      int32_t x34 = x5;
-      char x35 = x4[x34];
-      bool x36 = x35 != '\t';
-      if (!x36) break;
-      x5 += 1;
-    }
-    int32_t x41 = x5;
-    x5 += 1;
     int32_t x45 = x5;
+    x5 += 1;
+    int32_t x49 = x5;
+    int32_t x50 = 0;
     for (;;) {
-      int32_t x46 = x5;
-      char x47 = x4[x46];
-      bool x48 = x47 != '\n';
-      if (!x48) break;
+      int32_t x51 = x5;
+      char x52 = x4[x51];
+      bool x53 = x52 != '\n';
+      if (!x53) break;
+      int32_t x55 = x50;
+      int32_t x57 = x5;
+      int32_t x56 = x55 * 10;
+      char x58 = x4[x57];
+      char x59 = x58 - '0';
+      int32_t x60 = x56 + x59;
+      x50 = x60;
       x5 += 1;
     }
-    int32_t x53 = x5;
     x5 += 1;
-    int32_t x60 = 0;
+    int32_t x66 = x50;
+    int32_t x70 = 0;
+    int32_t x46 = x45 - x37;
+    char* x48 = x4+x37;
     for (;;) {
-      int32_t x61 = x60;
-      char x62 = x59[x61];
-      bool x63 = x62 != ',';
-      if (!x63) break;
-      x60 += 1;
-    }
-    int32_t x68 = x60;
-    x60 += 1;
-    int32_t x71 = x60;
-    int32_t x72 = 0;
-    for (;;) {
-      int32_t x73 = x60;
-      char x74 = x59[x73];
-      bool x75 = x74 != '\n';
-      if (!x75) break;
-      int32_t x77 = x72;
-      int32_t x79 = x60;
-      int32_t x78 = x77 * 10;
-      char x80 = x59[x79];
-      char x81 = x80 - '0';
-      int32_t x82 = x78 + x81;
-      x72 = x82;
-      x60 += 1;
-    }
-    x60 += 1;
-    int32_t x88 = x72;
-    int32_t x18 = x17 - x9;
-    char* x20 = x4+x9;
-    char* x32 = x4+x21;
-    char* x44 = x4+x33;
-    char* x56 = x4+x45;
-    for (;;) {
-      int32_t x89 = x60;
-      bool x90 = x89 < x58;
-      if (!x90) break;
-      int32_t x92 = x60;
+      int32_t x71 = x70;
+      bool x72 = x71 < x68;
+      if (!x72) break;
+      int32_t x74 = x70;
       for (;;) {
-        int32_t x93 = x60;
-        char x94 = x59[x93];
-        bool x95 = x94 != ',';
-        if (!x95) break;
-        x60 += 1;
+        int32_t x75 = x70;
+        char x76 = x69[x75];
+        bool x77 = x76 != '\t';
+        if (!x77) break;
+        x70 += 1;
       }
-      int32_t x100 = x60;
-      x60 += 1;
-      int32_t x104 = x60;
-      int32_t x105 = 0;
+      int32_t x82 = x70;
+      x70 += 1;
+      int32_t x86 = x70;
       for (;;) {
-        int32_t x106 = x60;
-        char x107 = x59[x106];
-        bool x108 = x107 != '\n';
-        if (!x108) break;
-        int32_t x110 = x105;
-        int32_t x112 = x60;
-        int32_t x111 = x110 * 10;
-        char x113 = x59[x112];
-        char x114 = x113 - '0';
-        int32_t x115 = x111 + x114;
-        x105 = x115;
-        x60 += 1;
+        int32_t x87 = x70;
+        char x88 = x69[x87];
+        bool x89 = x88 != '\t';
+        if (!x89) break;
+        x70 += 1;
       }
-      x60 += 1;
-      int32_t x121 = x105;
-      int32_t x101 = x100 - x92;
-      bool x123 = x18 == x101;
+      int32_t x94 = x70;
+      x70 += 1;
+      int32_t x98 = x70;
+      for (;;) {
+        int32_t x99 = x70;
+        char x100 = x69[x99];
+        bool x101 = x100 != '\t';
+        if (!x101) break;
+        x70 += 1;
+      }
+      int32_t x106 = x70;
+      x70 += 1;
+      int32_t x110 = x70;
+      for (;;) {
+        int32_t x111 = x70;
+        char x112 = x69[x111];
+        bool x113 = x112 != '\n';
+        if (!x113) break;
+        x70 += 1;
+      }
+      int32_t x118 = x70;
+      x70 += 1;
+      int32_t x83 = x82 - x74;
+      bool x123 = x46 == x83;
       bool x138;
       if (x123) {
         int32_t x124 = 0;
-        char* x103 = x59+x92;
+        char* x85 = x69+x74;
         for (;;) {
           int32_t x125 = x124;
-          bool x126 = x125 < x18;
-          char x127 = x20[x125];
-          char x128 = x103[x125];
+          bool x126 = x125 < x46;
+          char x127 = x48[x125];
+          char x128 = x85[x125];
           bool x129 = x127 == x128;
           bool x130 = x126 && x129;
           if (!x130) break;
           x124 += 1;
         }
         int32_t x135 = x124;
-        bool x136 = x135 == x18;
+        bool x136 = x135 == x46;
         x138 = x136;
       } else {
         x138 = false;
       }
       if (x138) {
-        int32_t x139 = printll(x20);
+        int32_t x139 = printll(x48);
         printf(",");
-        int32_t x141 = printll(x32);
+        printf("%d",x66);
         printf(",");
-        int32_t x143 = printll(x44);
-        printf(",");
-        int32_t x145 = printll(x56);
-        printf(",");
-        char* x103 = x59+x92;
-        int32_t x147 = printll(x103);
+        char* x85 = x69+x74;
+        int32_t x143 = printll(x85);
         printf("%s\n","");
       } else {
       }
