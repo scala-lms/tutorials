@@ -57,8 +57,34 @@ We add a parser that takes a SQL(-like) string and converts it to tree of operat
 */
 
 trait SQLParser extends QueryAST {
+
+  def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
+
   import scala.util.parsing.combinator._
   object Grammar extends JavaTokenParsers with PackratParsers {
+
+    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ {
+      case p ~ s ~ f ~ g => g(p(f(s)))
+    }
+    def selectClause: Parser[Operator=>Operator] =
+      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { case (fs,fs1) => Project(fs,fs1,_:Operator) })
+    def whereClause: Parser[Operator=>Operator] =
+      opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
+
+    def groupClause: Parser[Operator=>Operator] =
+      opt("group" ~> "by" ~> fieldList1 ~ ("sum" ~> fieldList1) ^^ { case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
+
+    def fromClause: Parser[Operator] =
+      "from" ~> joinClause
+    def joinClause: Parser[Operator] =
+      ("nestedloops" ~> repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => Join(a,b)) }) |
+      (repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => HashJoin(a,b)) })
+    def tableClause: Parser[Operator] =
+      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ {
+        case table ~ schema ~ delim => Scan(table, schema, delim)
+      } |
+      ("(" ~> stm <~ ")")
+
     def fieldIdent: Parser[String] = """[\w\#]+""".r
     def tableIdent: Parser[String] = """[\w_\-/\.]+""".r | "?"
     def fieldList:  Parser[(Schema,Schema)] =
@@ -71,30 +97,7 @@ trait SQLParser extends QueryAST {
     def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
     def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
           """[0-9]+""".r ^^ (s => Value(s.toInt))
-    def tableClause: Parser[Operator] =
-      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ {
-        case table ~ schema ~ delim => Scan(table, schema, delim)
-      } |
-      ("(" ~> stm <~ ")")
-    def fromClause: Parser[Operator] =
-      "from" ~> joinClause
-    def joinClause: Parser[Operator] =
-      ("nestedloops" ~> repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => Join(a,b)) }) |
-      (repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => HashJoin(a,b)) })
-
-    def selectClause: Parser[Operator=>Operator] =
-      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { case (fs,fs1) => Project(fs,fs1,_:Operator) })
-    def whereClause: Parser[Operator=>Operator] =
-      opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
-
-    def groupClause: Parser[Operator=>Operator] =
-      opt("group" ~> "by" ~> fieldList1 ~ ("sum" ~> fieldList1) ^^ { case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
-
-    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ {
-      case p ~ s ~ f ~ g => g(p(f(s)))
-    }
   }
-  def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
 }
 
 
@@ -324,7 +327,7 @@ trait Engine extends QueryProcessor with SQLParser {
   def run: Unit = execQuery(PrintCSV(parseSql(query)))
   override def dynamicFilePath(table: String): Table =
     liftTable(if (table == "?") filename else filePath(table))
-  def evalString = {
+    def evalString = {
       val source = new java.io.ByteArrayOutputStream()
       utils.withOutputFull(new java.io.PrintStream(source)) {
         eval
@@ -380,12 +383,20 @@ object Run {
       }
 
   def main(args: Array[String]) {
+    if (args.length < 2) {
+      println("syntax:")
+      println("   test:run (unstaged|scala|c) sql [file]")
+      println()
+      println("example usage:")
+      println("   test:run c \"select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'\" src/data/t1gram.csv")
+      return
+    }
     val version = args(0)
     val engine = version match {
       case "c" => c_engine
       case "scala" => scala_engine
       case "unstaged" => unstaged_engine
-      case _ => println("warning: unexecpted engine, using 'unstaged' by default")
+      case _ => println("warning: unexpected engine, using 'unstaged' by default")
         unstaged_engine
     }
     qu = args(1)
