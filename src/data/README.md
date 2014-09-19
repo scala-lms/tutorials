@@ -26,6 +26,26 @@ Creating, Importing and Querying the Data in MySql
 
 * `select n_gram, match_count from 1gram_a where n_gram = 'Auswanderung'`
 
+PostgreSQL
+----------
+
+* `$ /usr/local/bin/initdb -D /tmp/pgdata`
+* `$ /usr/local/bin/postgres -D /tmp/pgdata`
+* `$ /usr/local/bin/createdb`
+* `$ /usr/local/bin/psql`
+* `# \timing`
+* `# create table t1gram_a (n_gram text, year int default null, match_count int default null, volume_count int default null); `
+* `# copy t1gram_a FROM 'src/data/1gram_a.csv' DELIMITER '\t' CSV;`
+
+  (3 minutes 12 seconds on `tiark-mbp`)
+
+* `# select * from t1gram_a where n_gram = 'Auswanderung';`
+
+  (46.77 seconds on `tiark-mbp` 1st run,
+  24.51 seconds 2nd run,
+  7.17 seconds after a few more runs)
+
+
 Running Compiled Queries
 ------------------------
 

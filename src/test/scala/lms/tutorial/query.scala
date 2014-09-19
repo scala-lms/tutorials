@@ -38,7 +38,9 @@ some simple queries. We might be interested in all occurrences of the word 'Ausw
 
 Here are some timings:
 
-- Loading the CSV file into a MySQL database takes > 5 minutes, running the query about 50 seconds
+- Loading the CSV file into a MySQL database takes > 5 minutes, running the query about 50 seconds.
+
+- PostgreSQL takes 3 minutes to load, the first query run takes 46 seconds, but subsequent runs get faster over time (down to 7 seconds).
 
 - An [AWK script](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.awk) that processes the CSV file directly takes 45 seconds
 
