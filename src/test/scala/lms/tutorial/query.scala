@@ -2,10 +2,56 @@
 A SQL Query Compiler
 ====================
 
-Abstraction without regret for efficient data processing.
+Commercial and open source database systems consist of millions of lines of highly 
+optimized C code. Yet, their performance on individual queries falls 10x or 100x 
+short of what a hand-written, specialized, implementation of the same query can 
+achieve.
+
+In this tutorial, we will build a small SQL processing engine that consists of 
+just about 500 lines of high-level Scala code. Where other systems interpret query 
+plans, operator by operator, we will use LMS to generate and compile low-level C 
+code for entire queries.
+
+We keep the query functionality intentionally simple. A more complete engine
+that handles the full TPCH benchmark suite and consists of about 3000 lines of
+code has been developed in the [LegoBase](http://data.epfl.ch/legobase) project, which recently received
+a best paper award at VLDB'14.
+
+See also:
+
+- Building Efficient Query Engines in a High-Level Language ([PDF](http://infoscience.epfl.ch/record/198693/files/801-klonatos.pdf))
+  Yannis Klonatos, Christoph Koch, Tiark Rompf, Hassan Chafi. VLDB'14
 
 Outline:
 <div id="tableofcontents"></div>
+
+
+Setting the Stage
+-----------------
+
+Let us run a few quick benchmarks to get an idea of the relative performance of different
+data processing systems. We take a data sample from [the Google Books NGram Viewer](https://books.google.com/ngrams) project.
+The 2GB file that contains statistics for words starting with the letter 'A' is a good candidate to run
+some simple queries. We might be interested in all occurrences of the word 'Auswanderung':
+
+    select * from 1gram_a where n_gram = 'Auswanderung'
+
+Here are some timings:
+
+- Loading the CSV file into a MySQL database takes > 5 minutes, running the query about 50 seconds
+
+- An [AWK script](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.awk) that processes the CSV file directly takes 45 seconds
+
+- A [query interpreter](https://github.com/scala-lms/tutorials/blob/master/src/test/scala/lms/tutorial/query_unstaged.scala) written in Scala takes 39 sec
+
+- A hand-written specialized [Scala program](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand0.scala/) takes 13 sec
+
+- A similar hand-written [C program](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.c/) performs marginally faster,
+  but with [more optimizations](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand2.c/) we can get as good as 3.2 seconds
+
+The query processor we will develop in this tutorial matches the performance of the handwritten Scala and C queries (13s and 3s, respectively)
+
+More details on running the benchmarks are available [here](https://github.com/scala-lms/tutorials/blob/master/src/data/README.md). We now turn to our actual implementation.
 
 */
 
@@ -22,67 +68,69 @@ The core of any query processing engine is an AST representation of
 relational algebra operators.
 */
 trait QueryAST {
-  def tableFor(s: Table) = s // remove
-
-  type Schema = Vector[String]
-  def Schema(schema: String*): Schema = schema.toVector
   type Table
-  def Scan(tableName: String): Scan = Scan(tableName, None, None)
-  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan // defined in QueryProcessor
+  type Schema = Vector[String]
 
+  // relational algebra ops
   sealed abstract class Operator
-  case class Scan(tableName: Table, schema: Schema, fieldDelimiter: Char, externalSchema: Boolean) extends Operator
+  case class Scan(name: Table, schema: Schema, delim: Char, extSchema: Boolean) extends Operator
   case class PrintCSV(parent: Operator) extends Operator
-  case class Project(schema: Schema, schema2: Schema, parent: Operator) extends Operator
+  case class Project(outSchema: Schema, inSchema: Schema, parent: Operator) extends Operator
   case class Filter(pred: Predicate, parent: Operator) extends Operator
   case class Join(parent1: Operator, parent2: Operator) extends Operator
   case class Group(keys: Schema, agg: Schema, parent: Operator) extends Operator
   case class HashJoin(parent1: Operator, parent2: Operator) extends Operator
 
-  // for filtering
+  // filter predicates
   sealed abstract class Predicate
   case class Eq(a: Ref, b: Ref) extends Predicate
 
   sealed abstract class Ref
   case class Field(name: String) extends Ref
   case class Value(x: Any) extends Ref
+
+  // some smart constructors
+  def Schema(schema: String*): Schema = schema.toVector
+  def Scan(tableName: String): Scan = Scan(tableName, None, None)
+  def Scan(tableName: String, schema: Option[Schema], delim: Option[Char]): Scan
 }
 
 
 /**
-Parser
-------
+SQL Parser
+----------
 
 We add a parser that takes a SQL(-like) string and converts it to tree of operators.
 */
 
 trait SQLParser extends QueryAST {
-
-  def parseSql(input: String) = Grammar.parseAll(Grammar.stm, input).get // cleaner error reporting?
-
   import scala.util.parsing.combinator._
+
+  def parseSql(input: String) = Grammar.parseAll(input)
+
   object Grammar extends JavaTokenParsers with PackratParsers {
 
-    def stm: Parser[Operator] = selectClause ~ fromClause ~ whereClause ~ groupClause ^^ {
-      case p ~ s ~ f ~ g => g(p(f(s)))
-    }
+    def stm: Parser[Operator] = 
+      selectClause ~ fromClause ~ whereClause ~ groupClause ^^ {
+        case p ~ s ~ f ~ g => g(p(f(s))) }
     def selectClause: Parser[Operator=>Operator] =
-      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { case (fs,fs1) => Project(fs,fs1,_:Operator) })
-    def whereClause: Parser[Operator=>Operator] =
-      opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
-
-    def groupClause: Parser[Operator=>Operator] =
-      opt("group" ~> "by" ~> fieldList1 ~ ("sum" ~> fieldList1) ^^ { case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
-
+      "select" ~> ("*" ^^ { _ => (op:Operator) => op } | fieldList ^^ { 
+        case (fs,fs1) => Project(fs,fs1,_:Operator) })
     def fromClause: Parser[Operator] =
       "from" ~> joinClause
+    def whereClause: Parser[Operator=>Operator] =
+      opt("where" ~> predicate ^^ { p => Filter(p, _:Operator) }) ^^ { _.getOrElse(op => op)}
+    def groupClause: Parser[Operator=>Operator] =
+      opt("group" ~> "by" ~> fieldIdList ~ ("sum" ~> fieldIdList) ^^ { 
+        case p1 ~ p2 => Group(p1,p2, _:Operator) }) ^^ { _.getOrElse(op => op)}
+
     def joinClause: Parser[Operator] =
       ("nestedloops" ~> repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => Join(a,b)) }) |
       (repsep(tableClause, "join") ^^ { _.reduceLeft((a,b) => HashJoin(a,b)) })
     def tableClause: Parser[Operator] =
-      tableIdent ~ opt("schema" ~> fieldList1) ~ opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ {
-        case table ~ schema ~ delim => Scan(table, schema, delim)
-      } |
+      tableIdent ~ opt("schema" ~> fieldIdList) ~ 
+        opt("delim" ~> ("""\t""" ^^ (_ => '\t') | """.""".r ^^ (_.head))) ^^ {
+          case table ~ schema ~ delim => Scan(table, schema, delim) } |
       ("(" ~> stm <~ ")")
 
     def fieldIdent: Parser[String] = """[\w\#]+""".r
@@ -90,13 +138,21 @@ trait SQLParser extends QueryAST {
     def fieldList:  Parser[(Schema,Schema)] =
       repsep(fieldIdent ~ opt("as" ~> fieldIdent), ",") ^^ { fs2s =>
         val (fs,fs1) = fs2s.map { case a~b => (b.getOrElse(a),a) }.unzip
-        (Schema(fs:_*),Schema(fs1:_*))
-      }
-    def fieldList1:  Parser[Schema] = repsep(fieldIdent,",") ^^ (fs => Schema(fs:_*))
+        (Schema(fs:_*),Schema(fs1:_*)) }
+    def fieldIdList:  Parser[Schema] = 
+      repsep(fieldIdent,",") ^^ (fs => Schema(fs:_*))
 
-    def predicate: Parser[Predicate] = ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
-    def ref: Parser[Ref] = fieldIdent ^^ Field | """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
-          """[0-9]+""".r ^^ (s => Value(s.toInt))
+    def predicate: Parser[Predicate] = 
+      ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
+    def ref: Parser[Ref] = 
+      fieldIdent ^^ Field | 
+      """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
+      """[0-9]+""".r ^^ (s => Value(s.toInt))
+  
+    def parseAll(input: String): Operator = parseAll(stm,input) match {
+      case Success(res,_)  => res
+      case res => throw new Exception(res.toString)
+    }
   }
 }
 
@@ -108,7 +164,51 @@ Iterative Development of a Query Processor
 
 We develop our SQL engine in multiple steps. Each steps leads to a
 working processor, and each successive step either adds a feature or
-optimization. We define a common interface for each processor.
+optimization. 
+
+### Step 1: A (Plain) Query Interpreter
+
+We start with a plain query processor: an interpreter.
+
+- [query_unstaged.scala](query_unstaged.html)
+
+
+### Step 2: A Staged Query Interpreter (= Compiler)
+
+Staging our query interpreter yields a query compiler.
+In the first iteration we generate Scala code but we disregard 
+operators that require internal data structures:
+
+- [query_staged0](query_staged0.html)
+
+
+### Step 3: Specializing Data Structures
+
+The next iteration adds optimized data structure implementations
+that follow a column-store layout. This includes specialized hash 
+tables for gropuBy and join operators:
+
+- [query_staged](query_staged.html)
+
+
+### Step 4: Switching to C and Optimizing IO
+
+For additional low-level optimizations we switch to generating C 
+code:
+
+- [query_optc](query_optc.html)
+
+On the C level, we optimize the IO layer by mapping files directly
+into memory and we further specialize internal data structures
+to minimize data conversions and enable representing string object
+directly as pointers into the memory-mapped input file.
+
+
+Plumbing
+--------
+
+To actually run queries, a little bit of plumbing is necessary. We define a 
+common interface for all query processors (plain or staged, Scala or C).
 
 */
 trait QueryProcessor extends QueryAST {
@@ -134,39 +234,120 @@ trait QueryProcessor extends QueryAST {
   def execQuery(q: Operator): Unit
 }
 
-/**
-### A (Plain) Query Interpreter
-
-We start with a plain query processor: an interpreter.
-
-- [query_unstaged.scala](query_unstaged.html)
-
-*/
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
 }
 
-/**
-
-### A Staged Query Interpreter (= Compiler)
-
-Staging our query interpreter yields a query compiler.
-In the first iteration we generate Scala code:
-
-- [query_staged0](query_staged0.html)
-
-- [query_staged](query_staged.html)
-
-For additional low-level optimizations we switch to
-generating C code:
-
-- [query_optc](query_optc.html)
-
-*/
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
   type Table = Rep[String] // dynamic filename
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
 }
+
+
+/**
+Interactive Mode
+----------------
+
+Examples:
+
+    test:run unstaged "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
+    test:run c        "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
+*/
+trait Engine extends QueryProcessor with SQLParser {
+  def query: String
+  def filename: String
+  def liftTable(n: String): Table
+  def eval: Unit
+  def prepare: Unit = {}
+  def run: Unit = execQuery(PrintCSV(parseSql(query)))
+  override def dynamicFilePath(table: String): Table =
+    liftTable(if (table == "?") filename else filePath(table))
+    def evalString = {
+      val source = new java.io.ByteArrayOutputStream()
+      utils.withOutputFull(new java.io.PrintStream(source)) {
+        eval
+      }
+      source.toString
+    }
+}
+trait StagedEngine extends Engine with StagedQueryProcessor {
+  override def liftTable(n: String) = unit(n)
+}
+
+object Run {
+  def time[A](a: => A) = {
+    val now = System.nanoTime
+    val result = a
+    val micros = (System.nanoTime - now) / 1000
+    println("%d microseconds".format(micros))
+    result
+  }
+
+  var qu: String = _
+  var fn: String = _
+
+  trait MainEngine extends Engine {
+    override def query = qu
+    override def filename =  fn
+  }
+
+  def unstaged_engine: Engine =
+    new Engine with MainEngine with query_unstaged.QueryInterpreter {
+      override def liftTable(n: Table) = n
+      override def eval = run
+    }
+  def scala_engine =
+    new DslDriver[String,Unit] with ScannerExp
+    with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
+      override val codegen = new DslGen with ScalaGenScanner {
+        val IR: q.type = q
+      }
+      override def snippet(fn: Table): Rep[Unit] = run
+      override def prepare: Unit = precompile
+      override def eval: Unit = eval(filename)
+    }
+  def c_engine =
+    new DslDriverC[String,Unit] with ScannerLowerExp
+    with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
+      override val codegen = new DslGenC with CGenScannerLower {
+        val IR: q.type = q
+      }
+      override def snippet(fn: Table): Rep[Unit] = run
+      override def prepare: Unit = {}
+      override def eval: Unit = eval(filename)
+    }
+
+  def main(args: Array[String]) {
+    if (args.length < 2) {
+      println("syntax:")
+      println("   test:run (unstaged|scala|c) sql [file]")
+      println()
+      println("example usage:")
+      println("   test:run c \"select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'\" src/data/t1gram.csv")
+      return
+    }
+    val version = args(0)
+    val engine = version match {
+      case "c" => c_engine
+      case "scala" => scala_engine
+      case "unstaged" => unstaged_engine
+      case _ => println("warning: unexpected engine, using 'unstaged' by default")
+        unstaged_engine
+    }
+    qu = args(1)
+    if (args.length > 2)
+      fn = args(2)
+
+    try {
+      engine.prepare
+      time(engine.eval)
+    } catch {
+      case ex: Exception =>
+        println("ERROR: " + ex)
+    }
+  }
+}
+
 
 /**
 
@@ -309,108 +490,15 @@ class QueryTest extends TutorialFunSuite {
   testquery("t1gram4h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
 }
 
-/**
-Interactive Mode
-----------------
 
-Examples:
-
-    test:run unstaged "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
-    test:run c        "select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'" src/data/t1gram.csv
-*/
-trait Engine extends QueryProcessor with SQLParser {
-  def query: String
-  def filename: String
-  def liftTable(n: String): Table
-  def eval: Unit
-  def prepare: Unit = {}
-  def run: Unit = execQuery(PrintCSV(parseSql(query)))
-  override def dynamicFilePath(table: String): Table =
-    liftTable(if (table == "?") filename else filePath(table))
-    def evalString = {
-      val source = new java.io.ByteArrayOutputStream()
-      utils.withOutputFull(new java.io.PrintStream(source)) {
-        eval
-      }
-      source.toString
-    }
-}
-trait StagedEngine extends Engine with StagedQueryProcessor {
-  override def liftTable(n: String) = unit(n)
-}
-
-object Run {
-  def time[A](a: => A) = {
-    val now = System.nanoTime
-    val result = a
-    val micros = (System.nanoTime - now) / 1000
-    println("%d microseconds".format(micros))
-    result
-  }
-
-    var qu: String = _
-    var fn: String = _
-
-    trait MainEngine extends Engine {
-      override def query = qu
-      override def filename =  fn
-    }
-
-    def unstaged_engine: Engine =
-      new Engine with MainEngine with query_unstaged.QueryInterpreter {
-        override def liftTable(n: Table) = n
-        override def eval = run
-      }
-    def scala_engine =
-      new DslDriver[String,Unit] with ScannerExp
-      with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
-        override val codegen = new DslGen with ScalaGenScanner {
-          val IR: q.type = q
-        }
-        override def snippet(fn: Table): Rep[Unit] = run
-        override def prepare: Unit = precompile
-        override def eval: Unit = eval(filename)
-      }
-    def c_engine =
-      new DslDriverC[String,Unit] with ScannerLowerExp
-      with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
-        override val codegen = new DslGenC with CGenScannerLower {
-          val IR: q.type = q
-        }
-        override def snippet(fn: Table): Rep[Unit] = run
-        override def prepare: Unit = {}
-        override def eval: Unit = eval(filename)
-      }
-
-  def main(args: Array[String]) {
-    if (args.length < 2) {
-      println("syntax:")
-      println("   test:run (unstaged|scala|c) sql [file]")
-      println()
-      println("example usage:")
-      println("   test:run c \"select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'\" src/data/t1gram.csv")
-      return
-    }
-    val version = args(0)
-    val engine = version match {
-      case "c" => c_engine
-      case "scala" => scala_engine
-      case "unstaged" => unstaged_engine
-      case _ => println("warning: unexpected engine, using 'unstaged' by default")
-        unstaged_engine
-    }
-    qu = args(1)
-    if (args.length > 2)
-      fn = args(2)
-
-    engine.prepare
-    time(engine.eval)
-  }
-}
 
 /**
 Suggestions for Exercises
 -------------------------
+
+The query engine we presented is decidedly simple, so as to present an
+end-to-end system that can be understood in total. Below are a few
+suggestions for interesting extensions.
 
 - Implement a scanner that reads on demand from a URL.
 
@@ -430,7 +518,6 @@ Suggestions for Exercises
   own file so that it can be read independently.
 
 - Implement an optimizer on the relational algebra before generating code.
-
   (Hint: smart constructors might help.)
 
 */

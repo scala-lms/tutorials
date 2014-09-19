@@ -142,7 +142,7 @@ Query Interpretation = Compilation
 
   def execOp(o: Operator)(yld: Record => Rep[Unit]): Rep[Unit] = o match {
     case Scan(filename, schema, fieldDelimiter, externalSchema) =>
-      processCSV(tableFor(filename), schema, fieldDelimiter, externalSchema)(yld)
+      processCSV(filename, schema, fieldDelimiter, externalSchema)(yld)
     case Filter(pred, parent) =>
       execOp(parent) { rec => if (evalPred(pred)(rec)) yld(rec) }
     case Project(newSchema, parentSchema, parent) =>
