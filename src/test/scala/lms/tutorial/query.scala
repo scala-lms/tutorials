@@ -265,13 +265,13 @@ trait Engine extends QueryProcessor with SQLParser {
   def run: Unit = execQuery(PrintCSV(parseSql(query)))
   override def dynamicFilePath(table: String): Table =
     liftTable(if (table == "?") filename else filePath(table))
-    def evalString = {
-      val source = new java.io.ByteArrayOutputStream()
-      utils.withOutputFull(new java.io.PrintStream(source)) {
-        eval
-      }
-      source.toString
+  def evalString = {
+    val source = new java.io.ByteArrayOutputStream()
+    utils.withOutputFull(new java.io.PrintStream(source)) {
+      eval
     }
+    source.toString
+  }
 }
 trait StagedEngine extends Engine with StagedQueryProcessor {
   override def liftTable(n: String) = unit(n)
