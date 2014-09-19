@@ -209,8 +209,9 @@ directly as pointers into the memory-mapped input file.
 Plumbing
 --------
 
-To actually run queries, a little bit of plumbing is necessary. We define a 
-common interface for all query processors (plain or staged, Scala or C).
+To actually run queries and test the different implementations side
+by side, a little bit of plumbing is necessary. We define a common 
+interface for all query processors (plain or staged, Scala or C).
 
 */
 trait QueryProcessor extends QueryAST {
