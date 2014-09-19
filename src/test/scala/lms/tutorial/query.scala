@@ -188,7 +188,7 @@ operators that require internal data structures:
 
 The next iteration adds optimized data structure implementations
 that follow a column-store layout. This includes specialized hash 
-tables for gropuBy and join operators:
+tables for groupBy and join operators:
 
 - [query_staged](query_staged.html)
 
