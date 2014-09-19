@@ -202,7 +202,7 @@ code:
 
 On the C level, we optimize the IO layer by mapping files directly
 into memory and we further specialize internal data structures
-to minimize data conversions and enable representing string object
+to minimize data conversions and to enable representing string objects
 directly as pointers into the memory-mapped input file.
 
 
