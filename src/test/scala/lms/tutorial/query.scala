@@ -148,7 +148,7 @@ trait SQLParser extends QueryAST {
       ref ~ "=" ~ ref ^^ { case a ~ _ ~ b => Eq(a,b) }
     def ref: Parser[Ref] = 
       fieldIdent ^^ Field | 
-      """'\w*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
+      """'[^']*'""".r ^^ (s => Value(s.drop(1).dropRight(1))) |
       """[0-9]+""".r ^^ (s => Value(s.toInt))
   
     def parseAll(input: String): Operator = parseAll(stm,input) match {
@@ -278,14 +278,6 @@ trait StagedEngine extends Engine with StagedQueryProcessor {
 }
 
 object Run {
-  def time[A](a: => A) = {
-    val now = System.nanoTime
-    val result = a
-    val micros = (System.nanoTime - now) / 1000
-    println("%d microseconds".format(micros))
-    result
-  }
-
   var qu: String = _
   var fn: String = _
 
@@ -343,7 +335,7 @@ object Run {
 
     try {
       engine.prepare
-      time(engine.eval)
+      utils.time(engine.eval)
     } catch {
       case ex: Exception =>
         println("ERROR: " + ex)

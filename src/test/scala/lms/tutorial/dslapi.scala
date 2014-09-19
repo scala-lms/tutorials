@@ -103,6 +103,8 @@ trait DslGen extends ScalaGenNumericOps
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
       emitValDef(sym, quote(c))
+    case PrintF(f:String,xs) => 
+      emitValDef(sym, src"printf(${Const(f)::xs})")
     case GenerateComment(s) =>
       stream.println("// "+s)
     case Comment(s, verbose, b) =>

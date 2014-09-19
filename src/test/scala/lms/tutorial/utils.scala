@@ -102,6 +102,18 @@ trait TutorialFunSuite extends LibSuite {
 }
 
 object utils {
+  def time[A](a: => A) = {
+    val now = System.nanoTime
+    val result = a
+    val micros = (System.nanoTime - now) / 1000
+    println("%d microseconds".format(micros))
+    result
+  }
+  def captureOut(func: => Any): String = {
+    val source = new java.io.ByteArrayOutputStream()
+    withOutputFull(new java.io.PrintStream(source))(func)
+    source.toString    
+  }
   def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
     scala.Console.withOut(out)(scala.Console.withErr(out)(f))
   }
