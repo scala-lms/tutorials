@@ -132,9 +132,9 @@ trait StagedRegexpMatcher extends Dsl {
     if (regexp(0) == '^')
       matchhere(regexp, 1, text, 0)
     else {
-      val start = var_new(unit(-1))
-      val found = var_new(unit(false))
-      while (!found &&& start < text.length) {
+      var start = -1
+      var found = false
+      while (!found && start < text.length) {
         start += 1
         found = matchhere(regexp, 0, text, start)
       }
@@ -150,22 +150,22 @@ trait StagedRegexpMatcher extends Dsl {
       start==text.length
     else if (restart+1 < regexp.length && regexp(restart+1)=='*')
       matchstar(regexp(restart), regexp, restart+2, text, start)
-    else if (start < text.length &&& matchchar(regexp(restart), text(start)))
+    else if (start < text.length && matchchar(regexp(restart), text(start)))
       matchhere(regexp, restart+1, text, start+1)
     else false
   }
 
   /* search for c* followed by restart of regexp at start of text */
   def matchstar(c: Char, regexp: String, restart: Int, text: Rep[String], start: Rep[Int]): Rep[Boolean] = {
-    val sstart = var_new(start)
-    val found = var_new(matchhere(regexp, restart, text, sstart))
-    val failed = var_new(unit(false))
-    while (!failed &&& !found &&& sstart < text.length) {
+    var sstart = start
+    var found = matchhere(regexp, restart, text, sstart)
+    var failed = false
+    while (!failed && !found && sstart < text.length) {
       failed = !matchchar(c, text(sstart))
       sstart += 1
       found = matchhere(regexp, restart, text, sstart)
     }
-    !failed &&& found
+    !failed && found
   }
 
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {

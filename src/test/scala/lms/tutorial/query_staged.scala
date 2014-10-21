@@ -144,7 +144,7 @@ Data Structure Implementations
     comment[Int]("hash_lookup") {
       val h = fieldsHash(k).toInt
       var pos = h & hashMask
-      while (htable(pos) != -1 &&& !fieldsEqual(keys(htable(pos)),k)) {
+      while (htable(pos) != -1 && !fieldsEqual(keys(htable(pos)),k)) {
         pos = (pos + 1) & hashMask
       }
       if (init.isDefined) {
