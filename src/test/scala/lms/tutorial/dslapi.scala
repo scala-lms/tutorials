@@ -149,7 +149,7 @@ trait DslGenC extends CGenNumericOps
     case "Char" => "char"
     case _ => super.remap(m)
   }
-  def format(s: Exp[Any]): String = {
+  override def format(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "uint16_t" => "%c"
       case "bool" | "int8_t" | "int16_t" | "int32_t" => "%d"
@@ -164,7 +164,7 @@ trait DslGenC extends CGenNumericOps
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }
-  def quoteRawString(s: Exp[Any]): String = {
+  override def quoteRawString(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "string" => quote(s) + ".c_str()"
       case _ => quote(s)
