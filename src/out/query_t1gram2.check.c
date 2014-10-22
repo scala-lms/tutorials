@@ -104,10 +104,15 @@ void Snippet(char*  x0) {
       for (;;) {
         int32_t x60 = x59;
         bool x61 = x60 < x18;
-        char x62 = x20[x60];
-        char x63 = "Auswanderung"[x60];
-        bool x64 = x62 == x63;
-        bool x65 = x61 && x64;
+        bool x65;
+        if (x61) {
+          char x62 = x20[x60];
+          char x63 = "Auswanderung"[x60];
+          bool x64 = x62 == x63;
+          x65 = x64;
+        } else {
+          x65 = false;
+        }
         if (!x65) break;
         x59 += 1;
       }

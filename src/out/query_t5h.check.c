@@ -181,10 +181,15 @@ void Snippet(char*  x0) {
           for (;;) {
             int32_t x130 = x129;
             bool x131 = x130 < x126;
-            char x132 = x125[x130];
-            char x133 = x79[x130];
-            bool x134 = x132 == x133;
-            bool x135 = x131 && x134;
+            bool x135;
+            if (x131) {
+              char x132 = x125[x130];
+              char x133 = x79[x130];
+              bool x134 = x132 == x133;
+              x135 = x134;
+            } else {
+              x135 = false;
+            }
             if (!x135) break;
             x129 += 1;
           }
@@ -332,10 +337,15 @@ void Snippet(char*  x0) {
           for (;;) {
             int32_t x274 = x273;
             bool x275 = x274 < x270;
-            char x276 = x269[x274];
-            char x277 = x230[x274];
-            bool x278 = x276 == x277;
-            bool x279 = x275 && x278;
+            bool x279;
+            if (x275) {
+              char x276 = x269[x274];
+              char x277 = x230[x274];
+              bool x278 = x276 == x277;
+              x279 = x278;
+            } else {
+              x279 = false;
+            }
             if (!x279) break;
             x273 += 1;
           }

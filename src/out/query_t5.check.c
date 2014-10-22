@@ -222,10 +222,15 @@ void Snippet(char*  x0) {
         for (;;) {
           int32_t x179 = x178;
           bool x180 = x179 < x58;
-          char x181 = x60[x179];
-          char x182 = x145[x179];
-          bool x183 = x181 == x182;
-          bool x184 = x180 && x183;
+          bool x184;
+          if (x180) {
+            char x181 = x60[x179];
+            char x182 = x145[x179];
+            bool x183 = x181 == x182;
+            x184 = x183;
+          } else {
+            x184 = false;
+          }
           if (!x184) break;
           x178 += 1;
         }

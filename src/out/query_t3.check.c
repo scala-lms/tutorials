@@ -139,10 +139,15 @@ void Snippet(char*  x0) {
       for (;;) {
         int32_t x94 = x93;
         bool x95 = x94 < x88;
-        char x96 = x90[x94];
-        char x97 = "yes"[x94];
-        bool x98 = x96 == x97;
-        bool x99 = x95 && x98;
+        bool x99;
+        if (x95) {
+          char x96 = x90[x94];
+          char x97 = "yes"[x94];
+          bool x98 = x96 == x97;
+          x99 = x98;
+        } else {
+          x99 = false;
+        }
         if (!x99) break;
         x93 += 1;
       }
