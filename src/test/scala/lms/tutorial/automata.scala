@@ -6,12 +6,24 @@ Outline:
 
 
 Specializing string matchers and parsers is a popular benchmark in the partial
-evaluation and supercompilation literature
-[(*)](DBLP:journals/ipl/ConselD89,DBLP:journals/toplas/AgerDR06,DBLP:journals/toplas/SperberT00,DBLP:journals/toplas/Turchin86,DBLP:journals/jfp/SorensenGJ96).
+evaluation and supercompilation literature.
+
+<!--
+- http://dblp.uni-trier.de/db/ journals/ipl/ConselD89
+- http://dblp.uni-trier.de/db/ journals/toplas/AgerDR06
+- http://dblp.uni-trier.de/db/ journals/toplas/SperberT00
+- http://dblp.uni-trier.de/db/ journals/toplas/Turchin86,
+- http://dblp.uni-trier.de/db/ journals/jfp/SorensenGJ96
+-->
+
 We consider ``multi-threaded'' regular expression matchers, that spawn a new
 conceptual thread to process alternatives in parallel. Of course these matchers
 do not actually spawn OS-level threads, but rather need to be advanced manually
 by client code. Thus, they are similar to coroutines.
+
+
+Regexp Matchers as Nondeterministic Finite Automata (NFA)
+---------------------------------------------------------
 
 Here is a simple example for the fixed regular expression `.*AAB`:
 
@@ -45,6 +57,9 @@ use `Char`s for simplicity, but of course we could  use generic types as well.
 Note that the API does not mention where input is obtained from (files,
 streams, etc).
 
+
+From NFA to DFA using Staging
+-----------------------------
 
 We will translate NFAs to DFAs using staging. This is the unstaged DFA API:
 
@@ -82,11 +97,11 @@ encountered NFA configuration (removing duplicate states via `canonicalize`):
     }
     iterate(findAAB())
 
-The LMS framework memoizes  functions (see [here](#sec:220functions)) which
+The LMS framework memoizes  functions (see [here (PDF)](http://infoscience.epfl.ch/record/178274/files/lms-cacm2012.pdf)) which
 ensures  termination if the NFA is indeed finite.
 
 We use a separate function to explore the NFA space (see
-Figure~\ref{fig:NFAexplore}), advancing the automaton by a symbolic character
+below), advancing the automaton by a symbolic character
 `cin` to invoke its continuations `k` with a new automaton, i.e. the possible
 set of states after consuming `cin`. The given implementation assumes
 character sets contain either zero or one characters, the empty set `Set()`
@@ -115,14 +130,17 @@ are staging time values.
         maybeFlag(exploreNFA(rest, cin)(acc => k(acc ++ s())))
     }
 
-The generated code is shown in Figure~\ref{fig:regexGen}. Each function
+The generated code is shown further down below. Each function
 corresponds to one DFA state. Note how  negative information has been used to
 prune the transition space: Given input such as `...AAB` the  automaton jumps
 back to the initial state, i.e. it recognizes that the last character B
 cannot also be A and starts looking for two As after the B.
 
 
-The generated code can be used as follows:
+Generated State Machine Code
+----------------------------
+
+To use the generated code, we use the following small driver loop:
 
     var state = stagedFindAAB()
     var input = ...
