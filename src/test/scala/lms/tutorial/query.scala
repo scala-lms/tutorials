@@ -8,7 +8,7 @@ short of what a hand-written, specialized, implementation of the same query can
 achieve.
 
 In this tutorial, we will build a small SQL processing engine that consists of 
-just about 500 lines of high-level Scala code. Where other systems interpret query 
+just about 500 lines of high-level Scala code. Whereas other systems interpret query 
 plans, operator by operator, we will use LMS to generate and compile low-level C 
 code for entire queries.
 
@@ -42,16 +42,16 @@ Here are some timings:
 
 - PostgreSQL takes 3 minutes to load, the first query run takes 46 seconds, but subsequent runs get faster over time (down to 7 seconds).
 
-- An [AWK script](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.awk) that processes the CSV file directly takes 45 seconds
+- An [AWK script](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.awk) that processes the CSV file directly takes 45 seconds.
 
-- A [query interpreter](https://github.com/scala-lms/tutorials/blob/master/src/test/scala/lms/tutorial/query_unstaged.scala) written in Scala takes 39 sec
+- A [query interpreter](https://github.com/scala-lms/tutorials/blob/master/src/test/scala/lms/tutorial/query_unstaged.scala) written in Scala takes 39 sec.
 
-- A hand-written specialized [Scala program](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand0.scala/) takes 13 sec
+- A hand-written specialized [Scala program](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand0.scala/) takes 13 sec.
 
 - A similar hand-written [C program](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand.c/) performs marginally faster,
-  but with [more optimizations](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand2.c/) we can get as good as 3.2 seconds
+  but with [more optimizations](https://github.com/scala-lms/tutorials/blob/master/src/out/query_t1gram2.hand2.c/) we can get as good as 3.2 seconds.
 
-The query processor we will develop in this tutorial matches the performance of the handwritten Scala and C queries (13s and 3s, respectively)
+The query processor we will develop in this tutorial matches the performance of the handwritten Scala and C queries (13s and 3s, respectively).
 
 More details on running the benchmarks are available [here](https://github.com/scala-lms/tutorials/blob/master/src/data/README.md). We now turn to our actual implementation.
 
