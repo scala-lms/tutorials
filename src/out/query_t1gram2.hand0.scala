@@ -10,8 +10,10 @@ class Snippet extends (String=>Unit) {
         val volumeCount = s.next('\n')
         println(s"$phrase,$year,$matchCount,$volumeCount")
       } else {
-        val year = s.next('\t') // could be optimized away (assuming input has expected format)
-        val matchCount = s.next('\t') // ditto
+        // next two tab scans could be optimized away,
+        // assuming input has expected format
+        val year = s.next('\t')
+        val matchCount = s.next('\t')
         val volumeCount = s.next('\n')
       }
     }
