@@ -147,7 +147,7 @@ Advanced:
 LMS In Depth
 ------------
 
-The material below has been extracted from Tiark's PhD thesis ([PDF](http://lampwww.epfl.ch/~rompf/thesis_120716.pdf)) and is still undergoing 
+The material below has been extracted from Tiark's PhD thesis ([PDF](http://infoscience.epfl.ch/record/180642/files/EPFL_TH5456.pdf)) and is still undergoing 
 revision for the web.
 
 1. [About generative programming](01_overview.html)
