@@ -1,6 +1,6 @@
 language: scala
 scala:
-   - 2.10.2
+   - 2.11.2
 
 before_install:
     - sudo apt-get update -qq
