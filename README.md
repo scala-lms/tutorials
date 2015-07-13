@@ -5,22 +5,24 @@
 
 Lightweight Modular Staging (LMS) is a framework for runtime code generation and compiled DSLs.
 
-Dependencies
-------------
+How to build and run
+--------------------
 
-* [SBT](http://www.scala-sbt.org/):
-  * Create or edit the file `~/.sbtconfig` to contain the following options for the JVM:
+1. Install the [SBT](http://www.scala-sbt.org/) build tool:
+    
+    If you are using OS X and [Homebrew](http://brew.sh), run `brew install sbt`.
 
-    `SBT_OPTS="-Xms3G -Xmx3G -Xss1M -XX:MaxPermSize=192M -XX:+UseParallelGC"`
+    For other platforms, follow the instructions on the [SBT](http://www.scala-sbt.org/) website.
 
-* [LMS](https://github.com/TiarkRompf/virtualization-lms-core):
-  * `git clone https://github.com/TiarkRompf/virtualization-lms-core.git`
-  * `sbt publish-local`
+2. Install [LMS](https://github.com/TiarkRompf/virtualization-lms-core):
+  * `git clone https://github.com/TiarkRompf/virtualization-lms-core.git lms-core`
+  * `cd lms-core; sbt publish-local; cd ..`
 
-SBT commands
-------------
+3. Clone this repo and run the tests:
+  * `git clone https://github.com/scala-lms/tutorials.git lms-tutorials`
+  * `cd lms-tutorials`
+  * `sbt test`
 
-* `test` -- runs all the tests
 
 Browse the sources
 ------------------
