@@ -505,14 +505,21 @@ suggestions for interesting extensions.
   (Hint: the C version already does this, but is also more involved
   because of the custom type representations.)
 
-- Implement more predicates (e.g. `LessThan`) and predicate
+- (easy) Implement more predicates (e.g. `LessThan`) and predicate
   combinators (e.g. `And`, `Or`) in order to run more interesting
   queries.
 
 - (medium) Implement a real column-oriented database, where each column has its
   own file so that it can be read independently.
 
-- Implement an optimizer on the relational algebra before generating code.
+- (hard) Implement an optimizer on the relational algebra before generating code.
   (Hint: smart constructors might help.)
+
+  The query optimizer should rearrange query operator trees for a better join ordering, i.e. decide whether to execute joins on relations S0 x S1 x S2 as  (S0 x (S1 x S2)) vs ((S0 x S1) x S2).
+
+  Use a dynamic programming algorithm, that for n joins on tables S0 x S1 x ...x Sn tries to find an optimal solution for S1 x .. x Sn first, and then the optimal combination with S0. 
+
+  To find an optimal combination, try all alternatives and estimate the cost of each. Cost can be measured roughly as number of records processed. As a simple approximation, you can use the size of each input table and assume that all filter predicates match uniformly with probability 0.5.
+
 
 */
