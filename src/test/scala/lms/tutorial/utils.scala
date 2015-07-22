@@ -3,11 +3,14 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
+import scala.virtualization.lms.common._
+import scala.reflect.SourceContext
+
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv
 }
 
-trait TutorialFunSuite extends LibSuite {
+trait TutorialFunSuite extends LibSuite with EmbeddedControls {//this: IfThenElse  =>
   val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
 
   val prefix = "src/out/"
@@ -45,14 +48,14 @@ trait TutorialFunSuite extends LibSuite {
     val aname = fileprefix+".actual."+suffix
     val expected = readFile(name)
     val code = indent(raw_code)
-    if (expected != code) {
-      val wname = if (overwriteCheckFiles) name else aname
-      println("writing " + wname)
-      writeFile(wname, code)
-    } else {
-      val f = new File(aname)
-      if (f.exists) f.delete
-    }
+    //EmbeddedControls.
+    __ifThenElse((expected != code),
+    {val wname = if (overwriteCheckFiles) name else aname
+    println("writing " + wname)
+    writeFile(wname, code)},
+    {val f = new File(aname)
+    if (f.exists) f.delete}
+    )
     if (!overwriteCheckFiles) {
       assert(expected == code, name)
     }

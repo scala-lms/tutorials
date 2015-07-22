@@ -23,7 +23,7 @@ import scala.reflect.SourceContext
 We first implement a pure, non-staged library version as a baseline.
 */
 
-trait Shallow extends Util {
+trait Shallow extends Util with EmbeddedControls {
   
   // people db schema
 
@@ -499,7 +499,7 @@ trait Staged extends ScalaOpsPkg with LiftPrimitives with LiftString with Struct
       if !exists(
         for {
           e <- org.employees
-          if d.dpt == e.dpt && !exists(
+          if (d.dpt == e.dpt) && !exists(
             for {
               t <- org.tasks
               if e.emp == t.emp && t.tsk == u 
