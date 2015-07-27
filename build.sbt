@@ -40,4 +40,4 @@ libraryDependencies ++= (
   else Nil
   )
 
-//addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
