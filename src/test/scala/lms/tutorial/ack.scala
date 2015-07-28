@@ -15,7 +15,9 @@ package scala.lms.tutorial
 
 import org.scalatest.FunSuite
 
-//import org.scala_lang.virtualized.virtualize
+import org.scala_lang.virtualized.{SourceContext, EmbeddedControls, virtualize}
+
+import scala.virtualization.lms.util.OverloadHack
 
 /**
 Ackermann's Function
@@ -28,11 +30,14 @@ and re-use.
 
 */
 
-//@virtualize
+@virtualize
 trait Ackermann extends Dsl {
+  @virtualize
   def a(m: Int): Rep[Int => Int] = fun { (n: Rep[Int]) =>
-    generate_comment("ack_"+m) // to navigate the generated code
-    if (m==0) n+1
+    //infix_+("arefdsf", 67) //test
+    val x = "ack_" //avoid string infix_+ overloading as it does not work nicely with implicit OverloadHack
+    generate_comment(x+m) // to navigate the generated code
+    if (m == 0) n+1
     else if (n==0) a(m-1)(1)
     else a(m-1)(a(m)(n-1))
   }
@@ -52,6 +57,7 @@ The stated goal is to specialize Ackermann's function for `m=2`.
 `ack_1(n) =  if n=0 then ack_0(1) else  ack_0(ack_1(n-1))`
 `ack_0(n) =  n+1`
 */
+@virtualize
 class AckermannTest extends TutorialFunSuite {
   val under = "ack"
   def specialize(m: Int): DslDriver[Int,Int] = new DslDriver[Int,Int] with Ackermann {
