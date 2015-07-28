@@ -4,7 +4,7 @@ scalaOrganization := "org.scala-lang.virtualized"
 
 scalaVersion := "2.11.2"
 
-libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
+libraryDependencies += "EPFL" %% "macro-lms" % "0.3-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
 
