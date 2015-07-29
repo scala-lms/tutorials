@@ -1,10 +1,10 @@
 name := "lms-tutorials"
 
-scalaOrganization := "org.scala-lang.virtualized"
+//scalaOrganization := "org.scala-lang.virtualized"
 
 scalaVersion := "2.11.2"
 
-libraryDependencies += "EPFL" %% "lms" % "0.3-SNAPSHOT"
+libraryDependencies += "EPFL" %% "macro-lms" % "0.3-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
 
@@ -31,7 +31,7 @@ libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _ % 
 
 libraryDependencies += "org.scala-lang.virtualized" %% "scala-virtualized" % "0.0.1-SNAPSHOT"
 
-autoCompilerPlugins := true
+//autoCompilerPlugins := true
 
 val paradiseVersion = "2.0.1"
 
@@ -40,4 +40,4 @@ libraryDependencies ++= (
   else Nil
   )
 
-//addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVersion.full)

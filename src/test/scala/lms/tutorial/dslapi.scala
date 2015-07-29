@@ -1,7 +1,9 @@
 package scala.lms.tutorial
 
+import org.scala_lang.virtualized.virtualize
+import org.scala_lang.virtualized.SourceContext
+
 import scala.virtualization.lms.common._
-import scala.reflect.SourceContext
 
 // TODO: clean up at least, maybe add to LMS?
 trait UtilOps extends Base {
@@ -39,10 +41,10 @@ trait CGenUtilOps extends CGenBase {
   }
 }
 
-
+@virtualize
 trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
-  override def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: scala.reflect.SourceContext): Rep[Boolean] =
+  /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
   def generate_comment(l: String): Rep[Unit]
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
@@ -129,6 +131,7 @@ trait DslImpl extends DslExp { q =>
 }
 
 // TODO: currently part of this is specific to the query tests. generalize? move?
+@virtualize
 trait DslGenC extends CGenNumericOps
     with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse
     with CGenEqual with CGenRangeOps with CGenOrderingOps
@@ -149,7 +152,7 @@ trait DslGenC extends CGenNumericOps
     case "Char" => "char"
     case _ => super.remap(m)
   }
-  override def format(s: Exp[Any]): String = {
+  /*override*/ def format(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "uint16_t" => "%c"
       case "bool" | "int8_t" | "int16_t" | "int32_t" => "%d"
@@ -164,7 +167,7 @@ trait DslGenC extends CGenNumericOps
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }
-  override def quoteRawString(s: Exp[Any]): String = {
+  /*override*/ def quoteRawString(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "string" => quote(s) + ".c_str()"
       case _ => quote(s)

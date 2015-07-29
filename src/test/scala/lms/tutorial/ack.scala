@@ -15,7 +15,7 @@ package scala.lms.tutorial
 
 import org.scalatest.FunSuite
 
-//import org.scala_lang.virtualized.virtualize
+import org.scala_lang.virtualized.virtualize
 
 /**
 Ackermann's Function
@@ -28,7 +28,7 @@ and re-use.
 
 */
 
-//@virtualize
+@virtualize
 trait Ackermann extends Dsl {
   def a(m: Int): Rep[Int => Int] = fun { (n: Rep[Int]) =>
     generate_comment("ack_"+m) // to navigate the generated code

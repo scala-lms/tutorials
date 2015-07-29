@@ -4,7 +4,8 @@ import java.io._
 import org.scalatest.FunSuite
 
 import scala.virtualization.lms.common._
-import scala.reflect.SourceContext
+import org.scala_lang.virtualized.SourceContext
+import org.scala_lang.virtualized.EmbeddedControls
 
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv
@@ -115,7 +116,7 @@ object utils {
   def captureOut(func: => Any): String = {
     val source = new java.io.ByteArrayOutputStream()
     withOutputFull(new java.io.PrintStream(source))(func)
-    source.toString    
+    source.toString
   }
   def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
     scala.Console.withOut(out)(scala.Console.withErr(out)(f))
