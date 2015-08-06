@@ -169,7 +169,7 @@ members defined by `TestFFC`.
 
 The full code is below:
 
-    package scala.virtualization.lms
+    package scala.lms
     package epfl
     package test2
 

@@ -34,7 +34,7 @@ This tutorial is a [literate Scala file](https://github.com/scala-lms/tutorials/
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 
 class GettingStartedTest extends TutorialFunSuite {
   val under = "dslapi"

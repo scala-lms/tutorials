@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 import scala.reflect.SourceContext
 
 // TODO: clean up at least, maybe add to LMS?
@@ -160,7 +160,7 @@ trait DslGenC extends CGenNumericOps
       case "char" => "%c"
       case "void" => "%c"
       case _ =>
-        import scala.virtualization.lms.internal.GenerationFailedException
+        import scala.lms.internal.GenerationFailedException
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }

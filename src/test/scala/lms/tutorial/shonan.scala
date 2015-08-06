@@ -22,7 +22,7 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 import scala.reflect.SourceContext
 
 class ShonanTest extends TutorialFunSuite {

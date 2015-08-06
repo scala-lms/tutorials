@@ -12,7 +12,7 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common.ForwardTransformer
+import scala.lms.common.ForwardTransformer
 import scala.reflect.SourceContext
 
 // Shonan Challenge 3.3 Stencil

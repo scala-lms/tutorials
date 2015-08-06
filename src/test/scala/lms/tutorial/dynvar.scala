@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common.Compile
+import scala.lms.common.Compile
 import scala.reflect.SourceContext
 
 trait TrackConditionals extends Dsl {
