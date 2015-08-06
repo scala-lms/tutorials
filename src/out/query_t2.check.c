@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #ifndef MAP_FILE
 #define MAP_FILE MAP_SHARED
 #endif
