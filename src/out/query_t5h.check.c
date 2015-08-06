@@ -232,6 +232,7 @@ void Snippet(char*  x0) {
     int32_t x171 = x167 + 1;
     x20[x166] = x171;
   }
+  close(x21);
   int32_t x176 = 0;
   for (;;) {
     int32_t x177 = x176;
@@ -392,6 +393,7 @@ void Snippet(char*  x0) {
       }
     }
   }
+  close(x21);
 }
 /*****************************************
 End of C Generated Code

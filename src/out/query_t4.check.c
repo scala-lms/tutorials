@@ -222,7 +222,9 @@ void Snippet(char*  x0) {
       int32_t x182 = printll(x145);
       printf("%s\n","");
     }
+    close(x2);
   }
+  close(x2);
 }
 /*****************************************
 End of C Generated Code

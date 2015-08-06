@@ -108,6 +108,7 @@ void Snippet(char*  x0) {
     int32_t x63 = printll(x56);
     printf("%s\n","");
   }
+  close(x2);
 }
 /*****************************************
 End of C Generated Code

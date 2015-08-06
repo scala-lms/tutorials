@@ -45,7 +45,7 @@ Input File Tokenizer
     }
 
     def hasNext = pos < fl
-    def close = fclose(fd)
+    def done = close(fd)
   }
 
 /**
@@ -99,7 +99,7 @@ Low-Level Processing Logic
       nextRecord // ignore csv header
     }
     while (s.hasNext) yld(nextRecord)
-    s.close
+    s.done
   }
 
   def printSchema(schema: Schema) = println(schema.mkString(defaultFieldDelimiter.toString))

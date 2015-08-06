@@ -176,7 +176,9 @@ void Snippet(char*  x0) {
       int32_t x132 = printll(x121);
       printf("%s\n","");
     }
+    close(x67);
   }
+  close(x2);
 }
 /*****************************************
 End of C Generated Code

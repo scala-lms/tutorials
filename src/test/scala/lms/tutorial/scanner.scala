@@ -94,7 +94,7 @@ trait ScalaGenScanner extends ScalaGenEffect {
 
 trait ScannerLowerBase extends Base with UncheckedOps {
   def open(name: Rep[String]): Rep[Int]
-  def fclose(fd: Rep[Int]): Rep[Unit]
+  def close(fd: Rep[Int]): Rep[Unit]
   def filelen(fd: Rep[Int]): Rep[Int]
   def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
   def stringFromCharArray(buf: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String]
@@ -104,7 +104,7 @@ trait ScannerLowerBase extends Base with UncheckedOps {
 
 trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
-  def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
+  def close(fd: Rep[Int]) = unchecked[Unit]("close(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
   def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
   def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data,"+",pos)

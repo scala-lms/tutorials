@@ -138,6 +138,7 @@ void Snippet(char*  x0) {
     } else {
     }
   }
+  close(x2);
 }
 /*****************************************
 End of C Generated Code
