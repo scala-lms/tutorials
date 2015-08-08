@@ -49,7 +49,7 @@ class Test extends TutorialFunSuite {
   val r = new DslDriver[Int,Int] with Snippet
   test("main") {
     println(indent(r.code))
-    println("//"+r.eval(40))
+    println(r.eval(40))
   }
 }
 </div>
