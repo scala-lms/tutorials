@@ -43,12 +43,16 @@ package scala.lms.tutorial
 
 class Test extends TutorialFunSuite {
   val under = "main"
-  trait Snippet extends DslSnippet[Int,Int] {
+
+  trait Program extends DslSnippet[Int,Int] {
     def snippet(n: Rep[Int]): Rep[Int] = n+1+1
   }
-  val r = new DslDriver[Int,Int] with Snippet
-  test("main") {
+  val r = new DslDriver[Int,Int] with Program
+  
+  test ("code generation") {
     println(indent(r.code))
+  }
+  test ("evaluation") {
     println(r.eval(40))
   }
 }
