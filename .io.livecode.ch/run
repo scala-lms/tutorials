@@ -4,6 +4,6 @@ set -e
 cp $1 src/test/scala/lms/tutorial/main.scala
 cp $2 src/test/scala/lms/tutorial/lib.scala
 
-sbt test
+sbt -no-colors test
 
 
