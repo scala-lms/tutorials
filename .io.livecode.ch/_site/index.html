@@ -1,0 +1,56 @@
+{% extends "base_livecode.html" %}
+{% block title %}LMS{% endblock %}
+
+{% block content %}
+<script>
+var output_editors = {}
+function livecode_html_extra(id) {
+  var boxit_id = 'boxit-'+id
+  return '<textarea class=hidden name='+boxit_id+' id='+boxit_id+'></textarea>'
+}
+function livecode_process_data(id, data) {
+  var lines = data.split('\n');
+  var s = 0
+  for (var i=0; i < lines.length; i++) {
+    if (s==0 && lines[i].startsWith("/*")) {
+      s = 1;
+    } else if (s==1 && lines[i].startsWith("/*")) {
+      s = 2;
+    } else if (s==2 && lines[i].startsWith("**")) {
+      s = 0;
+    } else if (s==0) {
+      lines[i] = '//'+lines[i];
+    }
+  }
+  var r = lines.join('\n')
+  var boxit_id = 'boxit-'+id
+  var e = output_editors[id]
+  if (!e) {
+    e = CodeMirror.fromTextArea(document.getElementById(boxit_id), {
+      mode: 'text/x-scala',
+      tabMode: 'indent',
+      readOnly: 'nocursor'
+    })
+    output_editors[id] = e
+  }
+  e.setValue(r)
+  $('#'+boxit_id).removeClass('hidden')
+  return '';
+}
+</script>
+<div class="live" id="main">
+package scala.lms.tutorial
+
+class Test extends TutorialFunSuite {
+  val under = "main"
+  trait Snippet extends DslSnippet[Int,Int] {
+    def snippet(n: Rep[Int]): Rep[Int] = n+1+1
+  }
+  val r = new DslDriver[Int,Int] with Snippet
+  test("main") {
+    println(indent(r.code))
+    println("//"+r.eval(40))
+  }
+}
+</div>
+{% endblock %}
