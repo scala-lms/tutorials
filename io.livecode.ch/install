@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+mkdir keep
+cp src/test/scala/lms/tutorial/dslapi.scala keep/
+cp src/test/scala/lms/tutorial/utils.scala keep/
+rm src/test/scala/lms/tutorial/*
+cp keep/* src/test/scala/lms/tutorial/*
+rm -rf keep
+
+sbt test:compile
+
