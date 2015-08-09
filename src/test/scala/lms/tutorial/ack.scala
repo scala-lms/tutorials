@@ -13,8 +13,6 @@ Outline:
 
 package scala.lms.tutorial
 
-import org.scalatest.FunSuite
-
 /**
 Ackermann's Function
 --------------------
