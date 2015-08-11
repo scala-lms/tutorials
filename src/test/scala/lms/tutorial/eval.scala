@@ -346,3 +346,13 @@ class TestEvaluator extends TutorialFunSuite {
       top_eval[NoRep](A(A(Y(true), List(A(sumf(true), List(A(Y(true), List(fib(true))))))), List(I(7))))}
   }
 }
+
+/**
+Generated Code
+-------------
+
+This is code generated while specializing the `fib` lambda.
+
+      .. includecode:: ../../../../out/eval_yfibc.check.scala
+
+*/
