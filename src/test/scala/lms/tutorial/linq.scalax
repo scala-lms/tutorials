@@ -385,7 +385,11 @@ trait Staged extends ScalaOpsPkg with LiftPrimitives with LiftString with Struct
 
   // 2.3 Abstracting over values
 
-  type Names = List[{ val name: String}]
+  type Name = Record { val name: String}
+  type Names = List[Name]
+
+  //implicit def namesTyp: Typ[Names]
+
   def range(a: Rep[Int], b: Rep[Int]): Rep[Names] =
     for {
       w <- db.people
@@ -691,7 +695,7 @@ trait StagedExp extends Staged with ScalaOpsPkgExp with BooleanOpsExpOpt with St
   // some extractor objects to make pattern matching more convenient
   // (these are not strictly necessary)
   object Empty {
-    def apply() = List()
+    def apply() = List[Unit]()
     def unapply[A](x:Exp[List[A]]): Boolean = x match {
       case Def(ListNew(xs)) if xs.length == 0 => true
       case _ => false
@@ -771,16 +775,16 @@ trait StagedExp extends Staged with ScalaOpsPkgExp with BooleanOpsExpOpt with St
                    for x in [] do N --> []
               for x in (P @ Q) do R --> (for x in P do R) @ (for x in Q do R)
 */
-    case Empty()              => List()
+    case Empty()              => List[B]()
     case Yield(a)             => f(a)
-    case IfThen(c,a)          => if (c) for (x <- a; y <- f(x)) yield y else List()
+    case IfThen(c,a)          => if (c) for (x <- a; y <- f(x)) yield y else List[B]()
     case For(l2,f2)           => for (x <- l2; y <- f2(x); z <- f(y)) yield z
     case Concat(a,b)          => a.flatMap(f) ++ b.flatMap(f)
     case (Def(FieldApply(Def(Database(db)), tbl))) =>     
       val ff = reifyFun(f)
       ff.body match {
 /*                 for x in P do [] --> []           */
-        case Block(Empty())              => List()
+        case Block(Empty())              => List[B]()
         case _ =>
           // no rewrites match, go ahead and create IR node
           reflectEffect(DBFor(l, f, db, tbl, ff), summarizeEffects(ff.body).star)
