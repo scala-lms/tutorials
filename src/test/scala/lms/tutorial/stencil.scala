@@ -110,14 +110,14 @@ trait SlidingExp extends DslExp with Sliding {
       // now generate the loop
       for (j <- (start + unit(1)) until end) {
         // read the overlap variables
-        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)))
+        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
         // emit the transformed loop body
         val (r,substY1) = trans.withSubstScope((reads:+(i->(j-unit(1)))): _*) {
           stms1.foreach(s=>trans.traverseStm(s))
           (trans(r1), trans.subst)
         }
         // write the new values to the overlap vars
-        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))))
+        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head)))
       }
     }
   }
