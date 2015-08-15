@@ -43,41 +43,41 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends ((Value)=>(Value)) {
   def apply(x0:Value): Value = {
-    val x14 = {x15: (Value) =>
-      x15: Value
+    val x15 = {x16: (Value) =>
+      x16: Value
     }
     val x1 = {x2: (Value) =>
-      val x8 = {x9: (Value) =>
-        val x12 = {x13: (Value) =>
-          val x16 = base_apply_norep(P("+"), List(x9, x13), Map(("fib" -> x0), ("n" -> x2)), x14)
-          x16: Value
+      val x9 = {x10: (Value) =>
+        val x13 = {x14: (Value) =>
+          val x17 = base_apply_norep(P("+"), List(x10, x14), Map(("fib" -> x0), ("n" -> x2)), x15)
+          x17: Value
         }
-        val x10 = {x11: (Value) =>
-          val x18 = base_apply_norep(x0, List(x11), Map(("fib" -> x0), ("n" -> x2)), x12)
-          x18: Value
+        val x11 = {x12: (Value) =>
+          val x19 = base_apply_norep(x0, List(x12), Map(("fib" -> x0), ("n" -> x2)), x13)
+          x19: Value
         }
-        val x20 = base_apply_norep(P("-"), List(x2, I(2)), Map(("fib" -> x0), ("n" -> x2)), x10)
-        x20: Value
+        val x21 = base_apply_norep(P("-"), List(x2, I(2)), Map(("fib" -> x0), ("n" -> x2)), x11)
+        x21: Value
       }
-      val x6 = {x7: (Value) =>
-        val x22 = base_apply_norep(x0, List(x7), Map(("fib" -> x0), ("n" -> x2)), x8)
-        x22: Value
+      val x7 = {x8: (Value) =>
+        val x23 = base_apply_norep(x0, List(x8), Map(("fib" -> x0), ("n" -> x2)), x9)
+        x23: Value
       }
       val x3 = {x4: (Value) =>
-        val x5 = B(false) != x4
-        val x26 = if (x5) {
-          x2
+        val x6 = B(false) == x4
+        val x27 = if (x6) {
+          val x25 = base_apply_norep(P("-"), List(x2, I(1)), Map(("fib" -> x0), ("n" -> x2)), x7)
+          x25
         } else {
-          val x24 = base_apply_norep(P("-"), List(x2, I(1)), Map(("fib" -> x0), ("n" -> x2)), x6)
-          x24
+          x2
         }
-        x26: Value
+        x27: Value
       }
-      val x28 = base_apply_norep(P("<"), List(x2, I(2)), Map(("fib" -> x0), ("n" -> x2)), x3)
-      x28: Value
+      val x29 = base_apply_norep(P("<"), List(x2, I(2)), Map(("fib" -> x0), ("n" -> x2)), x3)
+      x29: Value
     }
-    val x30 = evalfun(x1)
-    x30
+    val x31 = evalfun(x1)
+    x31
   }
 }
 /*****************************************
