@@ -42,7 +42,8 @@ class ScannerLibTest extends LibSuite {
   }
 }
 
-trait ScannerBase extends Base {
+trait ScannerBase extends Base { this: Dsl =>
+  implicit def scannerTyp: Typ[Scanner]
   implicit class RepScannerOps(s: Rep[Scanner]) {
     def next(d: Char)(implicit pos: SourceContext) = scannerNext(s, d)
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
@@ -54,7 +55,9 @@ trait ScannerBase extends Base {
   def scannerClose(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Unit]
 }
 
-trait ScannerExp extends ScannerBase with EffectExp {
+trait ScannerExp extends ScannerBase with EffectExp { this: DslExp =>
+  implicit def scannerTyp: Typ[Scanner] = manifestTyp
+
   case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
   case class ScannerNext(s: Exp[Scanner], d: Exp[Char]) extends Def[String]
   case class ScannerHasNext(s: Exp[Scanner]) extends Def[Boolean]
@@ -92,7 +95,7 @@ trait ScalaGenScanner extends ScalaGenEffect {
   }
 }
 
-trait ScannerLowerBase extends Base with UncheckedOps {
+trait ScannerLowerBase extends Base with UncheckedOps { this: Dsl =>
   def open(name: Rep[String]): Rep[Int]
   def close(fd: Rep[Int]): Rep[Unit]
   def filelen(fd: Rep[Int]): Rep[Int]
@@ -102,7 +105,7 @@ trait ScannerLowerBase extends Base with UncheckedOps {
   def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
 }
 
-trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
+trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp { this: DslExp =>
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
   def close(fd: Rep[Int]) = unchecked[Unit]("close(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
