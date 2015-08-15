@@ -41,7 +41,7 @@ trait CGenUtilOps extends CGenBase {
 }
 
 
-trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
+trait Dsl extends PrimitiveOps with BooleanOps with LiftString with LiftPrimitives with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   override def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: scala.reflect.SourceContext): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
@@ -49,7 +49,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   def comment[A:Typ](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
+trait DslExp extends Dsl with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
@@ -98,7 +98,7 @@ trait DslGen extends ScalaGenNumericOps
   override def quote(x: Exp[Any]) = x match {
     case Const('\n') if x.tp == manifest[Char] => "'\\n'"
     case Const('\t') if x.tp == manifest[Char] => "'\\t'"
-    case Const('\0') if x.tp == manifest[Char] => "'\\0'"
+    case Const(0)    if x.tp == manifest[Char] => "'\\0'"
     case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -185,7 +185,7 @@ trait DslGenC extends CGenNumericOps
     case Const(s: String) => "\""+s.replace("\"", "\\\"")+"\"" // TODO: more escapes?
     case Const('\n') if x.tp == manifest[Char] => "'\\n'"
     case Const('\t') if x.tp == manifest[Char] => "'\\t'"
-    case Const('\0') if x.tp == manifest[Char] => "'\\0'"
+    case Const(0)    if x.tp == manifest[Char] => "'\\0'"
     case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -267,15 +267,13 @@ abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
 }
 
 abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
-  implicit val mA = manifestTyp[A]
-  implicit val mB = manifestTyp[B]
-  lazy val f = compile(snippet)
+  lazy val f = compile(snippet)(manifestTyp[A],manifestTyp[B])
   def precompile: Unit = f
   def precompileSilently: Unit = utils.devnull(f)
   def eval(x: A): B = f(x)
   lazy val code: String = {
     val source = new java.io.StringWriter()
-    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
+    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))(manifestTyp[A],manifestTyp[B])
     source.toString
   }
 }
