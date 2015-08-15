@@ -226,7 +226,7 @@ Data Structure Implementations
     }
   }
 
-  class ArrayBuffer[T:Manifest](dataSize: Int, schema: Schema) {
+  class ArrayBuffer[T:Typ](dataSize: Int, schema: Schema) {
     val buf = schema.map(f => NewArray[T](dataSize))
     var len = 0
     def +=(x: Seq[Rep[T]]) = {

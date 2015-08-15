@@ -427,13 +427,13 @@ class QueryLiveStepsTest extends TutorialFunSuite {
   }
 
 
-  abstract class LMS_Driver[A:Manifest,B:Manifest] extends DslDriver[A,B] with ScannerExp { q =>
+  abstract class LMS_Driver[A:Typ,B:Typ] extends DslDriver[A,B] with ScannerExp { q =>
     override val codegen = new DslGen with ScalaGenScanner {
       val IR: q.type = q
     }
   }
 
-  /*abstract class LMS_Driver[A:Manifest,B:Manifest] extends DslDriver[A,B] with ScannerExp
+  /*abstract class LMS_Driver[A:Typ,B:Typ] extends DslDriver[A,B] with ScannerExp
     with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
       override val codegen = new DslGen with ScalaGenScanner {
         val IR: q.type = q

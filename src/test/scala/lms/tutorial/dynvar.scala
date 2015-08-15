@@ -22,7 +22,7 @@ trait TrackConditionals extends Dsl {
     finally
       cs0 = save
   }
-  abstract override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) = {
+  abstract override def __ifThenElse[T:Typ](cond: Rep[Boolean], thenp: => Rep[T], elsep: => Rep[T])(implicit pos: SourceContext) = {
     if (cs1.contains(cond)) thenp
     else if (cs0.contains(cond)) elsep
     else super.__ifThenElse(cond, push1(cond, thenp), push0(cond, elsep))

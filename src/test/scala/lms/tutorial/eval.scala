@@ -119,7 +119,7 @@ The `Ops` typeclass encapsulates all we need to know in order to parametrically 
     def lift(v: Value): R[Value]
     def base_apply(fun: R[Value], args: List[R[Value]], env: Env, cont: Cont[R]): R[Value]
     def isTrue(v: R[Value]): R[Boolean]
-    def ifThenElse[A:Manifest](cond: R[Boolean], thenp: => R[A], elsep: => R[A]): R[A]
+    def ifThenElse[A:Typ](cond: R[Boolean], thenp: => R[A], elsep: => R[A]): R[A]
     def makeFun(f: R[Value] => R[Value]): R[Value]
     def inRep: Boolean
   }
@@ -132,7 +132,7 @@ The type `NoRep` enables us to run the evaluator "now".
     def base_apply(fun: Value, args: List[Value], env: Env, cont: Cont[NoRep]) =
       base_apply_norep(fun, args, env, cont)
     def isTrue(v: Value) = B(false)!=v
-    def ifThenElse[A:Manifest](cond: Boolean, thenp: => A, elsep: => A): A = if (cond) thenp else elsep
+    def ifThenElse[A:Typ](cond: Boolean, thenp: => A, elsep: => A): A = if (cond) thenp else elsep
     def makeFun(f: Value => Value) = evalfun(f)
     def inRep = false
   }
@@ -236,7 +236,7 @@ trait EvalDsl extends Functions with IfThenElse with Equal with UncheckedOps {
     def base_apply(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]) =
       base_apply_rep(f, args, env, cont)
     def isTrue(v: Rep[Value]): Rep[Boolean] = unit(B(false))!=v
-    def ifThenElse[A:Manifest](cond: Rep[Boolean], thenp: => Rep[A], elsep: => Rep[A]): Rep[A] = if (cond) thenp else elsep
+    def ifThenElse[A:Typ](cond: Rep[Boolean], thenp: => Rep[A], elsep: => Rep[A]): Rep[A] = if (cond) thenp else elsep
     def makeFun(f: Rep[Value] => Rep[Value]) = unchecked("evalfun(", fun(f), ")")
     def inRep = true
   }
@@ -273,12 +273,12 @@ trait EvalDslImpl extends EvalDslExp { q =>
   val codegen = new EvalDslGen {
     val IR: q.type = q
 
-    override def remap[A](m: Manifest[A]): String = {
+    override def remap[A](m: Typ[A]): String = {
       if (m.toString.endsWith("$Value")) "Value"
       else super.remap(m)
     }
 
-    override def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
+    override def emitSource[A : Typ](args: List[Sym[_]], body: Block[A], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
       stream.println("import scala.lms.tutorial.eval._")
       super.emitSource(args, body, className, stream)
     }

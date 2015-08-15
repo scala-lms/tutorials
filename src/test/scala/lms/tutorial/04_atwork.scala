@@ -1789,7 +1789,7 @@ express the original problem in a more natural way without adding overwhelming
 performance overhead. The foreach implementation for stream.rows is:
 
 
-    def stream_foreachrow[A:Manifest](x: Exp[Stream[A]],
+    def stream_foreachrow[A:Typ](x: Exp[Stream[A]],
                   block: Exp[StreamRow[A]] => Exp[Unit]) = {
       var i = 0
       while (i < numChunks) {
@@ -1842,7 +1842,7 @@ matching mechanism described earlier:
     trait StreamOpsExpOpt extends StreamOpsExp {
       this: OptiMLExp with StreamImplOps =>
 
-      override def stream_numrows[A:Manifest](x: Exp[Stream[A]]) = x match {
+      override def stream_numrows[A:Typ](x: Exp[Stream[A]]) = x match {
         case Def(Reflect(StreamObjectNew(numRows, numCols,
                           chunkSize, func, isPure),_,_)) => numRows
         case _ => super.stream_numrows(x)
@@ -1852,7 +1852,7 @@ matching mechanism described earlier:
     trait VectorOpsExpOpt extends VectorOpsExp {
       this: OptiMLExp with VectorImplOps =>
       // accessing an element of a StreamRow directly accesses the underlying Stream
-      override def vector_apply[A:Manifest](x: Exp[Vector[A]], n: Exp[Int]) = x match {
+      override def vector_apply[A:Typ](x: Exp[Vector[A]], n: Exp[Int]) = x match {
         case Def(StreamChunkRow(x, i, offset)) => stream_chunk_elem(x,i,n)
         case _ => super.vector_apply(x,n)
       }

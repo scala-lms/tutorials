@@ -19,7 +19,7 @@ import scala.reflect.SourceContext
 // https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
 
 trait Sliding extends Dsl {
-  def infix_sliding[T:Manifest](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
+  def infix_sliding[T:Typ](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
     val a = NewArray[T](n)
     sliding(0,n)(i => a(i) = f(i))
     a
