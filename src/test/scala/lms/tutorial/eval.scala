@@ -116,10 +116,12 @@ Applying a primitive is straightforward.
 The `Ops` typeclass encapsulates all we need to know in order to parametrically stage the code. We define `Ops[Rep]` later outside the object.
 */
   trait Ops[R[_]] {
+    type T[A]
+    def valueT: T[Value]
     def lift(v: Value): R[Value]
     def base_apply(fun: R[Value], args: List[R[Value]], env: Env, cont: Cont[R]): R[Value]
     def isTrue(v: R[Value]): R[Boolean]
-    def ifThenElse[A:Typ](cond: R[Boolean], thenp: => R[A], elsep: => R[A]): R[A]
+    def ifThenElse[A:T](cond: R[Boolean], thenp: => R[A], elsep: => R[A]): R[A]
     def makeFun(f: R[Value] => R[Value]): R[Value]
     def inRep: Boolean
   }
@@ -128,11 +130,13 @@ The type `NoRep` enables us to run the evaluator "now".
 */
   type NoRep[A] = A
   implicit object OpsNoRep extends Ops[NoRep] {
+    type T[A] = Unit
+    def valueT = ()
     def lift(v: Value) = v
     def base_apply(fun: Value, args: List[Value], env: Env, cont: Cont[NoRep]) =
       base_apply_norep(fun, args, env, cont)
     def isTrue(v: Value) = B(false)!=v
-    def ifThenElse[A:Typ](cond: Boolean, thenp: => A, elsep: => A): A = if (cond) thenp else elsep
+    def ifThenElse[A:T](cond: Boolean, thenp: => A, elsep: => A): A = if (cond) thenp else elsep
     def makeFun(f: Value => Value) = evalfun(f)
     def inRep = false
   }
@@ -216,7 +220,7 @@ that the function is no longer tail-recursive.
       case If(cond, thenp, elsep) => base_eval[R](cond, env, { vc =>
         ifThenElse(isTrue(vc),
           base_eval[R](thenp, env, cont),
-          base_eval[R](elsep, env, cont))
+          base_eval[R](elsep, env, cont))(valueT)
       })
     }
   }
@@ -229,14 +233,17 @@ The LMS bits
 import eval._
 import scala.lms.common._
 
-trait EvalDsl extends Functions with IfThenElse with Equal with UncheckedOps {
+trait EvalDsl extends Dsl with UncheckedOps {
+  implicit def valTyp: Typ[Value]
   def base_apply_rep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]): Rep[Value]
   implicit object OpsRep extends scala.Serializable with Ops[Rep] {
+    type T[A] = Typ[A]
+    def valueT = typ[Value]
     def lift(v: Value) = unit(v)
     def base_apply(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]) =
       base_apply_rep(f, args, env, cont)
-    def isTrue(v: Rep[Value]): Rep[Boolean] = unit(B(false))!=v
-    def ifThenElse[A:Typ](cond: Rep[Boolean], thenp: => Rep[A], elsep: => Rep[A]): Rep[A] = if (cond) thenp else elsep
+    def isTrue(v: Rep[Value]): Rep[Boolean] = unit[Value](B(false))!=v
+    def ifThenElse[A:T](cond: Rep[Boolean], thenp: => Rep[A], elsep: => Rep[A]): Rep[A] = if (cond) thenp else elsep
     def makeFun(f: Rep[Value] => Rep[Value]) = unchecked("evalfun(", fun(f), ")")
     def inRep = true
   }
@@ -244,7 +251,8 @@ trait EvalDsl extends Functions with IfThenElse with Equal with UncheckedOps {
   def snippet(x: Rep[Value]): Rep[Value]
 }
 
-trait EvalDslExp extends EvalDsl with EffectExp with FunctionsRecursiveExp with IfThenElseExp with EqualExp with UncheckedOpsExp {
+trait EvalDslExp extends EvalDsl with DslExp with UncheckedOpsExp {
+  implicit def valTyp: Typ[Value] = manifestTyp
   case class BaseApplyRep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Rep[Cont[NoRep]]) extends Def[Value]
   def base_apply_rep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]): Rep[Value] =
     reflectEffect(BaseApplyRep(f, args, env, fun(cont)))
@@ -288,7 +296,7 @@ trait EvalDslImpl extends EvalDslExp { q =>
 
 abstract class EvalDslDriver extends EvalDsl with EvalDslImpl with CompileScala {
   lazy val f = compile(snippet)
-  def precompile: Unit = { print("// "); f }
+  def precompile: Unit = { Console.print("// "); f }
   def precompileSilently: Unit = utils.devnull(f)
   def eval(x: Value): Value = f(x)
   lazy val code: String = {
