@@ -3,19 +3,20 @@ package scala.lms.tutorial
 import scala.lms.common._
 import scala.reflect.SourceContext
 
-// TODO: clean up at least, maybe add to LMS?
+// should this be added to LMS?
 trait UtilOps extends Base {
   def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
   def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
 }
 trait UtilOpsExp extends UtilOps with BaseExp {
-  case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
+  implicit def longTyp: Typ[Long]
+  case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long] { def m = typ[T] }
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
   def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
   def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) = StrSubHashCode(o,len)
 
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case e@ObjHashCode(a) => infix_HashCode(f(a))
+    case e@ObjHashCode(a) => infix_HashCode(f(a))(e.m,pos)
     case e@StrSubHashCode(o,len) => infix_HashCode(f(o),f(len))
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
@@ -261,11 +262,13 @@ trait DslGenC extends CGenNumericOps
 }
 
 
-abstract class DslSnippet[A:Typ,B:Typ] extends Dsl {
+abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }
 
-abstract class DslDriver[A:Typ,B:Typ] extends DslSnippet[A,B] with DslImpl with CompileScala {
+abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
+  implicit val mA = manifestTyp[A]
+  implicit val mB = manifestTyp[B]
   lazy val f = compile(snippet)
   def precompile: Unit = f
   def precompileSilently: Unit = utils.devnull(f)
@@ -277,11 +280,13 @@ abstract class DslDriver[A:Typ,B:Typ] extends DslSnippet[A,B] with DslImpl with 
   }
 }
 
-abstract class DslDriverC[A:Typ,B:Typ] extends DslSnippet[A,B] with DslExp { q =>
+abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslExp { q =>
   val codegen = new DslGenC {
     val IR: q.type = q
   }
   lazy val code: String = {
+    implicit val mA = manifestTyp[A]
+    implicit val mB = manifestTyp[B]
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString
