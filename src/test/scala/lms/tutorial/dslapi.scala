@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.virtualize
+//import org.scala_lang.virtualized.virtualize
 import org.scala_lang.virtualized.SourceContext
 
 import scala.virtualization.lms.common._
@@ -41,7 +41,6 @@ trait CGenUtilOps extends CGenBase {
   }
 }
 
-@virtualize
 trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] =
@@ -131,7 +130,6 @@ trait DslImpl extends DslExp { q =>
 }
 
 // TODO: currently part of this is specific to the query tests. generalize? move?
-@virtualize
 trait DslGenC extends CGenNumericOps
     with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse
     with CGenEqual with CGenRangeOps with CGenOrderingOps

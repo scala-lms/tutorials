@@ -17,6 +17,7 @@
 //package scala.lms.tutorial
 //
 //import scala.virtualization.lms.common._
+//import org.scala_lang.virtualized.virtualize
 //import org.scala_lang.virtualized.SourceContext
 //import org.scala_lang.virtualized.EmbeddedControls
 //
@@ -24,6 +25,7 @@
 //We first implement a pure, non-staged library version as a baseline.
 //*/
 //
+//@virtualize
 //trait Shallow extends Util with EmbeddedControls {
 //
 //  // people db schema
@@ -332,6 +334,7 @@
 //
 //
 //// a staged implementation
+//@virtualize
 //trait Staged extends ScalaOpsPkg with LiftPrimitives with LiftString with StructOps {
 //
 //  def database[T:Manifest](s: String): Rep[T]
@@ -615,6 +618,7 @@
 //  case class NameTest(x: String) extends Path
 //  case class Filter(x: Path) extends Path
 //
+//  @virtualize
 //  def axis(ax: Axis)(s: Rep[Node], t: Rep[Node]): Rep[Boolean] = ax match {
 //    case Self             => s.id == t.id
 //    case Child            => s.id == t.parent

@@ -6,11 +6,13 @@ import org.scalatest.FunSuite
 import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.EmbeddedControls
+import org.scala_lang.virtualized.virtualize //"@virtualize" annotation macro
 
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv
 }
 
+@virtualize
 trait TutorialFunSuite extends LibSuite with EmbeddedControls {//this: IfThenElse  =>
   val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
 
