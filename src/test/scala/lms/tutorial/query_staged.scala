@@ -210,7 +210,7 @@ Data Structure Implementations
     }
 
   }
-qu
+
   // hash table for joins, storing lists of records
 
   @virtualize
