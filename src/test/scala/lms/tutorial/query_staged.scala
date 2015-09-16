@@ -8,16 +8,20 @@ Outline:
 */
 package scala.lms.tutorial
 
+import org.scala_lang.virtualized.SourceContext
+import org.scala_lang.virtualized.virtualize
 import scala.virtualization.lms.common._
 
+@virtualize //FIXME: to be safe we virtualize everything
 object query_staged {
-trait QueryCompiler extends Dsl with StagedQueryProcessor
-with ScannerBase {
+@virtualize
+trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerBase {
+
   override def version = "query_staged"
 
 /**
 Low-Level Processing Logic
---------------------------
+--------------------------q
 */
   type Fields = Vector[Rep[String]]
 
@@ -44,9 +48,22 @@ Low-Level Processing Logic
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("", defaultFieldDelimiter.toString, "\n"), fields: _*)
 
-  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
+  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => infix_&&(a, b._1 == b._2) } //FIXME: don't use infic version
 
-  def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
+  //def infix_HashCode(r:Rep[String]) = 8976578.toLong
+  //implicit val ctx = SourceContext
+  def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) {
+    _ * 41L + infix_HashCode(_) //_.HashCode //FIXME: why did we have "_.HashCode here before?"
+//    "afdsdsf".HashCode
+//    infix_hashCode("adf")
+//    infix_HashCode("adsf")
+//    infix_hashCode(unit("adf"))
+//    infix_HashCode(unit("adsf"))
+//    unit("sddsf").HashCode
+    //infix_HashCode()
+    //infix_hashCode()
+  }
+
 
 /**
 Query Interpretation = Compilation
@@ -136,7 +153,7 @@ Data Structure Implementations
 
     val hashMask = hashSize - 1
     val htable = NewArray[Int](hashSize)
-    for (i <- 0 until hashSize) { htable(i) = -1 }
+    for (i <- range_until(0, hashSize) /*FIXME 0 until hashSize*/) { htable(i) = -1 }
 
     def lookup(k: Fields) = lookupInternal(k,None)
     def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))
@@ -176,7 +193,7 @@ Data Structure Implementations
         val keyPos = lookupOrUpdate(k) { keyPos =>
           values(keyPos) = schema.map(_ => 0:Rep[Int])
         }
-        values(keyPos) = (values(keyPos), v.map(_.toInt)).zipped map (_ + _)
+        values(keyPos) = (values(keyPos), v.map(string_toint(_)/*FIXME _.toInt*/)).zipped map (_ + _)
       }
     }
 

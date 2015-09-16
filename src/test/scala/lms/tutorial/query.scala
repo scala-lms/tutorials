@@ -59,6 +59,7 @@ More details on running the benchmarks are available [here](https://github.com/s
 
 package scala.lms.tutorial
 
+import org.scala_lang.virtualized.virtualize
 import scala.virtualization.lms.common._
 import org.scalatest.FunSuite
 
@@ -214,6 +215,7 @@ by side, a little bit of plumbing is necessary. We define a common
 interface for all query processors (plain or staged, Scala or C).
 
 */
+@virtualize
 trait QueryProcessor extends QueryAST {
   def version: String
   val defaultFieldDelimiter = ','
@@ -241,6 +243,7 @@ trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
 }
 
+@virtualize
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
   type Table = Rep[String] // dynamic filename
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
@@ -291,16 +294,18 @@ object Run {
       override def liftTable(n: Table) = n
       override def eval = run
     }
-//  def scala_engine =
-//    new DslDriver[String,Unit] with ScannerExp
-//    with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
-//      override val codegen = new DslGen with ScalaGenScanner {
-//        val IR: q.type = q
-//      }
-//      override def snippet(fn: Table): Rep[Unit] = run
-//      override def prepare: Unit = precompile
-//      override def eval: Unit = eval(filename)
-//    }
+
+  def scala_engine =
+    new DslDriver[String,Unit] with ScannerExp
+    with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
+      override val codegen = new DslGen with ScalaGenScanner {
+        val IR: q.type = q
+      }
+      override def snippet(fn: Table): Rep[Unit] = run
+      override def prepare: Unit = precompile
+      override def eval: Unit = eval(filename)
+    }
+
 //  def c_engine =
 //    new DslDriverC[String,Unit] with ScannerLowerExp
 //    with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
@@ -350,6 +355,7 @@ Unit Tests
 ----------
 
 */
+//@virtualize
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
@@ -426,13 +432,13 @@ class QueryTest extends TutorialFunSuite {
   def testquery(name: String, query: String = "") {
     val drivers: List[TestDriver] =
       List(
-        new ScalaPlainQueryDriver(name, query) with query_unstaged.QueryInterpreter//,
-//        new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
-//        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler,
-//        new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
-//          // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
-//          override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
-//        }
+        new ScalaPlainQueryDriver(name, query) with query_unstaged.QueryInterpreter,
+        //new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
+        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler//,
+        //new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
+        //  // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
+        //  override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
+        //}
       )
     drivers.foreach(_.runtest)
   }
