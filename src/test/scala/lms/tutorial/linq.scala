@@ -1,4 +1,5 @@
 ///**
+//Records are an issue for @virtualize
 //Language Integrated Queries with Normalization
 //==============================================
 //
@@ -671,10 +672,8 @@
 //  //}
 //}
 //
-//
-//
-//
 //// internal staged implementation: IR node classes, rewrites for normalization
+//@virtualize
 //trait StagedExp extends Staged with ScalaOpsPkgExp with BooleanOpsExpOpt with StructExpOpt {
 //
 //  // IR node representing database("name")
@@ -836,6 +835,7 @@
 //
 //
 //// code generator for specific IR nodes -- alternative impl would emit SQL
+//@virtualize
 //trait ScalaGenStaged extends ScalaCodeGenPkg with ScalaGenStruct {
 //  val IR: StagedExp
 //  import IR._
@@ -865,6 +865,7 @@
 //
 //
 //// pretty printing for records
+//@virtualize
 //trait Util {
 //  abstract class Record extends Product {
 //    lazy val elems = {
@@ -882,6 +883,7 @@
 //  }
 //}
 //
+//@virtualize
 //abstract class LinqDriver[A:Manifest,B:Manifest] extends DslDriver[A,B] with Staged with StagedExp { q =>
 //  override val codegen = new DslGen with ScalaGenStaged {
 //    val IR: q.type = q
@@ -914,6 +916,7 @@
 //
 //
 //// test cases
+//@virtualize
 //class TestLinq extends TutorialFunSuite {
 //  val under = "linq-"
 //
