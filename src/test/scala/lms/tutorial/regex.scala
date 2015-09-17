@@ -34,7 +34,7 @@ a bytecode compiler.
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
-
+import org.scala_lang.virtualized.virtualize
 
 /**
 Regular Expression Matcher
@@ -125,6 +125,7 @@ The staged interpreter simply consist in wrapping the variable
 parameters in ``Rep[_]`` types. Otherwise, the code is the same.
 */
 
+@virtualize
 trait StagedRegexpMatcher extends Dsl {
 
   /* search for regexp anywhere in text */
@@ -173,6 +174,7 @@ trait StagedRegexpMatcher extends Dsl {
   }
 }
 
+@virtualize
 class StagedRegexpMatcherTest extends TutorialFunSuite {
   val under = "sre"
   var m = Map.empty[String, DslDriver[String,Boolean]]

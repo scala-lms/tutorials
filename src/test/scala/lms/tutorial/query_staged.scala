@@ -57,7 +57,7 @@ Low-Level Processing Logic
   def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { (l, s) =>
     l * 41L +
     // FIXME
-    //_.HashCode //original: missing parameter type
+    //s.HashCode //original: value HashCode is not a member of QueryCompiler.this.Rep[String]
     //infix_HashCode(s, s.length) // "don't know how to generate code for: StrSubHashCode(Sym(273),Sym(279))"
     infix_HashCode(s)
     //infix_hashCode(s) //What is the difference?
