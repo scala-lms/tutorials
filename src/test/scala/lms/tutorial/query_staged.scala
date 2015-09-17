@@ -199,7 +199,11 @@ Data Structure Implementations
         val keyPos = lookupOrUpdate(k) { keyPos =>
           values(keyPos) = schema.map(_ => 0:Rep[Int])
         }
-        values(keyPos) = (values(keyPos), v.map(string_toint(_)/*FIXME _.toInt*/)).zipped map (_ + _)
+        values(keyPos) = (values(keyPos), v.map(
+          //FIXME
+          //_.toInt //value toInt is not a member of QueryCompiler.this.Rep[String]
+          string_toint(_)
+          )).zipped map (_ + _)
       }
     }
 
