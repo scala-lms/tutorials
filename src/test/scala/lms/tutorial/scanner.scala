@@ -2,11 +2,13 @@ package scala.lms.tutorial
 
 import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
+import org.scala_lang.virtualized.virtualize
 
 // tests for the non-staged Scanner library
 // provided by scannerlib.scala
 // which is in a separate file so that it can easily be included
 // independently of the whole project
+
 class ScannerLibTest extends LibSuite {
   test("low-level first field scanning") {
     val s = new Scanner(dataFilePath("t.csv"))
@@ -42,6 +44,7 @@ class ScannerLibTest extends LibSuite {
   }
 }
 
+@virtualize
 trait ScannerBase extends Base {
   implicit class RepScannerOps(s: Rep[Scanner]) {
     def next(d: Char)(implicit pos: SourceContext) = scannerNext(s, d)
@@ -54,6 +57,7 @@ trait ScannerBase extends Base {
   def scannerClose(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Unit]
 }
 
+@virtualize
 trait ScannerExp extends ScannerBase with EffectExp {
   case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
   case class ScannerNext(s: Exp[Scanner], d: Exp[Char]) extends Def[String]
@@ -78,7 +82,7 @@ trait ScannerExp extends ScannerBase with EffectExp {
   }).asInstanceOf[Exp[A]]
 }
 
-
+@virtualize
 trait ScalaGenScanner extends ScalaGenEffect {
   val IR: ScannerExp
   import IR._
@@ -92,6 +96,7 @@ trait ScalaGenScanner extends ScalaGenEffect {
   }
 }
 
+@virtualize
 trait ScannerLowerBase extends Base with UncheckedOps {
   def open(name: Rep[String]): Rep[Int]
   def fclose(fd: Rep[Int]): Rep[Unit]
@@ -102,6 +107,7 @@ trait ScannerLowerBase extends Base with UncheckedOps {
   def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
 }
 
+@virtualize
 trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
   def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
@@ -111,4 +117,5 @@ trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
   def prints(s: Rep[String]): Rep[Int] = unchecked[Int]("printll(",s,")")
 }
 
+@virtualize
 trait CGenScannerLower extends CGenUncheckedOps

@@ -6,7 +6,7 @@ import org.scalatest.FunSuite
 import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.EmbeddedControls
-import org.scala_lang.virtualized.virtualize //"@virtualize" annotation macro
+import org.scala_lang.virtualized.virtualize
 
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv

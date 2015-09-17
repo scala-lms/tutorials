@@ -13,7 +13,7 @@ import org.scala_lang.virtualized.virtualize
 import scala.virtualization.lms.common._
 import scala.virtualization.lms.util.OverloadHack
 
-//@virtualize //FIXME: to be safe we virtualize everything
+@virtualize //FIXME: to be safe we virtualize everything?
 object query_staged {
 
 @virtualize
@@ -58,6 +58,7 @@ Low-Level Processing Logic
     l * 41L +
     // FIXME
     //s.HashCode //original: value HashCode is not a member of QueryCompiler.this.Rep[String]
+    //s.hashCode
     //infix_HashCode(s, s.length) // "don't know how to generate code for: StrSubHashCode(Sym(273),Sym(279))"
     infix_HashCode(s)
     //infix_hashCode(s) //What is the difference?
