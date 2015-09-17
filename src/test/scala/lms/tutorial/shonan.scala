@@ -23,8 +23,10 @@ Outline:
 package scala.lms.tutorial
 
 import scala.virtualization.lms.common._
-import scala.reflect.SourceContext
+import org.scala_lang.virtualized.SourceContext
+import org.scala_lang.virtualized.virtualize
 
+@virtualize
 class ShonanTest extends TutorialFunSuite {
   val under = ""
   val A = scala.Array
