@@ -13,11 +13,13 @@
 //package scala.lms.tutorial
 //
 //import scala.virtualization.lms.common.ForwardTransformer
-//import scala.reflect.SourceContext
+//import org.scala_lang.virtualized.SourceContext
+//import org.scala_lang.virtualized.virtualize
 //
 //// Shonan Challenge 3.3 Stencil
 //// https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
 //
+//@virtualize
 //trait Sliding extends Dsl {
 //  def infix_sliding[T:Manifest](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
 //    val a = NewArray[T](n)
@@ -38,6 +40,7 @@
 //  }
 //}
 //
+//@virtualize
 //trait SlidingExp extends DslExp with Sliding {
 //  object trans extends ForwardTransformer {
 //    val IR: SlidingExp.this.type = SlidingExp.this
@@ -123,6 +126,7 @@
 //  }
 //}
 //
+//@virtualize
 //trait SlidingWarmup extends Sliding {
 //  def snippet(n: Rep[Int]): Rep[Array[Int]] = {
 //    def compute(i: Rep[Int]) = 2*i+3
@@ -144,6 +148,7 @@
 //  }
 //}
 //
+//@virtualize
 //trait Stencil extends Sliding {
 //  def snippet(v: Rep[Array[Double]]): Rep[Array[Double]] = {
 //    val n = v.length
