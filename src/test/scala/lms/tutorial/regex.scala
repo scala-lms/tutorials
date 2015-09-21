@@ -34,7 +34,7 @@ a bytecode compiler.
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
-import org.scala_lang.virtualized.virtualize
+import org.scala_lang.virtualized.{EmbeddedControls, virtualize}
 
 /**
 Regular Expression Matcher
@@ -44,7 +44,9 @@ We start with a small regular expression matcher, ported to Scala from
 [a C version, written by Rob Pike and Brian Kernighan](http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html).
 */
 
-trait RegexpMatcher {
+
+@virtualize //cannot be virtualize because language constrcut overwrites are not mixed in
+trait RegexpMatcher /*@virtualize*/ extends EmbeddedControls {
 
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {
@@ -93,6 +95,7 @@ trait RegexpMatcher {
   }
 }
 
+@virtualize
 class RegexpMatcherTest extends FunSuite with RegexpMatcher {
   def testmatch(regexp: String, text: String, expected: Boolean) {
     test(s"""matchsearch("$regexp", "$text") == $expected""") {

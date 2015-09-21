@@ -1,15 +1,21 @@
 package scala.lms.tutorial
 
-//import org.scala_lang.virtualized.virtualize
+import org.scala_lang.virtualized.virtualize
 import org.scala_lang.virtualized.SourceContext
 
 import scala.virtualization.lms.common._
 
 // TODO: clean up at least, maybe add to LMS?
+@virtualize
 trait UtilOps extends Base {
+  implicit class Wrappa(o: Rep[Any]) {
+    def HashCode(implicit pos: SourceContext) = infix_HashCode(o)
+  }
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
   def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
 }
+
+@virtualize
 trait UtilOpsExp extends UtilOps with BaseExp {
   case class ObjHashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
@@ -22,6 +28,8 @@ trait UtilOpsExp extends UtilOps with BaseExp {
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
 }
+
+@virtualize
 trait ScalaGenUtilOps extends ScalaGenBase {
   val IR: UtilOpsExp
   import IR._
@@ -31,6 +39,8 @@ trait ScalaGenUtilOps extends ScalaGenBase {
     case _ => super.emitNode(sym, rhs)
   }
 }
+
+@virtualize
 trait CGenUtilOps extends CGenBase {
   val IR: UtilOpsExp
   import IR._
@@ -41,7 +51,8 @@ trait CGenUtilOps extends CGenBase {
   }
 }
 
-trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
+@virtualize
+trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with SeqOps with StringOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
@@ -49,6 +60,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 
+@virtualize
 trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
@@ -83,6 +95,8 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
   // TODO: should this be in LMS?
   override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
+
+@virtualize
 trait DslGen extends ScalaGenNumericOps
     with ScalaGenPrimitiveOps with ScalaGenBooleanOps with ScalaGenIfThenElse
     with ScalaGenEqual with ScalaGenRangeOps with ScalaGenOrderingOps
@@ -265,6 +279,7 @@ abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }
 
+@virtualize
 abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
   lazy val f = compile(snippet)
   def precompile: Unit = f
@@ -277,6 +292,7 @@ abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Dsl
   }
 }
 
+@virtualize
 abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslExp { q =>
   val codegen = new DslGenC {
     val IR: q.type = q

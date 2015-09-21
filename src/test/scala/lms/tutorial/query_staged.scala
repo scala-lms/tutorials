@@ -8,15 +8,16 @@ Outline:
 */
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.SourceContext
+//import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 import scala.virtualization.lms.common._
 import scala.virtualization.lms.util.OverloadHack
 
-@virtualize //FIXME: to be safe we virtualize everything?
-object query_staged {
+//FIXME: to be safe we virtualize everything?
 
 @virtualize
+object query_staged {
+
 trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerBase {
 
   override def version = "query_staged"
@@ -54,14 +55,8 @@ Low-Level Processing Logic
 
   //def infix_HashCode(r:Rep[String]) = 8976578.toLong
   //implicit val ctx = SourceContext
-  def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { (l, s) =>
-    l * 41L +
-    // FIXME
-    //s.HashCode //original: value HashCode is not a member of QueryCompiler.this.Rep[String]
-    //s.hashCode
-    //infix_HashCode(s, s.length) // "don't know how to generate code for: StrSubHashCode(Sym(273),Sym(279))"
-    infix_HashCode(s)
-    //infix_hashCode(s) //What is the difference?
+  def fieldsHash(a: Fields):Rep[Long] = a.foldLeft(unit(0L)) { (l, s) =>
+    l * 41L + s.HashCode
   }
 
 
@@ -145,7 +140,6 @@ Data Structure Implementations
 
   // common base class to factor out commonalities of group and join hash tables
 
-  @virtualize
   class HashMapBase(keySchema: Schema, schema: Schema) {
     import hashDefaults._
 
@@ -155,11 +149,7 @@ Data Structure Implementations
     val hashMask = hashSize - 1
     val htable = NewArray[Int](hashSize)
     for (i <-
-        //FIXME
-        //0 until hashSize //original: ambiguous reference to overloaded definition
-        //range_until(0, hashSize)
-        //range_until()
-        new Range(0,hashSize,1)
+        0 until hashSize :Range //ambiguous reference to overloaded definition can be fixed with type annotation
     ) { htable(i) = -1}
 
     def lookup(k: Fields) = lookupInternal(k,None)
@@ -189,7 +179,6 @@ Data Structure Implementations
   }
 
   // hash table for groupBy, storing sums
-  @virtualize
   class HashMapAgg(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
     import hashDefaults._
 
@@ -200,11 +189,7 @@ Data Structure Implementations
         val keyPos = lookupOrUpdate(k) { keyPos =>
           values(keyPos) = schema.map(_ => 0:Rep[Int])
         }
-        values(keyPos) = (values(keyPos), v.map(
-          //FIXME
-          //_.toInt //value toInt is not a member of QueryCompiler.this.Rep[String]
-          string_toint(_)
-          )).zipped map (_ + _)
+        values(keyPos) = (values(keyPos), v.map(_.toInt)).zipped map (_ + _)
       }
     }
 
@@ -217,8 +202,6 @@ Data Structure Implementations
   }
 
   // hash table for joins, storing lists of records
-
-  @virtualize
   class HashMapBuffer(keySchema: Schema, schema: Schema) extends HashMapBase(keySchema: Schema, schema: Schema) {
     import hashDefaults._
 
@@ -255,7 +238,6 @@ Data Structure Implementations
     }
   }
 
-  @virtualize
   class ArrayBuffer[T:Manifest](dataSize: Int, schema: Schema) {
     val buf = schema.map(f => NewArray[T](dataSize))
     var len = 0
