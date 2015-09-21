@@ -8,7 +8,7 @@ import scala.virtualization.lms.common._
 // TODO: clean up at least, maybe add to LMS?
 @virtualize
 trait UtilOps extends Base {
-  implicit class Wrappa(o: Rep[Any]) {
+  implicit class HashWrap(o: Rep[Any]) {
     def HashCode(implicit pos: SourceContext) = infix_HashCode(o)
   }
   def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
@@ -115,6 +115,7 @@ trait DslGen extends ScalaGenNumericOps
     case Const('\0') if x.tp == manifest[Char] => "'\\0'"
     case _ => super.quote(x)
   }
+
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
     case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
       emitValDef(sym, quote(c))
@@ -137,6 +138,8 @@ trait DslGen extends ScalaGenNumericOps
     case _ => super.emitNode(sym, rhs)
   }
 }
+
+@virtualize
 trait DslImpl extends DslExp { q =>
   val codegen = new DslGen {
     val IR: q.type = q
@@ -144,6 +147,7 @@ trait DslImpl extends DslExp { q =>
 }
 
 // TODO: currently part of this is specific to the query tests. generalize? move?
+@virtualize
 trait DslGenC extends CGenNumericOps
     with CGenPrimitiveOps with CGenBooleanOps with CGenIfThenElse
     with CGenEqual with CGenRangeOps with CGenOrderingOps
@@ -274,7 +278,7 @@ trait DslGenC extends CGenNumericOps
   }
 }
 
-
+@virtualize
 abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }

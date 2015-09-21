@@ -107,6 +107,7 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {//this: IfThenEls
   }
 }
 
+@virtualize
 object utils {
   def time[A](a: => A) = {
     val now = System.nanoTime

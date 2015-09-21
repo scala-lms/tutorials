@@ -9,7 +9,8 @@ import org.scala_lang.virtualized.virtualize
 // which is in a separate file so that it can easily be included
 // independently of the whole project
 
-class ScannerLibTest extends LibSuite {
+@virtualize
+class ScannerLibTest extends LibSuite { this: Equal =>
   test("low-level first field scanning") {
     val s = new Scanner(dataFilePath("t.csv"))
     assert(s.next(',')=="Name")
