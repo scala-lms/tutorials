@@ -70,6 +70,7 @@ Relational Algebra AST
 The core of any query processing engine is an AST representation of
 relational algebra operators.
 */
+@virtualize
 trait QueryAST {
   type Table
   type Schema = Vector[String]
@@ -106,6 +107,7 @@ SQL Parser
 We add a parser that takes a SQL(-like) string and converts it to tree of operators.
 */
 
+@virtualize
 trait SQLParser extends QueryAST {
   import scala.util.parsing.combinator._
 
@@ -215,7 +217,7 @@ by side, a little bit of plumbing is necessary. We define a common
 interface for all query processors (plain or staged, Scala or C).
 
 */
-//not virtualized because generic to both staged and unstaged
+@virtualize
 trait QueryProcessor extends QueryAST {
   def version: String
   val defaultFieldDelimiter = ','
@@ -358,7 +360,7 @@ Unit Tests
 ----------
 
 */
-//@virtualize needs more fined grained virtualization needed
+@virtualize
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
@@ -378,9 +380,8 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
-  //@virtualize //this breaks compilation
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
-    var dynamicFileName: Table = _
+    var dynamicFileName: Table = null.asInstanceOf[Table] //FIXME: "= _" gives argument expression's type is not compatible with formal parameter type; found   : <notype> ; required: ?T
     override def dynamicFilePath(table: String): Table = if (table == "?") dynamicFileName else unit(filePath(table))
     def snippet(fn: Table): Rep[Unit] = {
       dynamicFileName = fn
@@ -399,7 +400,6 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
-  @virtualize
   abstract class ScalaStagedQueryDriver(val name: String, val query: String) extends DslDriver[String,Unit] with StagedTestDriver with StagedQueryProcessor with ScannerExp { q =>
     override val codegen = new DslGen with ScalaGenScanner {
       val IR: q.type = q
@@ -418,7 +418,6 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
-  @virtualize
   abstract class CStagedQueryDriver(val name: String, val query: String) extends DslDriverC[String,Unit] with StagedTestDriver with StagedQueryProcessor with ScannerLowerExp { q =>
     override val codegen = new DslGenC with CGenScannerLower {
       val IR: q.type = q
@@ -435,7 +434,6 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
-  @virtualize
   def testquery(name: String, query: String = "") {
     val drivers: List[TestDriver] =
       List(
@@ -451,7 +449,6 @@ class QueryTest extends TutorialFunSuite {
   }
 
   // NOTE: we can use "select * from ?" to use dynamic file names (not used here right now)
-
   trait ExpectedASTs extends QueryAST {
     val scan_t = Scan("t.csv")
     val scan_t1gram = Scan("?",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
