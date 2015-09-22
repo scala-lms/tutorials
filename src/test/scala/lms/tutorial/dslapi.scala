@@ -8,11 +8,15 @@ import scala.virtualization.lms.common._
 // TODO: clean up at least, maybe add to LMS?
 @virtualize
 trait UtilOps extends Base {
-  implicit class HashWrap(o: Rep[Any]) {
-    def HashCode(implicit pos: SourceContext) = infix_HashCode(o)
+  implicit class HashCls(o: Rep[Any]) {
+    def HashCode(implicit pos: SourceContext):Rep[Long] = infix_HashCode(o)
+    def HashCode(len: Rep[Int])(implicit pos: SourceContext):Rep[Long] = o match {
+      case s:Rep[String] => infix_HashCode(s, len)
+      //case _ => infix_HashCode(o) //FIXME is this an ok dispatch?
+    }
   }
-  def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext): Rep[Long]
-  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
+  def infix_HashCode[T:Manifest](a: Rep[T])(implicit pos: SourceContext): Rep[Long]
+  def infix_HashCode(s: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
 }
 
 @virtualize

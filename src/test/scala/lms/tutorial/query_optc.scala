@@ -12,16 +12,18 @@ import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
+import scala.virtualization.lms.util.OverloadHack
+
 @virtualize
 object query_optc {
-trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerLowerBase with LiftNumeric {
+trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerLowerBase {
   override def version = "query_optc"
 
 /**
 Input File Tokenizer
 --------------------
 */
-  class Scanner(name: Rep[String]) { //bad encapsulation
+  class Scanner(name: Rep[String]) {
     val fd = open(name)
     val fl = filelen(fd)
     val data = mmap[Char](fd,fl)
@@ -207,7 +209,7 @@ Data Structure Implementations
 
     val hashMask = hashSize - 1
     val htable = NewArray[Int](hashSize)
-    for (i <- 0 until hashSize) { htable(i) = -1 }
+    for (i <- 0 until hashSize :Rep[Range]) { htable(i) = -1 }
 
     def lookup(k: Fields) = lookupInternal(k,None)
     def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))
