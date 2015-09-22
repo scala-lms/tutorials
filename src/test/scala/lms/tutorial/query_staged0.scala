@@ -9,7 +9,9 @@ Outline:
 package scala.lms.tutorial
 
 import scala.virtualization.lms.common._
+import org.scala_lang.virtualized.virtualize
 
+@virtualize
 object query_staged0 {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
 with ScannerBase {
