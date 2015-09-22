@@ -309,16 +309,16 @@ object Run {
       override def eval: Unit = eval(filename)
     }
 
-//  def c_engine =
-//    new DslDriverC[String,Unit] with ScannerLowerExp
-//    with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
-//      override val codegen = new DslGenC with CGenScannerLower {
-//        val IR: q.type = q
-//      }
-//      override def snippet(fn: Table): Rep[Unit] = run
-//      override def prepare: Unit = {}
-//      override def eval: Unit = eval(filename)
-//    }
+  def c_engine =
+    new DslDriverC[String,Unit] with ScannerLowerExp
+    with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
+      override val codegen = new DslGenC with CGenScannerLower {
+        val IR: q.type = q
+      }
+      override def snippet(fn: Table): Rep[Unit] = run
+      override def prepare: Unit = {}
+      override def eval: Unit = eval(filename)
+    }
 
   def main(args: Array[String]) {
     if (args.length < 2) {
@@ -331,8 +331,8 @@ object Run {
     }
     val version = args(0)
     val engine = version match {
-//      case "c" => c_engine
-//      case "scala" => scala_engine
+      case "c" => c_engine
+      case "scala" => scala_engine
       case "unstaged" => unstaged_engine
       case _ => println("warning: unexpected engine, using 'unstaged' by default")
         unstaged_engine
@@ -358,7 +358,7 @@ Unit Tests
 ----------
 
 */
-//@virtualize needs more fined grained virtualization
+//@virtualize needs more fined grained virtualization needed
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
@@ -440,7 +440,7 @@ class QueryTest extends TutorialFunSuite {
     val drivers: List[TestDriver] =
       List(
         new ScalaPlainQueryDriver(name, query) with query_unstaged.QueryInterpreter,
-        //new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
+        new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
         new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler//,
         //new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
         //  // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
