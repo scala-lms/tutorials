@@ -9,26 +9,28 @@
 //package scala.lms.tutorial
 //
 //import scala.virtualization.lms.common._
+//import org.scala_lang.virtualized.SourceContext
+//import org.scala_lang.virtualized.virtualize
 //
+//@virtualize
 //object query_optc {
-//trait QueryCompiler extends Dsl with StagedQueryProcessor
-//with ScannerLowerBase {
+//trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerLowerBase with LiftNumeric {
 //  override def version = "query_optc"
 //
 ///**
 //Input File Tokenizer
 //--------------------
 //*/
-//  class Scanner(name: Rep[String]) {
+//  class Scanner(name: Rep[String]) { //bad encapsulation
 //    val fd = open(name)
 //    val fl = filelen(fd)
 //    val data = mmap[Char](fd,fl)
 //    var pos = 0
 //
 //    def next(d: Rep[Char]) = {
-//      val start = pos: Rep[Int] // force read
+//      val start: Rep[Int] = pos // force read
 //      while (data(pos) != d) pos += 1
-//      val len = pos - start
+//      val len:Rep[Int] = pos - start
 //      pos += 1
 //      RString(stringFromCharArray(data,start,len), len)
 //    }

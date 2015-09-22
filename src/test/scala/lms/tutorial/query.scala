@@ -215,7 +215,7 @@ by side, a little bit of plumbing is necessary. We define a common
 interface for all query processors (plain or staged, Scala or C).
 
 */
-@virtualize
+//not virtualized because generic to both staged and unstaged
 trait QueryProcessor extends QueryAST {
   def version: String
   val defaultFieldDelimiter = ','
@@ -276,6 +276,8 @@ trait Engine extends QueryProcessor with SQLParser {
     source.toString
   }
 }
+
+@virtualize
 trait StagedEngine extends Engine with StagedQueryProcessor {
   override def liftTable(n: String) = unit(n)
 }
@@ -295,6 +297,7 @@ object Run {
       override def eval = run
     }
 
+  @virtualize
   def scala_engine =
     new DslDriver[String,Unit] with ScannerExp
     with StagedEngine with MainEngine with query_staged.QueryCompiler { q =>
@@ -355,7 +358,7 @@ Unit Tests
 ----------
 
 */
-//@virtualize
+//@virtualize needs more fined grained virtualization
 class QueryTest extends TutorialFunSuite {
   val under = "query_"
 
@@ -375,6 +378,7 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
+  //@virtualize //this breaks compilation
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
     var dynamicFileName: Table = _
     override def dynamicFilePath(table: String): Table = if (table == "?") dynamicFileName else unit(filePath(table))
@@ -395,6 +399,7 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
+  @virtualize
   abstract class ScalaStagedQueryDriver(val name: String, val query: String) extends DslDriver[String,Unit] with StagedTestDriver with StagedQueryProcessor with ScannerExp { q =>
     override val codegen = new DslGen with ScalaGenScanner {
       val IR: q.type = q
@@ -413,6 +418,7 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
+  @virtualize
   abstract class CStagedQueryDriver(val name: String, val query: String) extends DslDriverC[String,Unit] with StagedTestDriver with StagedQueryProcessor with ScannerLowerExp { q =>
     override val codegen = new DslGenC with CGenScannerLower {
       val IR: q.type = q
@@ -429,6 +435,7 @@ class QueryTest extends TutorialFunSuite {
     }
   }
 
+  @virtualize
   def testquery(name: String, query: String = "") {
     val drivers: List[TestDriver] =
       List(

@@ -7,8 +7,8 @@ import org.scala_lang.virtualized.virtualize
 
 import scala.virtualization.lms.common.{EqualExpOpt, Equal}
 
-@virtualize
-class Scanner(filename: String) extends EqualExpOpt { //maxro FIXME not a good idea. What needs to be virtualized?
+//@virtualize //macro FIXME do we need this to be virtualized?
+class Scanner(filename: String) {
   val br = new BufferedReader(new FileReader(filename))
   private[this] var pending: String = br.readLine()
   def next(delim: Char): String = {
