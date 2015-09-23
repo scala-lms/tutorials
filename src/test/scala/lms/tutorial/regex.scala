@@ -45,8 +45,8 @@ We start with a small regular expression matcher, ported to Scala from
 */
 
 
-@virtualize //cannot be virtualize because language constrcut overwrites are not mixed in
-trait RegexpMatcher extends EmbeddedControls {
+//@virtualize //FIXME: if virtualized we need "EmbeddedControls"
+trait RegexpMatcher { //this: EmbeddedControls =>
 
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {

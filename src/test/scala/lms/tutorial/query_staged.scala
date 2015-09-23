@@ -8,12 +8,9 @@ Outline:
 */
 package scala.lms.tutorial
 
-//import org.scala_lang.virtualized.SourceContext
+import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 import scala.virtualization.lms.common._
-import scala.virtualization.lms.util.OverloadHack
-
-//FIXME: to be safe we virtualize everything?
 
 @virtualize
 object query_staged {
@@ -24,7 +21,7 @@ trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerBase {
 
 /**
 Low-Level Processing Logic
---------------------------q
+--------------------------
 */
   type Fields = Vector[Rep[String]]
 
@@ -51,14 +48,9 @@ Low-Level Processing Logic
 
   def printFields(fields: Fields) = printf(fields.map{_ => "%s"}.mkString("", defaultFieldDelimiter.toString, "\n"), fields: _*)
 
-  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => infix_&&(a, b._1 == b._2) } //FIXME: don't use infic version
+  def fieldsEqual(a: Fields, b: Fields) = (a zip b).foldLeft(unit(true)) { (a,b) => a && b._1 == b._2 }
 
-  //def infix_HashCode(r:Rep[String]) = 8976578.toLong
-  //implicit val ctx = SourceContext
-  def fieldsHash(a: Fields):Rep[Long] = a.foldLeft(unit(0L)) { (l, s) =>
-    l * 41L + s.HashCode
-  }
-
+  def fieldsHash(a: Fields) = a.foldLeft(unit(0L)) { _ * 41L + _.HashCode }
 
 /**
 Query Interpretation = Compilation
@@ -148,9 +140,7 @@ Data Structure Implementations
 
     val hashMask = hashSize - 1
     val htable = NewArray[Int](hashSize)
-    for (i <-
-        0 until hashSize :Range //ambiguous reference to overloaded definition can be fixed with type annotation
-    ) { htable(i) = -1}
+    for (i <- 0 until hashSize :Range) { htable(i) = -1 } //ambiguous reference to overloaded definition can be fixed with type annotation
 
     def lookup(k: Fields) = lookupInternal(k,None)
     def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))

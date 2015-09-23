@@ -381,7 +381,7 @@ class QueryTest extends TutorialFunSuite {
   }
 
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
-    var dynamicFileName: Table = null.asInstanceOf[Table] //FIXME: "= _" gives argument expression's type is not compatible with formal parameter type; found   : <notype> ; required: ?T
+    var dynamicFileName: Table = null.asInstanceOf[Table] //FIXME: "= _" gives: "argument expression's type is not compatible with formal parameter type; found   : <notype> ; required: ?T"
     override def dynamicFilePath(table: String): Table = if (table == "?") dynamicFileName else unit(filePath(table))
     def snippet(fn: Table): Rep[Unit] = {
       dynamicFileName = fn

@@ -7,7 +7,7 @@ import org.scala_lang.virtualized.virtualize
 
 import scala.virtualization.lms.common.{EqualExpOpt, Equal}
 
-//@virtualize //macro FIXME do we need this to be virtualized?
+//@virtualize //FIXME to virtualize we need EmbeddedControls
 class Scanner(filename: String) {
   val br = new BufferedReader(new FileReader(filename))
   private[this] var pending: String = br.readLine()

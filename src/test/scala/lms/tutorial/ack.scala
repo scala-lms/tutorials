@@ -30,7 +30,6 @@ and re-use.
 
 @virtualize
 trait Ackermann extends Dsl {
-  //override def infix_+(s:String, a:Any) = "kaka"
   def a(m: Int): Rep[Int => Int] = fun { (n: Rep[Int]) =>
     generate_comment("ack_"+m) // to navigate the generated code
     if (m==0) n+1

@@ -12,8 +12,6 @@ import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
-import scala.virtualization.lms.util.OverloadHack
-
 @virtualize
 object query_optc {
 trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerLowerBase {

@@ -4,8 +4,8 @@ import java.io._
 import org.scalatest.FunSuite
 
 import scala.virtualization.lms.common._
-import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.EmbeddedControls
+import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
 trait LibSuite extends FunSuite {
@@ -13,7 +13,7 @@ trait LibSuite extends FunSuite {
 }
 
 @virtualize
-trait TutorialFunSuite extends LibSuite with EmbeddedControls {//this: IfThenElse  =>
+trait TutorialFunSuite extends LibSuite with EmbeddedControls {
   val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
 
   val prefix = "src/out/"
