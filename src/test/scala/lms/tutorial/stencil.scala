@@ -12,7 +12,7 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common.ForwardTransformer
+import scala.lms.common.ForwardTransformer
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
@@ -22,15 +22,15 @@ import org.scala_lang.virtualized.virtualize
 @virtualize
 trait Sliding extends Dsl {
   implicit class WrapIntSliding(n: Rep[Int]) {
-    def sliding[T:Manifest](f: Rep[Int] => Rep[T]): Rep[Array[T]] = infix_sliding(n, f)
+    def sliding[T:Typ](f: Rep[Int] => Rep[T]): Rep[Array[T]] = infix_sliding(n, f)
   }
-  def infix_sliding[T:Manifest](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
+  def infix_sliding[T:Typ](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
     val a = NewArray[T](n)
     sliding(0,n)(i => a(i) = f(i))
     a
   }
   implicit class WrapRangeSliding(r: Rep[Range]) {
-    def sliding[T:Manifest] = infix_sliding(r)
+    def sliding[T:Typ] = infix_sliding(r)
   }
   def infix_sliding(r: Rep[Range]) = new {
     def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] =

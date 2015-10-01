@@ -10,7 +10,7 @@ package scala.lms.tutorial
 
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
-import scala.virtualization.lms.common._
+import scala.lms.common._
 
 @virtualize
 object query_staged {
@@ -228,7 +228,7 @@ Data Structure Implementations
     }
   }
 
-  class ArrayBuffer[T:Manifest](dataSize: Int, schema: Schema) {
+  class ArrayBuffer[T:Typ](dataSize: Int, schema: Schema) {
     val buf = schema.map(f => NewArray[T](dataSize))
     var len = 0
     def +=(x: Seq[Rep[T]]) = {

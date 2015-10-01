@@ -3,7 +3,7 @@ package scala.lms.tutorial
 import org.scala_lang.virtualized.virtualize
 import org.scala_lang.virtualized.SourceContext
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 
 // TODO: clean up at least, maybe add to LMS?
 @virtualize
@@ -15,18 +15,20 @@ trait UtilOps extends Base {
       //case _ => infix_HashCode(o) //FIXME is this an ok dispatch?
     }
   }
-  def infix_HashCode[T:Manifest](a: Rep[T])(implicit pos: SourceContext): Rep[Long]
+  def infix_HashCode[T:Typ](a: Rep[T])(implicit pos: SourceContext): Rep[Long]
   def infix_HashCode(s: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
 }
 
 @virtualize
 trait UtilOpsExp extends UtilOps with BaseExp {
-  case class ObjHashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
+  implicit def longTyp: Typ[Long] = manifestTyp
+
+  case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
-  def infix_HashCode[T:Manifest](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
+  def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = toAtom(ObjHashCode(o))
   def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) = StrSubHashCode(o,len)
 
-  override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
+  override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
     case e@ObjHashCode(a) => infix_HashCode(f(a))
     case e@StrSubHashCode(o,len) => infix_HashCode(f(o),f(len))
     case _ => super.mirror(e,f)
@@ -60,7 +62,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] = __ifThenElse(lhs, rhs, unit(false))
   def generate_comment(l: String): Rep[Unit]
-  def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
+  def comment[A:Typ](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
 
 @virtualize
@@ -76,8 +78,8 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
 
   case class GenerateComment(l: String) extends Def[Unit]
   def generate_comment(l: String) = reflectEffect(GenerateComment(l))
-  case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
-  def comment[A:Manifest](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {
+  case class Comment[A:Typ](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
+  def comment[A:Typ](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {
     val br = reifyEffects(b)
     val be = summarizeEffects(br)
     reflectEffect[A](Comment(l, verbose, br), be)
@@ -88,7 +90,7 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
     case _ => super.boundSyms(e)
   }
 
-  override def array_apply[T:Manifest](x: Exp[Array[T]], n: Exp[Int])(implicit pos: SourceContext): Exp[T] = (x,n) match {
+  override def array_apply[T:Typ](x: Exp[Array[T]], n: Exp[Int])(implicit pos: SourceContext): Exp[T] = (x,n) match {
     case (Def(StaticData(x:Array[T])), Const(n)) =>
       val y = x(n)
       if (y.isInstanceOf[Int]) unit(y) else staticData(y)
@@ -96,7 +98,7 @@ trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with Bool
   }
 
   // TODO: should this be in LMS?
-  override def isPrimitiveType[T](m: Manifest[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
+  override def isPrimitiveType[T](m: Typ[T]) = (m == manifest[String]) || super.isPrimitiveType(m)
 }
 
 @virtualize
@@ -165,7 +167,7 @@ trait DslGenC extends CGenNumericOps
   def getMemoryAllocString(count: String, memType: String): String = {
       "(" + memType + "*)malloc(" + count + " * sizeof(" + memType + "));"
   }
-  override def remap[A](m: Manifest[A]): String = m.toString match {
+  override def remap[A](m: Typ[A]): String = m.toString match {
     case "java.lang.String" => "char*"
     case "Array[Char]" => "char*"
     case "Char" => "char"
@@ -182,7 +184,7 @@ trait DslGenC extends CGenNumericOps
       case "char" => "%c"
       case "void" => "%c"
       case _ =>
-        import scala.virtualization.lms.internal.GenerationFailedException
+        import scala.lms.internal.GenerationFailedException
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }
@@ -229,7 +231,7 @@ trait DslGenC extends CGenNumericOps
       stream.println("//#" + s)
     case _ => super.emitNode(sym,rhs)
   }
-  override def emitSource[A:Manifest](args: List[Sym[_]], body: Block[A], functionName: String, out: java.io.PrintWriter) = {
+  override def emitSource[A:Typ](args: List[Sym[_]], body: Block[A], functionName: String, out: java.io.PrintWriter) = {
     withStream(out) {
       stream.println("""
       #include <fcntl.h>
@@ -281,17 +283,23 @@ trait DslGenC extends CGenNumericOps
   }
 }
 
+
+
 @virtualize
-abstract class DslSnippet[A:Manifest,B:Manifest] extends Dsl {
+abstract class DslSnippet[A:Manifest, B:Typ] extends Dsl with Base {
   def snippet(x: Rep[A]): Rep[B]
 }
 
 @virtualize
-abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
+abstract class DslDriver[A: Typ, B: Typ] extends DslSnippet[A, B] with DslImpl with CompileScala {
   lazy val f = compile(snippet)
+
   def precompile: Unit = f
+
   def precompileSilently: Unit = utils.devnull(f)
+
   def eval(x: A): B = f(x)
+
   lazy val code: String = {
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
@@ -300,7 +308,8 @@ abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Dsl
 }
 
 @virtualize
-abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslExp { q =>
+abstract class DslDriverC[A: Typ, B: Typ] extends DslSnippet[A, B] with DslExp {
+  q =>
   val codegen = new DslGenC {
     val IR: q.type = q
   }
@@ -309,14 +318,16 @@ abstract class DslDriverC[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Ds
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString
   }
-  def eval(a:A): Unit = { // TBD: should read result of type B?
+
+  def eval(a: A): Unit = {
+    // TBD: should read result of type B?
     val out = new java.io.PrintWriter("/tmp/snippet.c")
     out.println(code)
     out.close
     //TODO: use precompile
     (new java.io.File("/tmp/snippet")).delete
     import scala.sys.process._
-    (s"cc -std=c99 -O3 /tmp/snippet.c -o /tmp/snippet":ProcessBuilder).lines.foreach(Console.println _)
-    (s"/tmp/snippet $a":ProcessBuilder).lines.foreach(Console.println _)
+    (s"cc -std=c99 -O3 /tmp/snippet.c -o /tmp/snippet": ProcessBuilder).lines.foreach(Console.println _)
+    (s"/tmp/snippet $a": ProcessBuilder).lines.foreach(Console.println _)
   }
 }

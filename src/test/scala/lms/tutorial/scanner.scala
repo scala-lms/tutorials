@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
@@ -74,7 +74,7 @@ trait ScannerExp extends ScannerBase with EffectExp {
   override def scannerClose(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Unit] =
     reflectWrite(s)(ScannerClose(s))
 
-  override def mirror[A:Manifest](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
+  override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
     case Reflect(e@ScannerNew(fn), u, es) => reflectMirrored(Reflect(ScannerNew(f(fn)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case Reflect(ScannerNext(s, d), u, es) => reflectMirrored(Reflect(ScannerNext(f(s), f(d)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
     case Reflect(ScannerHasNext(s), u, es) => reflectMirrored(Reflect(ScannerHasNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
@@ -102,7 +102,7 @@ trait ScannerLowerBase extends Base with UncheckedOps {
   def open(name: Rep[String]): Rep[Int]
   def fclose(fd: Rep[Int]): Rep[Unit]
   def filelen(fd: Rep[Int]): Rep[Int]
-  def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
+  def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
   def stringFromCharArray(buf: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String]
   def prints(s: Rep[String]): Rep[Int]
   def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
@@ -113,7 +113,7 @@ trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
   def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
-  def mmap[T:Manifest](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
+  def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
   def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data,"+",pos)
   def prints(s: Rep[String]): Rep[Int] = unchecked[Int]("printll(",s,")")
 }

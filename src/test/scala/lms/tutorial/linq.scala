@@ -338,7 +338,7 @@
 //@virtualize
 //trait Staged extends ScalaOpsPkg with LiftPrimitives with LiftString with StructOps {
 //
-//  def database[T:Manifest](s: String): Rep[T]
+//  def database[T:Typ](s: String): Rep[T]
 //  //trait Record extends Struct
 //  implicit def recordToRecordOps2(record: Rep[Record]) = new RecordOps(record.asInstanceOf[Rep[Record]])
 //
@@ -546,13 +546,13 @@
 //
 //  // 3.2 Higher-order queries
 //
-//  def any[A:Manifest](xs: Rep[List[A]])(p: Rep[A] => Rep[Boolean]): Rep[Boolean] =
+//  def any[A:Typ](xs: Rep[List[A]])(p: Rep[A] => Rep[Boolean]): Rep[Boolean] =
 //    exists(for (x <- xs if p(x)) yield empty)
 //
-//  def all[A:Manifest](xs: Rep[List[A]])(p: Rep[A] => Rep[Boolean]): Rep[Boolean] =
+//  def all[A:Typ](xs: Rep[List[A]])(p: Rep[A] => Rep[Boolean]): Rep[Boolean] =
 //    !any(xs)(x => !p(x))
 //
-//  def contains[A:Manifest](xs: Rep[List[A]], u: Rep[A]): Rep[Boolean] =
+//  def contains[A:Typ](xs: Rep[List[A]], u: Rep[A]): Rep[Boolean] =
 //    any(xs)(x => x == u)
 //
 //  def expertise2(u: Rep[String]): Rep[List[{ val dpt: String }]] =
@@ -678,7 +678,7 @@
 //
 //  // IR node representing database("name")
 //  case class Database[T](s: String) extends Def[T]
-//  def database[T:Manifest](s: String): Exp[T] = Database[T](s)
+//  def database[T:Typ](s: String): Exp[T] = Database[T](s)
 //
 //  // IR node representing for (x <- l) yield f(x)
 //  // we store two representations at the same time:
@@ -688,7 +688,7 @@
 //  //   used for code generation
 //  // - the former is the input form, extensional representation,
 //  //   used to perform rewriting in NBE style ("normalization by evaluation")
-//  case class DBFor[A:Manifest, B:Manifest](l: Exp[List[A]], f: Exp[A] => Exp[List[B]],
+//  case class DBFor[A:Typ, B:Typ](l: Exp[List[A]], f: Exp[A] => Exp[List[B]],
 //    db: String, tbl: String, ff: Fun[A,List[B]]) extends Def[List[B]]
 //
 //
@@ -703,7 +703,7 @@
 //  }
 //
 //  object Yield {
-//    def apply[A:Manifest](x:Exp[A]) = List(x)
+//    def apply[A:Typ](x:Exp[A]) = List(x)
 //    def unapply[A](x:Exp[List[A]]): Option[Exp[A]] = x match {
 //      case Def(ListNew(xs)) if xs.length == 1 => Some(xs.head)
 //      case _ => None
@@ -767,7 +767,7 @@
 //
 //  // implement smart constructor for DBFor nodes; perform normalization.
 //  // note that we map IR nodes to staged code, not directly to other IR nodes.
-//  def dbfor[A:Manifest,B:Manifest](l: Exp[List[A]], f: Exp[A] => Exp[List[B]])(implicit pos: SourceContext): Exp[List[B]] = l match {
+//  def dbfor[A:Typ,B:Typ](l: Exp[List[A]], f: Exp[A] => Exp[List[B]])(implicit pos: SourceContext): Exp[List[B]] = l match {
 ///*
 //             for x in (yield Q)do R --> R[x:=Q]
 //    for y in (for x in P do Q) do R --> for x in P do (for y in Q do R)
@@ -799,7 +799,7 @@
 //
 //
 //  // override `if (c) a else b` smart constructor to add rewrites
-//  override def ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: Block[T], elsep: Block[T])(implicit pos: SourceContext) = ((thenp.res,elsep.res) match {
+//  override def ifThenElse[T:Typ](cond: Rep[Boolean], thenp: Block[T], elsep: Block[T])(implicit pos: SourceContext) = ((thenp.res,elsep.res) match {
 ///*
 //                  if P then (Q @ R) --> (if P then Q) @ (if P then R)
 //                       if P then [] --> []
@@ -808,7 +808,7 @@
 //*/
 //    case (Empty(),Empty())       => List()
 //    case (IfThen(c,a),Empty())   => if (cond && c) a else List()
-//    case (For(l,f),Empty())      => implicit def unsafe[T] = manifest[Any].asInstanceOf[Manifest[T]] // FIXME: get manifest (for result type) from somewhere else
+//    case (For(l,f),Empty())      => implicit def unsafe[T] = manifest[Any].asInstanceOf[Typ[T]] // FIXME: get manifest (for result type) from somewhere else
 //                                    for (x <- l if cond; y <- f(x)) yield y
 //    case (Concat(a,b),Empty())   => (if (cond) a else List()) ++ (if (cond) b else List())
 //    case _                       => super.ifThenElse(cond,thenp,elsep)
@@ -817,18 +817,18 @@
 //
 //
 //  // override Rep[List[T]] methods to create For nodes
-//  override def list_flatMap[A:Manifest,B:Manifest](l: Exp[List[A]], f: Exp[A] => Exp[List[B]])(implicit pos: SourceContext) = {
+//  override def list_flatMap[A:Typ,B:Typ](l: Exp[List[A]], f: Exp[A] => Exp[List[B]])(implicit pos: SourceContext) = {
 //    dbfor[A,B](l,f)
 //  }
-//  override def list_map[A:Manifest,B:Manifest](l: Exp[List[A]], f: Exp[A] => Exp[B])(implicit pos: SourceContext) = {
+//  override def list_map[A:Typ,B:Typ](l: Exp[List[A]], f: Exp[A] => Exp[B])(implicit pos: SourceContext) = {
 //    list_flatMap[A,B](l, x => List(f(x)))
 //  }
-//  override def list_filter[A : Manifest](l: Exp[List[A]], f: Exp[A] => Exp[Boolean])(implicit pos: SourceContext) = {
+//  override def list_filter[A: Typ](l: Exp[List[A]], f: Exp[A] => Exp[Boolean])(implicit pos: SourceContext) = {
 //    list_flatMap[A,A](l, x => if (f(x)) List(x) else List())
 //  }
 //  // wrap for bodies as function objects
 //  case class Fun[A,B](arg: Sym[A], body: Block[B])
-//  def reifyFun[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]) = {
+//  def reifyFun[A:Typ,B:Typ](f: Rep[A] => Rep[B]) = {
 //    val x = fresh[A]; Fun(x,reifyEffects(f(x)))
 //  }
 //}
@@ -884,7 +884,7 @@
 //}
 //
 //@virtualize
-//abstract class LinqDriver[A:Manifest,B:Manifest] extends DslDriver[A,B] with Staged with StagedExp { q =>
+//abstract class LinqDriver[A:Typ,B:Typ] extends DslDriver[A,B] with Staged with StagedExp { q =>
 //  override val codegen = new DslGen with ScalaGenStaged {
 //    val IR: q.type = q
 //  }
@@ -905,7 +905,7 @@
 //    case DBFor(_, _, _, _, Fun(_, body)) => freqCold(body)
 //    case _ => super.symsFreq(e)
 //  }
-//  override def __ifThenElse[T:Manifest](cond: Rep[Boolean], thenp: =>Rep[T], elsep: =>Rep[T])(implicit pos: SourceContext) = {
+//  override def __ifThenElse[T:Typ](cond: Rep[Boolean], thenp: =>Rep[T], elsep: =>Rep[T])(implicit pos: SourceContext) = {
 //    val a = reifyEffectsHere(thenp)
 //    val b = reifyEffectsHere(elsep)
 //    val ae = summarizeEffects(a)

@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
@@ -67,7 +67,7 @@ class ShonanLiveTest extends TutorialFunSuite {
   5) unrollIf
 */
 
-abstract class LMS_Driver[A:Manifest,B:Manifest] extends DslDriver[A,B]
+abstract class LMS_Driver[A:Typ,B:Typ] extends DslDriver[A,B]
 
 
 }

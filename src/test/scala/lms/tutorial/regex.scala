@@ -34,7 +34,9 @@ a bytecode compiler.
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
-import org.scala_lang.virtualized.{EmbeddedControls, virtualize}
+import org.scala_lang.virtualized.{EmbeddedControls, virtualize, SourceContext}
+
+import scala.lms.common._
 
 /**
 Regular Expression Matcher
@@ -44,9 +46,7 @@ We start with a small regular expression matcher, ported to Scala from
 [a C version, written by Rob Pike and Brian Kernighan](http://www.cs.princeton.edu/courses/archive/spr09/cos333/beautiful.html).
 */
 
-
-//@virtualize //FIXME: if virtualized we need "EmbeddedControls"
-trait RegexpMatcher { //this: EmbeddedControls =>
+trait RegexpMatcher {
 
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: String): Boolean = {
@@ -95,7 +95,6 @@ trait RegexpMatcher { //this: EmbeddedControls =>
   }
 }
 
-@virtualize
 class RegexpMatcherTest extends FunSuite with RegexpMatcher {
   def testmatch(regexp: String, text: String, expected: Boolean) {
     test(s"""matchsearch("$regexp", "$text") == $expected""") {
@@ -129,7 +128,7 @@ parameters in ``Rep[_]`` types. Otherwise, the code is the same.
 */
 
 @virtualize
-trait StagedRegexpMatcher extends Dsl {
+trait StagedRegexpMatcher extends Dsl { //with EqualExp with BooleanOpsExp with LiftEquals
 
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: Rep[String]): Rep[Boolean] = {
@@ -172,8 +171,11 @@ trait StagedRegexpMatcher extends Dsl {
     !failed && found
   }
 
+  //FIXME: do these code generation problems get fixed with the inclusion of CharOpsClass?
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
     c == '.' || c == t
+    //infix_==(c, '.') || infix_==(c, t)
+    true
   }
 }
 

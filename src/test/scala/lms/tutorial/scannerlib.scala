@@ -5,7 +5,7 @@ import java.io.BufferedReader
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
-import scala.virtualization.lms.common.{EqualExpOpt, Equal}
+import scala.lms.common.{EqualExpOpt, Equal}
 
 //@virtualize //FIXME to virtualize we need EmbeddedControls
 class Scanner(filename: String) {

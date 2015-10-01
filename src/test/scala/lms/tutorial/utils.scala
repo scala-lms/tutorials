@@ -3,7 +3,7 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 import org.scala_lang.virtualized.EmbeddedControls
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
