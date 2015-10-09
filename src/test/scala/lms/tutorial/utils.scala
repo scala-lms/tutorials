@@ -3,8 +3,6 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
-import scala.virtualization.lms.common._
-import scala.reflect.SourceContext
 
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv

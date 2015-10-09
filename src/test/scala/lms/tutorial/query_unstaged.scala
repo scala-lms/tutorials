@@ -8,7 +8,7 @@ Outline:
 */
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 
 object query_unstaged {
 trait QueryInterpreter extends PlainQueryProcessor {

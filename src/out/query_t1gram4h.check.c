@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #ifndef MAP_FILE
 #define MAP_FILE MAP_SHARED
 #endif
@@ -206,6 +207,7 @@ void Snippet(char*  x0) {
     int32_t x143 = x139 + 1;
     x18[x138] = x143;
   }
+  close(x19);
   int32_t x151 = 0;
   int32_t x148 = open(x0,0);
   int32_t x149 = fsize(x148);
@@ -339,6 +341,7 @@ void Snippet(char*  x0) {
       }
     }
   }
+  close(x148);
 }
 /*****************************************
 End of C Generated Code

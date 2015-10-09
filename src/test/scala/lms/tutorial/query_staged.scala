@@ -8,7 +8,7 @@ Outline:
 */
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.lms.common._
 
 object query_staged {
 trait QueryCompiler extends Dsl with StagedQueryProcessor
@@ -226,7 +226,7 @@ Data Structure Implementations
     }
   }
 
-  class ArrayBuffer[T:Manifest](dataSize: Int, schema: Schema) {
+  class ArrayBuffer[T:Typ](dataSize: Int, schema: Schema) {
     val buf = schema.map(f => NewArray[T](dataSize))
     var len = 0
     def +=(x: Seq[Rep[T]]) = {

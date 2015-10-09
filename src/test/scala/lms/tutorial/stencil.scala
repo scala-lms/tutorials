@@ -12,14 +12,14 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common.ForwardTransformer
+import scala.lms.common.ForwardTransformer
 import scala.reflect.SourceContext
 
 // Shonan Challenge 3.3 Stencil
 // https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
 
 trait Sliding extends Dsl {
-  def infix_sliding[T:Manifest](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
+  def infix_sliding[T:Typ](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
     val a = NewArray[T](n)
     sliding(0,n)(i => a(i) = f(i))
     a
@@ -110,14 +110,14 @@ trait SlidingExp extends DslExp with Sliding {
       // now generate the loop
       for (j <- (start + unit(1)) until end) {
         // read the overlap variables
-        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)))
+        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
         // emit the transformed loop body
         val (r,substY1) = trans.withSubstScope((reads:+(i->(j-unit(1)))): _*) {
           stms1.foreach(s=>trans.traverseStm(s))
           (trans(r1), trans.subst)
         }
         // write the new values to the overlap vars
-        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))))
+        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head)))
       }
     }
   }

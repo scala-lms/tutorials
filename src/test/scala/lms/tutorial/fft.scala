@@ -169,7 +169,7 @@ members defined by `TestFFC`.
 
 The full code is below:
 
-    package scala.virtualization.lms
+    package scala.lms
     package epfl
     package test2
 
@@ -272,7 +272,7 @@ The full code is below:
        import IR._
        type Block[+T] = Exp[T]
        def getBlockResultFull[T](x: Block[T]): Exp[T] = x
-       def reifyBlock[T:Manifest](x: =>Exp[T]): Block[T] = x
+       def reifyBlock[T:Typ](x: =>Exp[T]): Block[T] = x
        def traverseBlock[A](block: Block[A]): Unit = {
          buildScheduleForResult(block) foreach traverseStm
        }
