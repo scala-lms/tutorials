@@ -172,8 +172,9 @@ trait StagedRegexpMatcher extends Dsl {
   }
 
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
+//    boolean_or(infix_==(c, '.'), infix_==(c, t))
     c == '.' || c == t
-    true
+//    boolean_or(infix_==(c, '.'), infix_==(c, t)) //__equals
   }
 }
 
