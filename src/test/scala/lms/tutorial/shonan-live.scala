@@ -67,7 +67,7 @@ class ShonanLiveTest extends TutorialFunSuite {
   5) unrollIf
 */
 
-abstract class LMS_Driver[A:Typ,B:Typ] extends DslDriver[A,B]
+abstract class LMS_Driver[A:Manifest, B:Manifest] extends DslDriver[A,B]
 
 
 }

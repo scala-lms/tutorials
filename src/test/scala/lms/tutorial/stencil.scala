@@ -22,7 +22,7 @@ import org.scala_lang.virtualized.virtualize
 @virtualize
 trait Sliding extends Dsl {
   implicit class WrapIntSliding(n: Rep[Int]) {
-    def sliding[T:Typ](f: Rep[Int] => Rep[T]): Rep[Array[T]] = infix_sliding(n, f)
+    def slidingi[T:Typ](f: Rep[Int] => Rep[T]): Rep[Array[T]] = infix_sliding(n, f)
   }
   def infix_sliding[T:Typ](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
     val a = NewArray[T](n)
@@ -30,7 +30,7 @@ trait Sliding extends Dsl {
     a
   }
   implicit class WrapRangeSliding(r: Rep[Range]) {
-    def sliding[T:Typ] = infix_sliding(r)
+    def slidingr = infix_sliding(r)
   }
   def infix_sliding(r: Rep[Range]) = new {
     def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] =
@@ -120,14 +120,14 @@ trait SlidingExp extends DslExp with Sliding {
       // now generate the loop
       for (j <- (start + unit(1)) until end) {
         // read the overlap variables
-        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)))
+        val reads = (overlap0 zip vars) map (p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
         // emit the transformed loop body
         val (r,substY1) = trans.withSubstScope((reads:+(i->(j-unit(1)))): _*) {
           stms1.foreach(s=>trans.traverseStm(s))
           (trans(r1), trans.subst)
         }
         // write the new values to the overlap vars
-        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))))
+        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head)))
       }
     }
   }
@@ -137,7 +137,7 @@ trait SlidingExp extends DslExp with Sliding {
 trait SlidingWarmup extends Sliding {
   def snippet(n: Rep[Int]): Rep[Array[Int]] = {
     def compute(i: Rep[Int]) = 2*i+3
-    n sliding { i => compute(i) + compute(i+1) }
+    n slidingi { i => compute(i) + compute(i+1) }
   }
 }
 
@@ -168,7 +168,7 @@ trait Stencil extends Sliding {
     def wm(j: Rep[Int]) = a(j) - w1(j) + w1(j-1)
     def w2(j: Rep[Int]) = wm(j) * wm(j+1)
     def b(j: Rep[Int]) = wm(j) - w2(j) + w2(j-1)
-    for (i <- (2 until n-2).sliding) {
+    for (i <- WrapRangeSliding(2 until n-2).slidingr) {
       output(i) = b(i)
     }
     output

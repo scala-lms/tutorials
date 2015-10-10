@@ -10,6 +10,7 @@ package scala.lms.tutorial
 
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
+
 import scala.lms.common._
 
 @virtualize

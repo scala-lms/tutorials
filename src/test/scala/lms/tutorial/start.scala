@@ -35,6 +35,7 @@ This tutorial is a [literate Scala file](https://github.com/scala-lms/tutorials/
 package scala.lms.tutorial
 
 import scala.lms.common._
+
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 

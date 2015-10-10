@@ -7,8 +7,8 @@ import scala.lms.common._
 
 // TODO: clean up at least, maybe add to LMS?
 @virtualize
-trait UtilOps extends Base {
-  implicit class HashCls(o: Rep[Any]) {
+trait UtilOps extends Base { this: Dsl =>
+  implicit class HashCls[T: Typ](o: Rep[T]) {
     def HashCode(implicit pos: SourceContext):Rep[Long] = infix_HashCode(o)
     def HashCode(len: Rep[Int])(implicit pos: SourceContext):Rep[Long] = o match {
       case s:Rep[String] => infix_HashCode(s, len)
@@ -16,20 +16,19 @@ trait UtilOps extends Base {
     }
   }
   def infix_HashCode[T:Typ](a: Rep[T])(implicit pos: SourceContext): Rep[Long]
-  def infix_HashCode(s: Rep[String], len: Rep[Int])(implicit pos: SourceContext): Rep[Long]
+  def infix_HashCode(s: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext): Rep[Long]
 }
 
 @virtualize
-trait UtilOpsExp extends UtilOps with BaseExp {
-  implicit def longTyp: Typ[Long] = manifestTyp
+trait UtilOpsExp extends UtilOps with BaseExp { this: DslExp =>
 
-  case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long]
+  case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long] { def m = typ[T] }
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
   def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = toAtom(ObjHashCode(o))
-  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) = StrSubHashCode(o,len)
+  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext) = StrSubHashCode(o,len)
 
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case e@ObjHashCode(a) => infix_HashCode(f(a))
+    case e@ObjHashCode(a) => infix_HashCode(f(a))(e.m, pos)
     case e@StrSubHashCode(o,len) => infix_HashCode(f(o),f(len))
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
@@ -58,7 +57,7 @@ trait CGenUtilOps extends CGenBase {
 }
 
 @virtualize
-trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with SeqOps with StringOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
+trait Dsl extends PrimitiveOps with NumericOps with BooleanOps with LiftString with LiftPrimitives with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] = __ifThenElse(lhs, rhs, unit(false))
   def generate_comment(l: String): Rep[Unit]
@@ -66,7 +65,7 @@ trait Dsl extends NumericOps with PrimitiveOps with BooleanOps with LiftString w
 }
 
 @virtualize
-trait DslExp extends Dsl with NumericOpsExpOpt with PrimitiveOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
+trait DslExp extends Dsl with PrimitiveOpsExpOpt with NumericOpsExpOpt with BooleanOpsExp with IfThenElseExpOpt with EqualExpBridgeOpt with RangeOpsExp with OrderingOpsExp with MiscOpsExp with EffectExp with ArrayOpsExpOpt with StringOpsExp with SeqOpsExp with FunctionsRecursiveExp with WhileExp with StaticDataExp with VariablesExpOpt with ObjectOpsExpOpt with UtilOpsExp {
   override def boolean_or(lhs: Exp[Boolean], rhs: Exp[Boolean])(implicit pos: SourceContext) : Exp[Boolean] = lhs match {
     case Const(false) => rhs
     case _ => super.boolean_or(lhs, rhs)
@@ -115,9 +114,9 @@ trait DslGen extends ScalaGenNumericOps
   import IR._
 
   override def quote(x: Exp[Any]) = x match {
-    case Const('\n') if x.tp == manifest[Char] => "'\\n'"
-    case Const('\t') if x.tp == manifest[Char] => "'\\t'"
-    case Const('\0') if x.tp == manifest[Char] => "'\\0'"
+    case Const('\n') if x.tp == typ[Char] => "'\\n'"
+    case Const('\t') if x.tp == typ[Char] => "'\\t'"
+    case Const(0)    if x.tp == typ[Char] => "'\\0'"
     case _ => super.quote(x)
   }
 
@@ -173,7 +172,7 @@ trait DslGenC extends CGenNumericOps
     case "Char" => "char"
     case _ => super.remap(m)
   }
-  /*override*/ def format(s: Exp[Any]): String = {
+  override def format(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "uint16_t" => "%c"
       case "bool" | "int8_t" | "int16_t" | "int32_t" => "%d"
@@ -188,7 +187,7 @@ trait DslGenC extends CGenNumericOps
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }
-  /*override*/ def quoteRawString(s: Exp[Any]): String = {
+  override def quoteRawString(s: Exp[Any]): String = {
     remap(s.tp) match {
       case "string" => quote(s) + ".c_str()"
       case _ => quote(s)
@@ -206,9 +205,9 @@ trait DslGenC extends CGenNumericOps
 
   override def quote(x: Exp[Any]) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"")+"\"" // TODO: more escapes?
-    case Const('\n') if x.tp == manifest[Char] => "'\\n'"
-    case Const('\t') if x.tp == manifest[Char] => "'\\t'"
-    case Const('\0') if x.tp == manifest[Char] => "'\\0'"
+    case Const('\n') if x.tp == typ[Char] => "'\\n'"
+    case Const('\t') if x.tp == typ[Char] => "'\\t'"
+    case Const(0)    if x.tp == typ[Char] => "'\\0'"
     case _ => super.quote(x)
   }
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
@@ -241,6 +240,7 @@ trait DslGenC extends CGenNumericOps
       #include <sys/stat.h>
       #include <stdio.h>
       #include <stdint.h>
+      #include <unistd.h>
       #ifndef MAP_FILE
       #define MAP_FILE MAP_SHARED
       #endif
@@ -286,14 +286,13 @@ trait DslGenC extends CGenNumericOps
 
 
 @virtualize
-abstract class DslSnippet[A:Manifest, B:Typ] extends Dsl with Base {
+abstract class DslSnippet[A:Manifest, B:Manifest] extends Dsl with Base {
   def snippet(x: Rep[A]): Rep[B]
 }
 
 @virtualize
-abstract class DslDriver[A: Typ, B: Typ] extends DslSnippet[A, B] with DslImpl with CompileScala {
-  lazy val f = compile(snippet)
-
+abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with DslImpl with CompileScala {
+  lazy val f = compile(snippet)(manifestTyp[A],manifestTyp[B])
   def precompile: Unit = f
 
   def precompileSilently: Unit = utils.devnull(f)
@@ -302,18 +301,20 @@ abstract class DslDriver[A: Typ, B: Typ] extends DslSnippet[A, B] with DslImpl w
 
   lazy val code: String = {
     val source = new java.io.StringWriter()
-    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
+    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))(manifestTyp[A],manifestTyp[B])
     source.toString
   }
 }
 
 @virtualize
-abstract class DslDriverC[A: Typ, B: Typ] extends DslSnippet[A, B] with DslExp {
+abstract class DslDriverC[A: Manifest, B: Manifest] extends DslSnippet[A, B] with DslExp {
   q =>
   val codegen = new DslGenC {
     val IR: q.type = q
   }
   lazy val code: String = {
+    implicit val mA = manifestTyp[A]
+    implicit val mB = manifestTyp[B]
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString

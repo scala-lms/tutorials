@@ -4,9 +4,10 @@ name := "lms-tutorials"
 
 scalaVersion := "2.11.2"
 
-libraryDependencies += "EPFL" %% "macro-lms" % "0.3-SNAPSHOT"
+libraryDependencies += "EPFL" %% "macro-lms" % "1.0.0-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
+
 
 //libraryDependencies += "org.scala-lang.virtualized" % "scala-compiler" % "2.11.2"
 

@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #ifndef MAP_FILE
 #define MAP_FILE MAP_SHARED
 #endif
@@ -207,7 +208,9 @@ void Snippet(char*  x0) {
       } else {
       }
     }
+    close(x67);
   }
+  close(x2);
 }
 /*****************************************
 End of C Generated Code

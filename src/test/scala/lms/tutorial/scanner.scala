@@ -46,7 +46,8 @@ class ScannerLibTest extends LibSuite { this: Equal =>
 }
 
 @virtualize
-trait ScannerBase extends Base {
+trait ScannerBase extends Base { this: Dsl =>
+  implicit def scannerTyp: Typ[Scanner]
   implicit class RepScannerOps(s: Rep[Scanner]) {
     def next(d: Char)(implicit pos: SourceContext) = scannerNext(s, d)
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
@@ -59,7 +60,8 @@ trait ScannerBase extends Base {
 }
 
 @virtualize
-trait ScannerExp extends ScannerBase with EffectExp {
+trait ScannerExp extends ScannerBase with EffectExp { this: DslExp =>
+  implicit def scannerTyp: Typ[Scanner] = manifestTyp
   case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
   case class ScannerNext(s: Exp[Scanner], d: Exp[Char]) extends Def[String]
   case class ScannerHasNext(s: Exp[Scanner]) extends Def[Boolean]
@@ -98,9 +100,9 @@ trait ScalaGenScanner extends ScalaGenEffect {
 }
 
 @virtualize
-trait ScannerLowerBase extends Base with UncheckedOps {
+trait ScannerLowerBase extends Base with UncheckedOps { this: Dsl =>
   def open(name: Rep[String]): Rep[Int]
-  def fclose(fd: Rep[Int]): Rep[Unit]
+  def close(fd: Rep[Int]): Rep[Unit]
   def filelen(fd: Rep[Int]): Rep[Int]
   def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
   def stringFromCharArray(buf: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String]
@@ -109,9 +111,9 @@ trait ScannerLowerBase extends Base with UncheckedOps {
 }
 
 @virtualize
-trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp {
+trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp { this: DslExp =>
   def open(name: Rep[String]) = uncheckedPure[Int]("open(",name,",0)")
-  def fclose(fd: Rep[Int]) = unchecked[Unit]("fclose(",fd,")")
+  def close(fd: Rep[Int]) = unchecked[Unit]("close(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
   def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
   def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data,"+",pos)
