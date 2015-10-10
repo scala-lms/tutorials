@@ -24,7 +24,7 @@ trait UtilOpsExp extends UtilOps with BaseExp { this: DslExp =>
 
   case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long] { def m = typ[T] }
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
-  def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = toAtom(ObjHashCode(o))
+  def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
   def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext) = StrSubHashCode(o,len)
 
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
@@ -59,7 +59,7 @@ trait CGenUtilOps extends CGenBase {
 @virtualize
 trait Dsl extends PrimitiveOps with NumericOps with BooleanOps with LiftString with LiftPrimitives with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
-  /*override*/ def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] = __ifThenElse(lhs, rhs, unit(false))
+  override def boolean_and(lhs: Rep[Boolean], rhs: Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] = __ifThenElse(lhs, rhs, unit(false))
   def generate_comment(l: String): Rep[Unit]
   def comment[A:Typ](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
@@ -286,7 +286,7 @@ trait DslGenC extends CGenNumericOps
 
 
 @virtualize
-abstract class DslSnippet[A:Manifest, B:Manifest] extends Dsl with Base {
+abstract class DslSnippet[A:Manifest, B:Manifest] extends Dsl {
   def snippet(x: Rep[A]): Rep[B]
 }
 

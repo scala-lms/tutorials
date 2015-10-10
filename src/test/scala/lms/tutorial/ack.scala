@@ -13,8 +13,6 @@ Outline:
 
 package scala.lms.tutorial
 
-import org.scalatest.FunSuite
-
 import org.scala_lang.virtualized.virtualize
 
 /**

@@ -29,7 +29,7 @@ We first implement a pure, non-staged library version as a baseline.
 */
 
 @virtualize
-trait Shallow extends Util with EmbeddedControls {
+trait Shallow extends Util {
   
   // people db schema
 

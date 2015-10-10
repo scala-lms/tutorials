@@ -32,7 +32,7 @@ libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _ % 
 
 libraryDependencies += "org.scala-lang.virtualized" %% "scala-virtualized" % "0.0.1-SNAPSHOT"
 
-//autoCompilerPlugins := true
+autoCompilerPlugins := true
 
 val paradiseVersion = "2.0.1"
 

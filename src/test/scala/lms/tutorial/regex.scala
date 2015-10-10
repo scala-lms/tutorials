@@ -128,7 +128,7 @@ parameters in ``Rep[_]`` types. Otherwise, the code is the same.
 */
 
 @virtualize
-trait StagedRegexpMatcher extends Dsl { //with EqualExp with BooleanOpsExp with LiftEquals
+trait StagedRegexpMatcher extends Dsl {
 
   /* search for regexp anywhere in text */
   def matchsearch(regexp: String, text: Rep[String]): Rep[Boolean] = {
@@ -171,10 +171,8 @@ trait StagedRegexpMatcher extends Dsl { //with EqualExp with BooleanOpsExp with 
     !failed && found
   }
 
-  //FIXME: do these code generation problems get fixed with the inclusion of CharOpsClass?
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
     c == '.' || c == t
-    //infix_==(c, '.') || infix_==(c, t)
     true
   }
 }
