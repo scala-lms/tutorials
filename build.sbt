@@ -4,7 +4,7 @@ name := "lms-tutorials"
 
 scalaVersion := "2.11.2"
 
-libraryDependencies += "EPFL" %% "macro-lms" % "1.0.0-SNAPSHOT"
+libraryDependencies += "EPFL" %% "macro-lms" % "1.0.0-macrovirt"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
 
@@ -24,13 +24,13 @@ libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
 
 //macro trans:
 
-libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-compiler" % _ % "compile")
+libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value % "compile"
 
-libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-library" % _ % "compile")
+libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value % "compile"
 
-libraryDependencies <+= (scalaVersion)("org.scala-lang" % "scala-reflect" % _ % "compile")
+libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value % "compile"
 
-libraryDependencies += "org.scala-lang.virtualized" %% "scala-virtualized" % "0.0.1-SNAPSHOT"
+libraryDependencies += "org.scala-lang.virtualized" %% "scala-virtualized" % "1.0.0-macrovirt"
 
 autoCompilerPlugins := true
 
