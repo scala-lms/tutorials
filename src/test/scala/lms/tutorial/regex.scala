@@ -34,9 +34,8 @@ a bytecode compiler.
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
-import org.scala_lang.virtualized.{EmbeddedControls, virtualize, SourceContext}
+import org.scala_lang.virtualized.virtualize
 
-import scala.lms.common._
 
 /**
 Regular Expression Matcher
@@ -172,8 +171,15 @@ trait StagedRegexpMatcher extends Dsl {
   }
 
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
-//    boolean_or(infix_==(c, '.'), infix_==(c, t))
     c == '.' || c == t
+    // Line below fixes Regex tests
+//    infix_||(c == '.', c == t)
+    // Other tests and trials
+//    boolean_or(infix_==(c, '.'), infix_==(c, t))
+//    c == '.' || infix_==(c, t)(overloaded5, charTyp, charTyp, null)
+//    c == unit('.') || c == t
+//    infix_==[Char, Rep[Char]](c, '.') || c == t
+//    infix_==[Char, Rep[Char]](c, '.')//(overloaded5, charTyp, charTyp, pos) || c == t
 //    boolean_or(infix_==(c, '.'), infix_==(c, t)) //__equals
   }
 }
