@@ -3,9 +3,7 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
-import scala.lms.common._
 import org.scala_lang.virtualized.EmbeddedControls
-import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
 trait LibSuite extends FunSuite {
@@ -51,14 +49,14 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
     val aname = fileprefix+".actual."+suffix
     val expected = readFile(name)
     val code = indent(raw_code)
-    //EmbeddedControls.
-    __ifThenElse((expected != code),
-    {val wname = if (overwriteCheckFiles) name else aname
-    println("writing " + wname)
-    writeFile(wname, code)},
-    {val f = new File(aname)
-    if (f.exists) f.delete}
-    )
+    if (expected != code) {
+      val wname = if (overwriteCheckFiles) name else aname
+      println("writing " + wname)
+      writeFile(wname, code)
+    } else {
+      val f = new File(aname)
+      if (f.exists) f.delete
+    }
     if (!overwriteCheckFiles) {
       assert(expected == code, name)
     }
