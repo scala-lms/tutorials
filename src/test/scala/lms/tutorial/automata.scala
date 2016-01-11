@@ -24,49 +24,69 @@ by client code. Thus, they are similar to coroutines.
 
 package scala.lms.tutorial
 
-case class Automaton[@specialized(Char) I, @specialized(Boolean) O](out: O, next: I => Automaton[I,O])
 
-trait DFAOps extends Dsl {
-  implicit def dfaTyp: Typ[DfaState]
-  type DfaState = Automaton[Char,Boolean]
-  type DIO = Rep[DfaState]
-  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(false)(f)
-  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO
-}
+/**
+Regexp Matchers as Nondeterministic Finite Automata (NFA)
+---------------------------------------------------------
 
-trait DFAOpsExp extends DslExp with DFAOps {
-  implicit def dfaTyp: Typ[DfaState] = manifestTyp
-  case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
-  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
-}
+*/
 
-trait ScalaGenDFAOps extends DslGen {
-  val IR: DFAOpsExp
-  import IR._
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case dfa@DFAState(b,f) =>
-      emitValDef(sym, "scala.lms.tutorial.Automaton(" + quote(b) + ", " + quote(f) + ")")
-    case _ => super.emitNode(sym, rhs)
-  }
-}
-abstract class AutomataDriver extends DslDriver[Unit,Automaton[Char,Boolean]] with DFAOpsExp { q =>
-  override val codegen = new ScalaGenDFAOps {
-    val IR: q.type = q
-  }
-  def matches(s: String): Boolean = {
-    var a: Automaton[Char,Boolean] = f(())
-    var i: Int = 0
-    while (!a.out && i < s.length) {
-      a = a.next(s(i))
-      i += 1
+class AutomataTest extends TutorialFunSuite {
+  val under = "dfa_"
+
+  test("findAAB") {
+    val p = new AutomataDriver with NFAtoDFA {
+      def snippet(x: Rep[Unit]) = {
+/**
+Here is a simple example for the fixed regular expression `.*AAB`:
+*/
+        def findAAB(): NIO = {
+          guard(C('A')) {
+            guard(C('A')) {
+              guard(C('B'), true) {
+                stop()
+          }}} ++
+          guard(W) { findAAB() } // in parallel ...
+        }
+
+        convertNFAtoDFA((findAAB(), false))
+      }
     }
-    a.out
+    assertResult(true){p.matches("AAB")}
+    assertResult(false){p.matches("AAC")}
+    assertResult(true){p.matches("AACAAB")}
+    assertResult(true){p.matches("AACAABAAC")}
+    check("aab", p.code)
   }
 }
 
-trait NFAtoDFA extends DFAOps with scala.lms.util.ClosureCompare {
-  type NIO = List[NTrans]
-  
+/**
+We can easily add combinators on top of the core abstractions that take care
+of producing matchers from textual regular expressions. However, the point
+here is to demonstrate how the implementation works.
+*/
+
+trait NFAOps extends scala.lms.util.ClosureCompare {
+/**
+The given matcher uses an API that models nondeterministic finite automata
+(NFA):
+
+An NFA state consists of a list of possible transitions. Each transition may
+be guarded by a set of characters and it may  have a flag to be signaled if
+the transition is taken. It also knows how to compute the following state. We
+use `Char`s for simplicity, but of course we could  use generic types as well.
+Note that the API does not mention where input is obtained from (files,
+streams, etc).
+*/
+  type NIO = List[NTrans] // state: many possible transitions
+  def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
+    List(NTrans(cond, () => found, () => e))
+  }
+  def stop(): NIO = Nil
+  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
+  def guards(conds: List[CharSet], found: Boolean = false)(e: => NIO): NIO = {
+    conds.flatMap(guard(_, found)(e))
+  }
   case class NTrans(c: CharSet, e: () => Boolean, s: () => NIO) extends Ordered[NTrans] {
     override def compare(o: NTrans) = {
       val i = this.c.compare(o.c)
@@ -76,21 +96,11 @@ trait NFAtoDFA extends DFAOps with scala.lms.util.ClosureCompare {
           val tf = canonicalize(this.s())
           val of = canonicalize(o.s())
           if (tf == of) 0 else tf.compare(of)
-	}
+	      }
       }
     }
   }
 
-  def trans(c: CharSet)(s: () => NIO): NIO = List(NTrans(c, () => false, s))
-  def guard(cond: CharSet, found: => Boolean = false)(e: => NIO): NIO = {
-    List(NTrans(cond, () => found, () => e))
-  }
-  def guards(conds: List[CharSet], found: Boolean = false)(e: => NIO): NIO = {
-    conds.flatMap(guard(_, found)(e))
-  }
-
-  def stop(): NIO = Nil
-  
   sealed abstract class CharSet extends Ordered[CharSet] {
     override def compare(o: CharSet) = (this,o) match {
       case (W,W) => 0
@@ -106,10 +116,78 @@ trait NFAtoDFA extends DFAOps with scala.lms.util.ClosureCompare {
   case class R(a: Char, b: Char) extends CharSet
   case class C(c: Char) extends CharSet
   case object W extends CharSet
-
   def r(a: Char, b: Char) = {
     assert(a <= b)
     if (a == b) C(a) else R(a, b)
+  }
+}
+
+/**
+From NFA to DFA using Staging
+-----------------------------
+
+We will translate NFAs to DFAs using staging. This is the staged DFA API,
+which is just a thin wrapper over an unstaged API with no `Rep`s:
+*/
+
+case class Automaton[@specialized(Char) I, @specialized(Boolean) O](out: O, next: I => Automaton[I,O])
+
+trait DFAOps extends Dsl {
+  implicit def dfaTyp: Typ[DfaState]
+  type DfaState = Automaton[Char,Boolean]
+  type DIO = Rep[DfaState]
+  def dfa_trans(f: Rep[Char] => DIO): DIO = dfa_trans(false)(f)
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO
+}
+
+trait NFAtoDFA extends NFAOps with DFAOps {
+/**
+Translating an NFA to a DFA is accomplished by creating a DFA state for each
+encountered NFA configuration (removing duplicate states via `canonicalize`):
+*/
+  def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
+    def iterate(flag: Boolean, state: NIO): DIO = {
+      val state_cooked = if (state.isEmpty) state else {
+        val state_sorted = state.sorted
+        state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
+             if s.compare(sn) != 0) yield sn)
+      }
+      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
+    }}
+    iterate(in._2, in._1)
+  }
+
+/**
+The LMS framework memoizes functions which ensures termination if the
+NFA is indeed finite.
+
+We use a separate function to explore the NFA space,
+advancing the automaton by a symbolic character `cin` to invoke its
+continuations `k` with a new automaton, i.e. the possible set of
+states after consuming `cin`. The given implementation assumes
+character sets contain either zero or one characters, the empty set
+denoting a wildcard match. More elaborate cases such as
+character ranges are easy to add. The algorithm tries to remove as
+many redundant checks and impossible branches as possible. This only
+works because the character guards are staging time values.
+*/
+  def exploreNFA[A:Typ](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
+    case Nil => k(false, Nil)
+    case NTrans(W, e, s)::rest =>
+      val (xs1, xs2) = xs.partition(_.c != W)
+      exploreNFA(xs1,cin)((flag,acc) => k(flag || xs2.exists(_.e()), acc ++ xs2.flatMap(_.s())))
+    case NTrans(cset, e, s)::rest =>
+      if (cset contains cin) {
+        val xs1 = for (NTrans(rcset, re, rs) <- rest;
+		       kcset <- rcset knowing cset) yield
+			 NTrans(kcset,re,rs)
+        exploreNFA(xs1,cin)((flag,acc) => k(flag || e(), acc ++ s()))
+      } else {
+        val xs1 = for (NTrans(rcset, re, rs) <- rest;
+		       kcset <- rcset knowing_not cset) yield
+			 NTrans(kcset,re,rs)
+        exploreNFA(xs1, cin)(k)
+      }
   }
 
   def infix_contains(s: CharSet, c: Rep[Char]): Rep[Boolean] = s match {
@@ -135,64 +213,61 @@ trait NFAtoDFA extends DFAOps with scala.lms.util.ClosureCompare {
     case (R(a1,b1),R(a2,b2)) if a2 <= a1 && a1 <= b2 && b2 <= b1 => Some(r(b2, b1))
     case _ => Some(s1)
   }
+}
 
-  def exploreNFA[A:Typ](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
-    case Nil => k(false, Nil)
-    case NTrans(W, e, s)::rest =>
-      val (xs1, xs2) = xs.partition(_.c != W)
-      exploreNFA(xs1,cin)((flag,acc) => k(flag || xs2.exists(_.e()), acc ++ xs2.flatMap(_.s())))
-    case NTrans(cset, e, s)::rest =>
-      if (cset contains cin) {
-        val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing cset) yield
-			 NTrans(kcset,re,rs)
-        exploreNFA(xs1,cin)((flag,acc) => k(flag || e(), acc ++ s()))
-      } else {
-        val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing_not cset) yield
-			 NTrans(kcset,re,rs)
-        exploreNFA(xs1, cin)(k)
-      }
-  }
+/**
+The generated code is shown further down below. Each function
+corresponds to one DFA state. Note how  negative information has been used to
+prune the transition space: Given input such as `...AAB` the  automaton jumps
+back to the initial state, i.e. it recognizes that the last character B
+cannot also be A and starts looking for two As after the B.
 
+Generated State Machine Code
+----------------------------
+*/
+trait DFAOpsExp extends DslExp with DFAOps {
+  implicit def dfaTyp: Typ[DfaState] = manifestTyp
+  case class DFAState(e: Boolean, f: Rep[Char => DfaState]) extends Def[DfaState]
+  def dfa_trans(e: Boolean)(f: Rep[Char] => DIO): DIO = DFAState(e, doLambda(f))
+}
 
-  def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
-    def iterate(flag: Boolean, state: NIO): DIO = {
-      val state_cooked = if (state.isEmpty) state else {
-        val state_sorted = state.sorted
-        state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
-             if s.compare(sn) != 0) yield sn)
-      }
-      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
-    }}
-    iterate(in._2, in._1)
+trait ScalaGenDFAOps extends DslGen {
+  val IR: DFAOpsExp
+  import IR._
+  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case dfa@DFAState(b,f) =>
+      emitValDef(sym, "scala.lms.tutorial.Automaton(" + quote(b) + ", " + quote(f) + ")")
+    case _ => super.emitNode(sym, rhs)
   }
 }
 
-class AutomataTest extends TutorialFunSuite {
-  val under = "dfa_"
-
-  test("findAAB") {
-    val p = new AutomataDriver with NFAtoDFA {
-      def snippet(x: Rep[Unit]) = {
-        def findAAB(): NIO = {
-          guard(C('A')) {
-            guard(C('A')) {
-              guard(C('B'), true) {
-                stop()
-          }}} ++
-          guard(W) { findAAB() } // in parallel ...
-        }
-        convertNFAtoDFA((findAAB(), false))
-      }
+/**
+To use the generated code, we use the `matches` small driver loop:
+*/
+abstract class AutomataDriver extends DslDriver[Unit,Automaton[Char,Boolean]] with DFAOpsExp { q =>
+  override val codegen = new ScalaGenDFAOps {
+    val IR: q.type = q
+  }
+  def matches(s: String): Boolean = {
+    var a: Automaton[Char,Boolean] = f(())
+    var i: Int = 0
+    while (!a.out && i < s.length) {
+      a = a.next(s(i))
+      i += 1
     }
-    assertResult(true){p.matches("AAB")}
-    assertResult(false){p.matches("AAC")}
-    assertResult(true){p.matches("AACAAB")}
-    assertResult(true){p.matches("AACAABAAC")}
-    check("aab", p.code)
+    a.out
   }
 }
+
+/**
+If the matcher and input iteration logic is generated together, further
+translations can be applied to transform the mutually recursive lambdas into
+tight imperative state machines.
+
+Here is the generated code for `.*AAB`, shown initially:
+
+      .. includecode:: ../../../../out/dfa_aab.check.scala
+*/
 
 /**
 Regexp Matchers as Nondeterministic Finite Automata (NFA)
