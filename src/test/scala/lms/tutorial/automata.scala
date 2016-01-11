@@ -49,13 +49,18 @@ Here is a simple example for the fixed regular expression `.*AAB`:
           guard(W) { findAAB() } // in parallel ...
         }
 
+        // NFA to DFA conversion via staging explained below.
         convertNFAtoDFA((findAAB(), false))
       }
     }
+
+    // Some tests.
     assertResult(true){p.matches("AAB")}
     assertResult(false){p.matches("AAC")}
     assertResult(true){p.matches("AACAAB")}
     assertResult(true){p.matches("AACAABAAC")}
+
+    // The generated code for the DFA is shown at the end.
     check("aab", p.code)
   }
 }
@@ -121,7 +126,8 @@ We will translate NFAs to DFAs using staging. This is the staged DFA API,
 which is just a thin wrapper over an unstaged API with no `Rep`s:
 */
 
-case class Automaton[@specialized(Char) I, @specialized(Boolean) O](out: O, next: I => Automaton[I,O])
+case class Automaton[@specialized(Char) I, @specialized(Boolean) O](
+  out: O, next: I => Automaton[I,O])
 
 trait DFAOps extends Dsl {
   implicit def dfaTyp: Typ[DfaState]
@@ -165,21 +171,25 @@ character ranges are easy to add. The algorithm tries to remove as
 many redundant checks and impossible branches as possible. This only
 works because the character guards are staging time values.
 */
-  def exploreNFA[A:Typ](xs: NIO, cin: Rep[Char])(k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
+  def exploreNFA[A:Typ](xs: NIO, cin: Rep[Char])(
+    k: (Boolean, NIO) => Rep[A]): Rep[A] = xs match {
     case Nil => k(false, Nil)
     case NTrans(W, e, s)::rest =>
       val (xs1, xs2) = xs.partition(_.c != W)
-      exploreNFA(xs1,cin)((flag,acc) => k(flag || xs2.exists(_.e()), acc ++ xs2.flatMap(_.s())))
+      exploreNFA(xs1,cin)((flag,acc) =>
+        k(flag || xs2.exists(_.e()), acc ++ xs2.flatMap(_.s())))
     case NTrans(cset, e, s)::rest =>
       if (cset contains cin) {
-        val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing cset) yield
-			 NTrans(kcset,re,rs)
+        val xs1 = for (
+          NTrans(rcset, re, rs) <- rest;
+          kcset <- rcset knowing cset
+        ) yield NTrans(kcset,re,rs)
         exploreNFA(xs1,cin)((flag,acc) => k(flag || e(), acc ++ s()))
       } else {
-        val xs1 = for (NTrans(rcset, re, rs) <- rest;
-		       kcset <- rcset knowing_not cset) yield
-			 NTrans(kcset,re,rs)
+        val xs1 = for (
+          NTrans(rcset, re, rs) <- rest;
+          kcset <- rcset knowing_not cset
+        ) yield NTrans(kcset,re,rs)
         exploreNFA(xs1, cin)(k)
       }
   }
