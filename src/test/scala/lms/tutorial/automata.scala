@@ -138,14 +138,17 @@ encountered NFA configuration (removing duplicate states via `canonicalize`):
 */
   def convertNFAtoDFA(in: (NIO, Boolean)): DIO = {
     def iterate(flag: Boolean, state: NIO): DIO = {
-      val state_cooked = if (state.isEmpty) state else {
-        val state_sorted = state.sorted
-        state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
-             if s.compare(sn) != 0) yield sn)
-      }
-      dfa_trans(flag){ c: Rep[Char] => exploreNFA(state_cooked, c) { iterate }
+      dfa_trans(flag){ c: Rep[Char] => exploreNFA(canonicalize(state), c) { iterate }
     }}
     iterate(in._2, in._1)
+  }
+
+  def canonicalize(state: NIO): NIO = {
+    if (state.isEmpty) state else {
+      val state_sorted = state.sorted
+      state_sorted.head :: (for ((s,sn) <- (state_sorted zip state_sorted.tail)
+        if s.compare(sn) != 0) yield sn)
+    }
   }
 
 /**
