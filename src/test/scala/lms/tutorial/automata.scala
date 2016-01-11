@@ -203,8 +203,8 @@ works because the character guards are staging time values.
 The generated code is shown further down below. Each function
 corresponds to one DFA state. Note how  negative information has been used to
 prune the transition space: Given input such as `...AAB` the  automaton jumps
-back to the initial state, i.e. it recognizes that the last character B
-cannot also be A and starts looking for two As after the B.
+back to the initial state, i.e. it recognizes that the last character `B`
+cannot also be `A` and starts looking for two `A`s after the `B`.
 
 Generated State Machine Code
 ----------------------------
