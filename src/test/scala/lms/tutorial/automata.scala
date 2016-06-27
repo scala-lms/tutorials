@@ -261,4 +261,10 @@ tight imperative state machines.
 Here is the generated code for `.*AAB`, shown initially:
 
       .. includecode:: ../../../../out/dfa_aab.check.scala
+
+What's next?
+------------
+
+Go back to the [tutorial index](index.html) or continue with the [SQL Query Compiler](query.html).
+
 */
