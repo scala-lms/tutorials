@@ -198,19 +198,19 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
 
   testmatch("^hello$", "hello", true)
   testmatch("^hello$", "hell", false)
-  testmatch("hell", "hello", true);
-  testmatch("hell", "hell", true);
-  testmatch("hel*", "he", true);
-  testmatch("hel*$", "hello", false);
-  testmatch("hel*", "yo hello", true);
-  testmatch("ab", "hello ab hello", true);
-  testmatch("^ab", "hello ab hello", false);
-  testmatch("a*b", "hello aab hello", true);
-  testmatch("^ab*", "abcd", true);
-  testmatch("^ab*", "a", true);
-  testmatch("^ab*", "ac", true);
-  testmatch("^ab*", "bac", false);
-  testmatch("^ab*$", "ac", false);
+  testmatch("hell", "hello", true)
+  testmatch("hell", "hell", true)
+  testmatch("hel*", "he", true)
+  testmatch("hel*$", "hello", false)
+  testmatch("hel*", "yo hello", true)
+  testmatch("ab", "hello ab hello", true)
+  testmatch("^ab", "hello ab hello", false)
+  testmatch("a*b", "hello aab hello", true)
+  testmatch("^ab*", "abcd", true)
+  testmatch("^ab*", "a", true)
+  testmatch("^ab*", "ac", true)
+  testmatch("^ab*", "bac", false)
+  testmatch("^ab*$", "ac", false)
 
 /**
 Generated Code
