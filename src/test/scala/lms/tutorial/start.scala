@@ -103,7 +103,7 @@ regret*: the ``compute`` function exists only at staging time, and is
 not part of the generated code -- more generally, we can freely use
 abstractions to structure and compose the staged program, but these
 abstractions are not part of the generated code when their type is a
-bare ``T`` as opposed of a ``Rep[T]``. In the right snippet,
+bare ``T`` as opposed of a ``Rep[T]``. In the second snippet,
 ``compute`` has the type ``Rep[Boolean] => Rep[Int]``, not
 ``Rep[Boolean => Int]`` -- its type already tells us that the function
 is known at staging time.
