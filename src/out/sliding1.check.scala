@@ -18,8 +18,8 @@ class Snippet extends ((Int)=>(Array[Int])) {
         val x31 = x30 + 3
         val x32 = x26 + x31
         val x33 = x1(x27) = x32
-        val x34 = x22 = x31
-        val x35 = x23 = x29
+        x22 = x31
+        x23 = x29
         x25 = x25 + 1
       }
       x37

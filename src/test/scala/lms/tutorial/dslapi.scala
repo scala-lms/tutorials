@@ -128,6 +128,8 @@ trait DslGen extends ScalaGenNumericOps
   }
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+    case Assign(Variable(a), b) => 
+      emitAssignment(a.asInstanceOf[Sym[Variable[Any]]], quote(b))
     case IfThenElse(c,Block(Const(true)),Block(Const(false))) =>
       emitValDef(sym, quote(c))
     case PrintF(f:String,xs) => 
@@ -208,6 +210,13 @@ trait DslGenC extends CGenNumericOps
       case "char" => true
       case _ => super.isPrimitiveType(tpe)
     }
+  }
+  // XX: from LMS 1.0
+  override def emitValDef(sym: Sym[Any], rhs: String): Unit = {
+    if (!isVoidType(sym.tp))
+      stream.println(remapWithRef(sym.tp) + quote(sym) + " = " + rhs + ";")
+    else // we might still want the RHS for its effects
+      stream.println(rhs + ";")
   }
 
   override def quote(x: Exp[Any]) = x match {
