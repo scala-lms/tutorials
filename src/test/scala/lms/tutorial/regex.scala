@@ -171,16 +171,10 @@ trait StagedRegexpMatcher extends Dsl {
   }
 
   def matchchar(c: Char, t: Rep[Char]): Rep[Boolean] = {
-    c == '.' || c == t
-    // Line below fixes Regex tests
-//    infix_||(c == '.', c == t)
-    // Other tests and trials
-//    boolean_or(infix_==(c, '.'), infix_==(c, t))
-//    c == '.' || infix_==(c, t)(overloaded5, charTyp, charTyp, null)
-//    c == unit('.') || c == t
-//    infix_==[Char, Rep[Char]](c, '.') || c == t
-//    infix_==[Char, Rep[Char]](c, '.')//(overloaded5, charTyp, charTyp, pos) || c == t
-//    boolean_or(infix_==(c, '.'), infix_==(c, t)) //__equals
+    //c == '.' || c == t
+    // NOTE: implicits with macros currently do not 
+    // catch (Boolean || Rep[Boolean])
+    if (c == '.') true else c == t
   }
 }
 
