@@ -234,11 +234,11 @@ The LMS bits
 ------------
 */
 import eval._
-import scala.lms.common._
+import scala.virtualization.lms.common._
 
 @virtualize
 trait EvalDsl extends Dsl with UncheckedOps {
-  implicit def valTyp: Typ[Value]
+  //implicit def valTyp: Typ[Value]
   def base_apply_rep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]): Rep[Value]
   implicit object OpsRep extends scala.Serializable with Ops[Rep] {
     type T[A] = Typ[A]
@@ -256,7 +256,7 @@ trait EvalDsl extends Dsl with UncheckedOps {
 }
 
 trait EvalDslExp extends EvalDsl with DslExp with UncheckedOpsExp {
-  implicit def valTyp: Typ[Value] = manifestTyp
+  //implicit def valTyp: Typ[Value] = manifestTyp
   case class BaseApplyRep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Rep[Cont[NoRep]]) extends Def[Value]
   def base_apply_rep(f: Rep[Value], args: List[Rep[Value]], env: Env, cont: Cont[Rep]): Rep[Value] =
     reflectEffect(BaseApplyRep(f, args, env, fun(cont)))

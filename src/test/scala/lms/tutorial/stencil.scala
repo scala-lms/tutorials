@@ -12,7 +12,7 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.lms.common.ForwardTransformer
+import scala.virtualization.lms.common.ForwardTransformer
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 

@@ -10,7 +10,6 @@ trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv
 }
 
-@virtualize
 trait TutorialFunSuite extends LibSuite with EmbeddedControls {
   val overwriteCheckFiles = false // should be false; temporary set to true only to simplify development
 
@@ -105,7 +104,6 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
   }
 }
 
-@virtualize
 object utils {
   def time[A](a: => A) = {
     val now = System.nanoTime

@@ -3,33 +3,36 @@ package scala.lms.tutorial
 import org.scala_lang.virtualized.virtualize
 import org.scala_lang.virtualized.SourceContext
 
-import scala.lms.common._
+import scala.virtualization.lms.common._
 
 // TODO: clean up at least, maybe add to LMS?
-@virtualize
+//@virtualize
 trait UtilOps extends Base { this: Dsl =>
+  type Typ[T] = Manifest[T]
+  def typ[T:Typ] = manifest[T]
+  def manifestTyp[T:Typ] = manifest[T]
   implicit class HashCls[T: Typ](o: Rep[T]) {
     def HashCode(implicit pos: SourceContext):Rep[Long] = infix_HashCode(o)
     def HashCode(len: Rep[Int])(implicit pos: SourceContext):Rep[Long] = o match {
-      case s:Rep[String] => infix_HashCode(s, len)
+      case s:Rep[String] => infix_HashCodeS(s, len)
       //case _ => infix_HashCode(o) //FIXME is this an ok dispatch?
     }
   }
   def infix_HashCode[T:Typ](a: Rep[T])(implicit pos: SourceContext): Rep[Long]
-  def infix_HashCode(s: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext): Rep[Long]
+  def infix_HashCodeS(s: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext): Rep[Long]
 }
 
-@virtualize
+//@virtualize
 trait UtilOpsExp extends UtilOps with BaseExp { this: DslExp =>
 
   case class ObjHashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) extends Def[Long] { def m = typ[T] }
   case class StrSubHashCode(o: Rep[String], len: Rep[Int])(implicit pos: SourceContext) extends Def[Long]
   def infix_HashCode[T:Typ](o: Rep[T])(implicit pos: SourceContext) = ObjHashCode(o)
-  def infix_HashCode(o: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext) = StrSubHashCode(o,len)
+  def infix_HashCodeS(o: Rep[String], len: Rep[Int])(implicit v: Overloaded1, pos: SourceContext) = StrSubHashCode(o,len)
 
   override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
     case e@ObjHashCode(a) => infix_HashCode(f(a))(e.m, pos)
-    case e@StrSubHashCode(o,len) => infix_HashCode(f(o),f(len))
+    case e@StrSubHashCode(o,len) => infix_HashCodeS(f(o),f(len))
     case _ => super.mirror(e,f)
   }).asInstanceOf[Exp[A]]
 }
@@ -59,8 +62,9 @@ trait CGenUtilOps extends CGenBase {
 @virtualize
 trait Dsl extends PrimitiveOps with NumericOps with BooleanOps with LiftString with LiftPrimitives with LiftNumeric with LiftBoolean with IfThenElse with Equal with RangeOps with OrderingOps with MiscOps with ArrayOps with StringOps with SeqOps with Functions with While with StaticData with Variables with LiftVariables with ObjectOps with UtilOps {
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
-  override def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] =
-    __ifThenElse(lhs, rhs, unit(false))
+  implicit class BooleanOps2(lhs: Rep[Boolean]) {
+    def &&(rhs: =>Rep[Boolean])(implicit pos: SourceContext) = 
+    __ifThenElse(lhs, rhs, unit(false)) }
 //  override def boolean_and(lhs: Rep[Boolean], rhs: Rep[Boolean])(implicit pos: SourceContext): Rep[Boolean] = __ifThenElse(lhs, rhs, unit(false))
   def generate_comment(l: String): Rep[Unit]
   def comment[A:Typ](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
@@ -81,9 +85,10 @@ trait DslExp extends Dsl with PrimitiveOpsExpOpt with NumericOpsExpOpt with Bool
   def generate_comment(l: String) = reflectEffect(GenerateComment(l))
   case class Comment[A:Typ](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
   def comment[A:Typ](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {
+    //b
     val br = reifyEffects(b)
     val be = summarizeEffects(br)
-    reflectEffect[A](Comment(l, verbose, br), be)
+    super.reflectEffect[A](Comment(l, verbose, br), be)
   }
 
   override def boundSyms(e: Any): List[Sym[Any]] = e match {
@@ -185,7 +190,7 @@ trait DslGenC extends CGenNumericOps
       case "char" => "%c"
       case "void" => "%c"
       case _ =>
-        import scala.lms.internal.GenerationFailedException
+        import scala.virtualization.lms.internal.GenerationFailedException
         throw new GenerationFailedException("CGenMiscOps: cannot print type " + remap(s.tp))
     }
   }
@@ -315,8 +320,8 @@ abstract class DslDriverC[A: Manifest, B: Manifest] extends DslSnippet[A, B] wit
     val IR: q.type = q
   }
   lazy val code: String = {
-    implicit val mA = manifestTyp[A]
-    implicit val mB = manifestTyp[B]
+    //implicit val mA = manifestTyp[A]
+    //implicit val mB = manifestTyp[B]
     val source = new java.io.StringWriter()
     codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString

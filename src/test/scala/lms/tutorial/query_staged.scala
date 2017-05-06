@@ -11,7 +11,7 @@ package scala.lms.tutorial
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
-import scala.lms.common._
+import scala.virtualization.lms.common._
 
 @virtualize
 object query_staged {
@@ -141,7 +141,7 @@ Data Structure Implementations
 
     val hashMask = hashSize - 1
     val htable = NewArray[Int](hashSize)
-    for (i <- 0 until hashSize :Range) { htable(i) = -1 } //ambiguous reference to overloaded definition can be fixed with type annotation
+    for (i <- 0 until hashSize :Rep[Range]) { htable(i) = -1 } //ambiguous reference to overloaded definition can be fixed with type annotation
 
     def lookup(k: Fields) = lookupInternal(k,None)
     def lookupOrUpdate(k: Fields)(init: Rep[Int]=>Rep[Unit]) = lookupInternal(k,Some(init))

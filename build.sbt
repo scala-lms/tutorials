@@ -16,7 +16,7 @@ libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value %
 
 autoCompilerPlugins := true
 
-val paradiseVersion = "2.0.1"
+val paradiseVersion = "2.1.0"
 
 libraryDependencies ++= (
   if (scalaVersion.value.startsWith("2.10")) List("org.scalamacros" %% "quasiquotes" % paradiseVersion)

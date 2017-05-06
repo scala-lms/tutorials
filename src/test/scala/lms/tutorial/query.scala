@@ -61,7 +61,7 @@ package scala.lms.tutorial
 
 import org.scala_lang.virtualized.virtualize
 import org.scalatest.FunSuite
-import scala.lms.common._
+import scala.virtualization.lms.common._
 
 /**
 Relational Algebra AST
@@ -107,7 +107,6 @@ SQL Parser
 We add a parser that takes a SQL(-like) string and converts it to tree of operators.
 */
 
-@virtualize
 trait SQLParser extends QueryAST {
   import scala.util.parsing.combinator._
 

@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.lms.common._
+import scala.virtualization.lms.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
@@ -47,7 +47,7 @@ class ScannerLibTest extends LibSuite { this: Equal =>
 
 @virtualize
 trait ScannerBase extends Base { this: Dsl =>
-  implicit def scannerTyp: Typ[Scanner]
+  //implicit def scannerTyp: Typ[Scanner]
   implicit class RepScannerOps(s: Rep[Scanner]) {
     def next(d: Char)(implicit pos: SourceContext) = scannerNext(s, d)
     def hasNext(implicit pos: SourceContext) = scannerHasNext(s)
@@ -61,7 +61,7 @@ trait ScannerBase extends Base { this: Dsl =>
 
 @virtualize
 trait ScannerExp extends ScannerBase with EffectExp { this: DslExp =>
-  implicit def scannerTyp: Typ[Scanner] = manifestTyp
+  //implicit def scannerTyp: Typ[Scanner] = manifestTyp
   case class ScannerNew(fn: Exp[String]) extends Def[Scanner]
   case class ScannerNext(s: Exp[Scanner], d: Exp[Char]) extends Def[String]
   case class ScannerHasNext(s: Exp[Scanner]) extends Def[Boolean]
