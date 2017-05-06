@@ -2,6 +2,8 @@ name := "lms-tutorials"
 
 scalaVersion := "2.11.8"
 
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 libraryDependencies += "org.scala-lang.lms" %% "lms-core-macrovirt" % "0.9.0-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.2"
