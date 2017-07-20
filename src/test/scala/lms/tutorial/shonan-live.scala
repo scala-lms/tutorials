@@ -74,38 +74,38 @@ abstract class LMS_Driver[A:Manifest,B:Manifest] extends DslDriver[A,B]
 
 /*    
     val snippet = new LMS_Driver[Array[Int],Array[Int]] {
-      def snippet(v: Rep[Array[Int]]) = {
-
-        def matrix_vector_prod(a0: Array[Array[Int]], v: Rep[Array[Int]]) = {
-          val n = a0.length
-          val v1 = NewArray[Int](n)
-
-          val a = staticData(a0)
-
-          def unrollIf(c: Boolean)(r: Range) = new { 
-            def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
-              if (c) {
-                for (j <- r) {
-                  f(j)
-                }
-              } else {
-                for (j <- (r.start until r.end):Rep[Range]) {
-                  f(j)
-                }
-              }
+      def unrollIf(c: Boolean)(r: Range) = new {
+        def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
+          if (c) {
+            for (j <- r) {
+              f(j)
             }
-
-          }
-
-
-          for (i <- (0 until n):Range) {
-            val sparse = a0(i).count(_ != 0) < 3
-            for (j <- unrollIf(sparse)(0 until n)) {
-              v1(i) = v1(i) + a(i).apply(j) * v(j)
+          } else {
+            for (j <- (r.start until r.end):Rep[Range]) {
+              f(j)
             }
           }
-          v1
         }
+      }
 
+      def matrix_vector_prod(a0: Array[Array[Int]], v: Rep[Array[Int]]) = {
+        val n = a0.length
+        val v1 = NewArray[Int](n)
+
+        val a = staticData(a0)
+
+        for (i <- (0 until n):Range) {
+          val sparse = a0(i).count(_ != 0) < 3
+          for (j <- unrollIf(sparse)(0 until n)) {
+            v1(i) = v1(i) + a(i).apply(j) * v(j)
+          }
+        }
+        v1
+      }
+
+      def snippet(v: Rep[Array[Int]]) = {
         matrix_vector_prod(a,v)
-*/        
+      }
+
+    }
+*/
