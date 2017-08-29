@@ -43,7 +43,7 @@ class GettingStartedTest extends TutorialFunSuite {
 /**
 ### Rep[T] vs T
 
-In LMS, `Rep[T]` represents a delayed compuation of type `T`. Thus,
+In LMS, `Rep[T]` represents a delayed computation of type `T`. Thus,
 during staging, an expression of type `Rep[T]` becomes part of
 the generated code, while an expression of bare type `T` becomes a
 constant in the generated code. For core Scala features, adding
@@ -172,6 +172,3 @@ What's next?
 Go back to the [tutorial index](index.html) or continue with the [Shonan Challenge](shonan.html).
 
 */
-
-}
-
