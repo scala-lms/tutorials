@@ -46,7 +46,7 @@ trait SlidingExp extends DslExp with Sliding {
     System.out.println("sliding log: "+x)
   }
 
-  // some arithemetic rewrites to maximize sliding sharing
+  // some arithmetic rewrites to maximize sliding sharing
   override def int_plus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] = ((lhs,rhs) match {
     case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
     case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)

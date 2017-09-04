@@ -254,7 +254,7 @@ The generated code is identical: _"abstraction without regret"_ FTW!
     }
     check("shonan-hmm1d", snippet.code)
   }
-
+}
 
 /**
 What's next?
@@ -262,4 +262,3 @@ What's next?
 
 Go back to the [tutorial index](index.html) or continue with the [Regular Expression Matcher](regex.html).
 */
-}

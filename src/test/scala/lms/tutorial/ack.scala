@@ -57,6 +57,7 @@ class AckermannTest extends TutorialFunSuite {
     val ack2 = specialize(2)
     check("m2", ack2.code)
   }
+}
 
 /**
 Generated Code
@@ -73,4 +74,3 @@ What's next?
 Go back to the [tutorial index](index.html) or continue with the [Automata-Based Regex Matcher](automata.html).
 */
 
-}

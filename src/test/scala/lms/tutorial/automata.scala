@@ -16,7 +16,7 @@ evaluation and supercompilation literature.
 - http://dblp.uni-trier.de/db/ journals/jfp/SorensenGJ96
 -->
 
-We consider ``multi-threaded'' regular expression matchers, that spawn a new
+We consider "multi-threaded" regular expression matchers, that spawn a new
 conceptual thread to process alternatives in parallel. Of course these matchers
 do not actually spawn OS-level threads, but rather need to be advanced manually
 by client code. Thus, they are similar to coroutines.
