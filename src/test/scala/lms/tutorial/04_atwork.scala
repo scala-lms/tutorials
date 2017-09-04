@@ -2,7 +2,6 @@
 
 
 # (Chapter 0) Intro: Abstraction Without Regret
-\label{chap:400}
 
 Outline:
 <div id="tableofcontents"></div>
@@ -97,7 +96,6 @@ it does not depend on the loop variable `x`.
 
 
 # Delite: An End-to-End System for Embedded Parallel DSLs
-\label{sec:delite}
 
 This section gives an overview of our approach to developing and executing
 embedded DSLs in parallel and on heterogeneous devices. A more thorough
@@ -117,7 +115,6 @@ specific knowledge and restricted semantics of the DSL compiler.
 
 
 ## Building a Simple DSL
-\label{subsec:lms}
 
 On the surface, DSLs implemented on top of Delite appear very similar to
 purely-embedded (i.e. library only) Scala-based DSLs. However, a key aspect
@@ -234,7 +231,6 @@ provided by the Delite framework and are inherited via `DeliteOpsExp`.
 
 
 ## Code Generation
-\label{subsec:codegen}
 
 The LMS framework provides a code generation infrastructure that includes a
 program scheduler and a set of base code generators. The program scheduler
@@ -259,7 +255,6 @@ describes how Delite  takes over this responsibility for most operations.
 
 
 ## The Delite Compiler Framework and Runtime
-\label{subsec:delite}
 
 On top of the LMS framework that provides the basic means to construct IR
 nodes for DSL operations, the Delite Compiler Framework provides high-level
@@ -313,7 +308,6 @@ emits execution plans for each target hardware.
 
 
 # (Chapter 1) Control Abstraction
-\label{chap:450}
 
 Among the most useful control abstractions are higher order functions.  We can
 implement support for higher order functions in DSLs while keeping the
@@ -426,7 +420,6 @@ a virtual method call [(*)](cliffinlining).
 
 
 # Using Continuations in the Generator to Implement Backtracking
-\label{sec:450bam}
 
 Apart from pure performance improvements, we can use functionality of the
 generator stage to enrich the functionality of DSLs without any work on the
@@ -547,7 +540,6 @@ statements.
 
 
 # Using Continuations in the Generator to Generate Async Code Patterns
-\label{sec:cpsAsync}
 
 The previous section used continuations that were completely translated away
 during generation. In this section, we will use a CPS-transformed program
@@ -1060,7 +1052,6 @@ objects will need to be created at runtime.
 
 
 # (Chapter 2) Data Abstraction
-\label{chap:455data-abstraction}
 
 High level data structures are a cornerstone of modern programming and at the
 same time stand in the way of compiler optimizations.
@@ -1080,7 +1071,6 @@ In the following, we explore different ways to achieve that.
 
 
 # Static Data Structures
-\label{subsubsec:complexA}
 
 The simplest approach is to implement complex numbers as a fully static data
 type, that only exists at staging time. Only the actual `Double`s that
@@ -1163,7 +1153,6 @@ version above.
 
 
 # Dynamic Data Structures with Partial Evaluation
-\label{sec:455struct}
 
 We observe that we can increase the amount of statically possible computation
 (in a sense, applying binding-time improvements) for dynamic values with
@@ -1309,7 +1298,6 @@ staging, studied on top of LMS [(*)](slesarenko12polytypic).
 
 
 # Unions and Inheritance
-\label{sec:455inherit}
 
 The struct abstraction from [here](#sec:361struct) can be extended to sum
 types and inheritance using a tagged union approach
@@ -1356,7 +1344,6 @@ never used it will be removed by DCE.
 
 
 # Struct of Array and Other Data Format Conversions
-\label{sec:455structUse}
 
 There is another particularly interesting use case for the splitting of data
 structures:  Let us assume we want to create a vector of complex numbers. Just
@@ -1425,7 +1412,6 @@ desired, efficient way.
 
 
 # Loop Fusion and Deforestation
-\label{subsec:fusion}
 
 Building complex bulk operations out of simple ones often leads to inefficient
 generated code.  For example consider the simple vector code
@@ -1698,7 +1684,6 @@ after lowering (modulo unfolding of staged zipWith).
 
 
 # (Chapter 3) Case Studies
-\label{chap:460fusionUse}
 
 This chapter presents case studies for Delite apps (using the OptiML and
 OptiQL DSLs) as well as classical staging use cases (FFT specialization and
@@ -1715,7 +1700,6 @@ abstractions. OptiML is a prototypical example of how the techniques described
 in this thesis can be used to construct productive, high performance DSLs
 targeted at heterogeneous parallel machines.
 
-\label{sec:optiml}
 ## Downsampling in Bioinformatics
 
 In this example, we will demonstrate how the optimization and code generation
@@ -1919,7 +1903,6 @@ final result.
 
 
 # OptiQL Struct Of Arrays Example
-\label{sec:460optiqlSoa}
 
 OptiQL is a DSL for data querying of in-memory collections, inspired by
 LINQ~[(*)](meijer06linq). We consider querying a data set with roughly 10

@@ -102,7 +102,6 @@ data structures.
 
 
 # (Chapter 1) Intermediate Representation: Trees
-\label{chap:310trees}
 
 With the aim of generating code, we could represent staged expressions
 directly as strings, as done in [Part 2](02_basics.html). But for optimization
@@ -111,7 +110,6 @@ can analyze in various ways. Fortunately, LMS makes it very easy to use a
 different internal program representation.
 
 # Trees Instead of Strings
-\label{sec:301}
 
 Our starting point is an object language _interface_ derived from
 [Part 2](02_basics.html):
@@ -384,7 +382,6 @@ An implementation is straightforward:
 
 
 ## Transformation by Iterated Staging
-\label{sec:310treeTrans}
 
 Another option that is more principled and in line with the idea of making
 compiler transforms programmable through the use of staging is to traverse the
@@ -467,7 +464,6 @@ different IR  representation.
 
 
 # (Chapter 2) Intermediate Representation: Graphs
-\label{chap:320graphs}
 
 To remedy phase ordering problems and overall allow for more flexibility in
 rearranging program pieces,  we switch to a program representation based on
@@ -479,7 +475,6 @@ CFG would not be a good fit.
 
 
 # Purely Functional Subset
-\label{sec:303purefun}
 
 
 Let us first consider a purely functional language subset. There are much more
@@ -577,7 +572,6 @@ embedded DSLs [(*)](DBLP:conf/saig/ElliottFM00,DBLP:conf/dsl/LeijenM99) as
 well as staged FFT kernels [(*)](DBLP:conf/emsoft/KiselyovST04).
 
 ## Common Subexpression Elimination/Global Value Numbering
-\label{sec:320cse}
 
 Common subexpressions are eliminated during IR construction using hash
 consing:
@@ -628,7 +622,6 @@ rewrites first.
 
 
 ## Modularity: Adding new Optimizations
-\label{sec:308addOpts}
 
 Some profitable optimizations, such as the global value numbering described
 above, are very generic. Other optimizations apply only to specific aspects of
@@ -802,7 +795,6 @@ which graph nodes should go where in the resulting program. This is the task
 of code motion.
 
 ## Code Motion
-\label{sec:320codemotion}
 
 Other optimizations can apply transformations optimistically and need not
 worry  about maintaining a correct schedule: Code motion will fix it up.  The
@@ -1002,7 +994,6 @@ implementation of trait `ForwardTransformer` carries over almost unmodified.
 
 
 # Effects
-\label{sec:321}
 
 To ensure that operations can be safely moved around (and for other
 optimizations as well), a compiler needs to reason about their possible side
@@ -1131,7 +1122,6 @@ inserted for operations that may reference mutable state in an indirect way.
 
 
 # (Chapter 3) Advanced Optimizations
-\label{chap:330opt}
 
 We have seen [above](#chap:320graphs) how many classic compiler  optimizations
 can be applied to the IR generated from embedded programs  in a
@@ -1211,7 +1201,6 @@ final one.
 
 
 ## Delayed Rewriting and Multi-Level IR
-\label{sec:330delayed}
 
 For some transformations, e.g. data structure representation lowering, we do
 not execute rewrites now, but later, to give further immediate rewrites a
@@ -1287,7 +1276,6 @@ split.
 
 
 ## Data Structures
-\label{sec:361struct}
 
 Splitting is also very effective for data structures, as often only parts of a
 data structure are used or modified. We can define a generic framework for
@@ -1335,7 +1323,6 @@ We will study examples of this struct abstraction [here](#sec:455struct) and
 an extension to unions and inheritance in [here](#sec:455inherit).
 
 ## Representation Conversion
-\label{sec:360soa}
 
 A natural extension of this mechanism is a generic array-of-struct to struct-
 of-array transform.  The definition is analogous to that of conditionals. We
@@ -1374,7 +1361,6 @@ Examples for this struct of array transformation are shown in
 
 
 # Loop Fusion and Deforestation
-\label{sec:360fusionComp}
 
 The use of independent and freely composable traversal operations such as
 `v.map(..).sum` is preferable to explicitly coded loops. However, naive
