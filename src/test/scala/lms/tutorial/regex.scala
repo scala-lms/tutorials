@@ -211,6 +211,7 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
   testmatch("^ab*", "ac", true)
   testmatch("^ab*", "bac", false)
   testmatch("^ab*$", "ac", false)
+}
 
 /**
 Generated Code
@@ -226,5 +227,3 @@ What's next?
 
 Go back to the [tutorial index](index.html) or continue with the [Ackermann's Function](ack.html).
 */
-
-}
