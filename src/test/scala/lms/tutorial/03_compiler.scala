@@ -41,7 +41,7 @@ components. Newly defined high-level IR nodes should  profit from generic
 optimizations automatically.
 
 
-To remedy this situation, we switch to a graph-based ''sea of nodes''
+To remedy this situation, we switch to a graph-based "sea of nodes"
 representation (see [below](#chap:320graphs)). This representation links
 definitions and uses, and it also reflects the program block structure via
 nesting edges. We consider purely functional programs first. A number of
@@ -310,9 +310,9 @@ Finally, we can use our traversal as follows:
 
 
 
-## Solving the ''Expression Problem''
+## Solving the "Expression Problem"
 
-In essence, traversals confront us with the classic ''expression problem'' of
+In essence, traversals confront us with the classic "expression problem" of
 independently extending a data model with new data variants and  new
 operations [(*)](wadlerExprProblem). There are many solutions to this problem
 but most of them are rather heavyweight. More lightweight implementations are
@@ -323,7 +323,7 @@ of the fact  that composing traits is subject to linearization
 [(*)](DBLP:conf/oopsla/OderskyZ05). We package each set of specific traversal
 rules into its own trait, e.g. `MyTraversalArith` that inherits from
 `MyTraversalBase` and overrides `traverseStm`. When the arguments do not match
-the rewriting pattern, the overridden method will invoke the ''parent''
+the rewriting pattern, the overridden method will invoke the "parent"
 implementation using `super`. When several such traits are combined, the super
 calls will traverse the overridden method implementations according to the
 linearization order of their containing traits.  The use of pattern matching
@@ -486,7 +486,7 @@ elimination (CSE), pattern rewrites, dead code elimination (DCE) and code
 motion are considerably simpler than the usual implementations for imperative
 programs.
 
-We switch to a ''sea of nodes''-like [(*)](DBLP:conf/irep/ClickP95)
+We switch to a "sea of nodes"-like [(*)](DBLP:conf/irep/ClickP95)
 representation that is a directed  (and for the moment, acyclic) graph:
 
     trait Expressions {
@@ -519,7 +519,7 @@ representation that is a directed  (and for the moment, acyclic) graph:
 It is instructive to compare the definition of trait `Expressions` with the
 one from the previous [chapter](#chap:310trees). Again there are three
 categories of objects involved: expressions,  which are atomic (subclasses of
-`Exp`: constants and symbols; with a ''gensym'' operator `fresh` to create
+`Exp`: constants and symbols; with a "gensym" operator `fresh` to create
 fresh symbols), definitions, which represent composite operations (subclasses
 of `Def`, to be provided by other components), and blocks, which model nested
 scopes.
@@ -806,7 +806,7 @@ This makes  our algorithm different from code motion algorithms based on data
 flow  analysis such as Lazy Code Motion (LCM, [(*)](DBLP:conf/pldi/KnoopRS92))
 or Partial Redundancy Elimination (PRE, [(*)](DBLP:journals/toplas/KennedyCLLTC99)).
 
-The graph IR reflects ''must before'' (ordering) and ''must inside''
+The graph IR reflects "must before" (ordering) and "must inside"
 (containment) relations, as well as anti-dependence and frequency. These
 relations are implemented by the following methods, which can be overridden
 for new definition classes:
@@ -819,14 +819,14 @@ for new definition classes:
 
 To give an example, `boundSyms` applied to a loop node
 `RangeForeach(range,idx,body)` with index variable `idx` would return
-`List(idx)` to denote that `idx` is fixed ''inside'' the loop expression.
+`List(idx)` to denote that `idx` is fixed "inside" the loop expression.
 
 Given a subgraph and a list of result nodes, the goal is to identify the graph
-nodes that should form the ''current'' level, as opposed to those that should
-remain in some ''inner'' scope, to be scheduled later. We will reason about
+nodes that should form the "current" level, as opposed to those that should
+remain in some "inner" scope, to be scheduled later. We will reason about
 the paths on which statements can be reached from the result. The first idea
 is to retain all nodes on the current level that are reachable on a path that
-does not cross any conditionals, i.e. that has no ''cold'' refs. Nodes only
+does not cross any conditionals, i.e. that has no "cold" refs. Nodes only
 used from conditionals will be pushed down. However, this approach does not
 yet reflect the precedence of loops. If a loop is top-level,  then
 conditionals inside the loop (even if deeply nested) should not prevent
@@ -863,7 +863,7 @@ cold) through $E-G$ (not forced inside).
 
 3. For each hot ref from $L$ to a statement in $E-L$, follow any links through
 $G$, i.e. the nodes that are forced inside, if there are any. The first
-non-forced-inside nodes (the ''hot fringe'') become top level as well
+non-forced-inside nodes (the "hot fringe") become top level as well
 (add to $L$).
 
 4. Continue with 2 until a fixpoint is reached.
@@ -1007,7 +1007,7 @@ identical to SSA conversion).
 ## Simple Effect Domain
 
 We first consider global effects like console output via `println`.
-Distinguishing only between ''has no effect'' and ''may have effect'' means
+Distinguishing only between "has no effect" and "may have effect" means
 that all operations on mutable data structures,  including reads, have to be
 serialized along with all other side effects.
 
@@ -1031,7 +1031,7 @@ context dependencies:
     case class Reflect[T](d: Def[T], es: List[Sym[Any]]) extends Def[T]
     def reflectEffect[T](d: Def[T]): Exp[T] = createDefinition(Reflect(d, context)).sym
 
-The context denotes the ''current state''. Since state can be seen as an
+The context denotes the "current state". Since state can be seen as an
 abstraction of effect history, we just define context as a list of the
 previous effects.
 
@@ -1098,8 +1098,8 @@ operations `x = y`, `*x = y`, `x = *y` and `*x = *y`.  Assuming an operation
     x $\in$ extractSyms(y)    if y = *x     // array apply
     x $\in$ copySyms(y)       if *y = *x    // array clone
 
-Here, `y = x` is understood as ''y may be equal to x'',  `*y = x` as
-''dereferencing y (at some index) may return x'' etc.
+Here, `y = x` is understood as "y may be equal to x",  `*y = x` as
+"dereferencing y (at some index) may return x" etc.
 
 
 

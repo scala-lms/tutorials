@@ -27,14 +27,14 @@ First, processor clock speeds are no longer doubling every 18 months and instead
 
 Second, programming languages and methodologies focus increasingly on generality and abstraction, enabling programmers to build large systems from simple but versatile parts. This makes it fundamentally difficult for compilers to translate high-level programs to efficient code, because they do not have the capability to reason about domain-specific operations.
 
-Third, with a shift towards ``Big Data'' workloads in the cloud and a proliferation of mobile devices and embedded systems, there is a growing demand for highly efficient software.
+Third, with a shift towards "Big Data", workloads in the cloud, and a proliferation of mobile devices and embedded systems, there is a growing demand for highly efficient software.
 
 These trends cause software development teams to invest large efforts into carefully optimizing their code. From a software engineering perspective, this is disconcerting because manual optimization requires programmers to essentially abandon all best practices and benefits of high-level programming, such as abstraction, generality and modularity. Hand-optimized programs are hard to read, hard to maintain, hard to verify and thus likely to attract bugs and security vulnerabilities.
 
 
 ### Programming Generation and Meta-Programming
 
-As an alternative to counting on a ``sufficiently smart'' compiler to optimize a program, programmers can write a program generator -- a program that when run, produces the code of the target program as its output. A program generator can perform all kinds of computation while composing the target program, and thus emit highly efficient code.
+As an alternative to counting on a "sufficiently smart" compiler to optimize a program, programmers can write a program generator -- a program that when run, produces the code of the target program as its output. A program generator can perform all kinds of computation while composing the target program, and thus emit highly efficient code.
 
 Generative programming, as a subdomain of meta-programming, describes the practice of writing programs that generate other programs as part of their execution. Generative programming makes a pattern explicit that is found in many programs, namely a division into computational _stages_, separated by frequency of execution or availability of information. Therefore, we also speak of multi-stage programming or _staging_ for short.
 

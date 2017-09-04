@@ -139,7 +139,7 @@ implementations that realize the necessary data interface for a  fixed input
 size.
 
 
-We can then define code that creates and uses compiled  FFT ``codelets'' by
+We can then define code that creates and uses compiled  FFT "codelets" by
 extending `FFTC`:
 
     trait TestFFTC extends FFTC {
