@@ -162,6 +162,7 @@ the second stage, driven by the type of their condition.
     }
     check("range2", snippet.code)
   }
+}
 /**
       .. includecode:: ../../../../out/dslapirange2.check.scala for
 
