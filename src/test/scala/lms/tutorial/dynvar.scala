@@ -53,4 +53,3 @@ class DynVarWarmupTest extends TutorialFunSuite {
   }
 }
 
-

@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/scala-lms/tutorials.png)](https://travis-ci.org/scala-lms/tutorials)
+[![Build Status](https://travis-ci.org/scala-lms/tutorials.svg?branch=master)](https://travis-ci.org/scala-lms/tutorials)
 
 [Tutorials](http://scala-lms.github.io/tutorials/) on [LMS](http://scala-lms.github.io)
 ======================================================================
@@ -14,11 +14,7 @@ How to build and run
 
     For other platforms, follow the instructions on the [SBT](http://www.scala-sbt.org/) website.
 
-2. Install [LMS](https://github.com/TiarkRompf/virtualization-lms-core):
-  * `git clone https://github.com/TiarkRompf/virtualization-lms-core.git lms-core`
-  * `cd lms-core; sbt publish-local; cd ..`
-
-3. Clone this repo and run the tests:
+2. Clone this repo and run the tests:
   * `git clone https://github.com/scala-lms/tutorials.git lms-tutorials`
   * `cd lms-tutorials`
   * `sbt test`
@@ -28,3 +24,5 @@ Browse the sources
 ------------------
 
 * The [src/test/scala/lms/tutorial](src/test/scala/lms/tutorial) directory contains the source files from which the [tutorial website](http://scala-lms.github.io/tutorials) is generated. The website generation is handled in [the main website repository](https://github.com/scala-lms/scala-lms.github.com#maintainers).
+
+* If you want to dive deeper into LMS internals, you may want to browse the core  [LMS sources](https://github.com/TiarkRompf/virtualization-lms-core).

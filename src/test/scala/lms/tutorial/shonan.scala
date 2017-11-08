@@ -12,7 +12,7 @@ Therefore, it pays off to generate code that is specialized to a particular matr
 
 For further reference, see:
 
-- Shonan Challenge for Generative Programming ([PDF](https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf)) ([official code repository]((https://github.com/StagedHPC/shonan-challenge)))
+- Shonan Challenge for Generative Programming ([PDF](https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf)) ([official code repository](https://github.com/StagedHPC/shonan-challenge))
   Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
 
 Outline:
@@ -218,7 +218,7 @@ STEP 2: Conditional unrolling
 -----------------------------
 
 The code duplication of the loop body above is not very nice. Fortunately,
-we can create arbitrary staging-time abstractions. We create an auxiliary
+we can create arbitrary staging-time abstractions. Here, we create an auxiliary
 method `unrollIf` that captures the conditional unrolling pattern in a general
 way. The `matrix_vector_prod` function no longer needs to express the loop
 body twice.
@@ -257,7 +257,7 @@ The generated code is identical: _"abstraction without regret"_ FTW!
     }
     check("shonan-hmm1d", snippet.code)
   }
-
+}
 
 /**
 What's next?
@@ -265,4 +265,3 @@ What's next?
 
 Go back to the [tutorial index](index.html) or continue with the [Regular Expression Matcher](regex.html).
 */
-}

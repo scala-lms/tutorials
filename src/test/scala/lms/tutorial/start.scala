@@ -47,7 +47,7 @@ class GettingStartedTest extends TutorialFunSuite {
 /**
 ### Rep[T] vs T
 
-In LMS, `Rep[T]` represents a delayed compuation of type `T`. Thus,
+In LMS, `Rep[T]` represents a delayed computation of type `T`. Thus,
 during staging, an expression of type `Rep[T]` becomes part of
 the generated code, while an expression of bare type `T` becomes a
 constant in the generated code. For core Scala features, adding
@@ -107,7 +107,7 @@ regret*: the ``compute`` function exists only at staging time, and is
 not part of the generated code -- more generally, we can freely use
 abstractions to structure and compose the staged program, but these
 abstractions are not part of the generated code when their type is a
-bare ``T`` as opposed of a ``Rep[T]``. In the right snippet,
+bare ``T`` as opposed of a ``Rep[T]``. In the second snippet,
 ``compute`` has the type ``Rep[Boolean] => Rep[Int]``, not
 ``Rep[Boolean => Int]`` -- its type already tells us that the function
 is known at staging time.
@@ -166,6 +166,7 @@ the second stage, driven by the type of their condition.
     }
     check("range2", snippet.code)
   }
+}
 /**
       .. includecode:: ../../../../out/dslapirange2.check.scala for
 
@@ -176,6 +177,3 @@ What's next?
 Go back to the [tutorial index](index.html) or continue with the [Shonan Challenge](shonan.html).
 
 */
-
-}
-

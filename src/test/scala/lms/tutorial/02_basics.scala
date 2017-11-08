@@ -60,7 +60,7 @@ are well-typed or compute correct results.
 ## Program Generation with Quasi-Quotes
 
 Strings model concrete syntax, but we can also use abstract syntax. This idea
-is inspired by Lisp's ''''code as data'' model.  We start with a slightly more
+is inspired by Lisp's "code as data" model.  We start with a slightly more
 convenient string notation, denoted by `s"..."` quotes:
 
     def power(b: String, n: Int): String =
@@ -126,7 +126,7 @@ compute `Double` values in the next stage.
 
 Note that the use of parametric types alone does not prevent scope extrusion,
 which can also be seen as a type error in the sense of a well-typed multi-
-stage program ''going wrong''
+stage program "going wrong"
 [(*)](DBLP:conf/icalp/TahaBS98,DBLP:conf/popl/TahaN03).  Thus we do not obtain
 a guarantee that _all_  generated programs type check, but the slightly
 weaker assurance  that all generated programs that are well-formed are also
@@ -210,15 +210,15 @@ This effect of staging undoing binding and memoization is widely known
 
 One way of fixing the order of staged expressions is to insert let-bindings in
 strategic places. This is frequently done by separate front ends. Staging
-effectively becomes an ''assembly language'' for code generation.  The front
+effectively becomes an "assembly language" for code generation.  The front
 end can assemble pieces of generated code using explicit side effects, or the
 code generators are written in monadic style or continuation passing style
 (CPS), in which case the monadic bind operation will insert let-bindings to
 maintain the desired evaluation order [(*)](DBLP:conf/pepm/SwadiTKP06).
 Effectful code generators are much more likely to cause scope extrusion.
 Explicit monadic style or CPS complicate code generators a lot. This dilemma
-is described as an ''agonizing trade-off'', due to which one ''cannot achieve
-clarity, safety, and efficiency at the same time''
+is described as an "agonizing trade-off", due to which one "cannot achieve
+clarity, safety, and efficiency at the same time"
 [(*)](DBLP:conf/pepm/KameyamaKS09). Only very recently have type-systems been
 devised to handle both staging and effects
 [(*)](DBLP:conf/pepm/KameyamaKS08,DBLP:conf/pepm/KameyamaKS09,DBLP:conf/pldi/WestbrookRIYAT10).
@@ -399,7 +399,7 @@ We have seen how we can improve staging based on  quasiquotes or direct string
 generation. Now we turn to other approaches of delineating embedded object
 programs. Our aim is embedding domain specific  compilers. We want object
 languages tailored to specific applications, with custom compiler components.
-The ''one size fits all'' approach of having the same meta and object language
+The "one size fits all" approach of having the same meta and object language
 is not ideal for this purpose. In our case, we would have to inspect Scala
 ASTs and reject or possibly interpret constructs that have no correspondence
 in the object language (type, class or method definitions, etc).
@@ -472,7 +472,7 @@ about the _representation_ of a `T` value in the next stage and less
 about composing code fragments.
 
 Where quasiquoting allowed the full language to be staged, we now have to
-explicitly ''white-list'' all operations we want to make available. Clearly
+explicitly "white-list" all operations we want to make available. Clearly
 there is a tradeoff, as explicit white-listing of operations can be tedious.
 However we can remedy the white-listing effort to a large extent by providing
 libraries of reusable components that contain sets of lifted operations from
@@ -550,7 +550,7 @@ fresh identifier to each and every subexpression encountered, essentially
 producing on object program in administrative normal form (ANF). This removes
 the need for explicit val bindings in object code. Instead, programmers can
 just use val bindings in the meta program. This is an example of deep
-linguistic reuse, as the ''feature'' of val bindings is translated away.
+linguistic reuse, as the "feature" of val bindings is translated away.
 
 As for scope correctness, we have not encountered any binders in object code
 so far. [Below](#sec:220functions) we will introduce staged
@@ -615,7 +615,7 @@ inline the definition of `fac` but result in an actual function call in  the
 generated code.
 
 However the HOAS representation has the disadvantage of being opaque: there is
-no immediate way to ''look into'' a Scala function object. If we want to treat
+no immediate way to "look into" a Scala function object. If we want to treat
 functions in the same way as other program constructs, we need a way to
 transform the HOAS encoding into our string representation. We can implement
 `lambda(f)` to call
@@ -656,7 +656,7 @@ intensional equality amounts to checking if two functions are defined at the
 same syntactic location in the source program and whether all data referenced
 by their free variables is equal. Fortunately, the implementation of first-
 class functions as closure objects offers (at least in principle) access to a
-''defunctionalized''  data type representation on which equality can easily be
+"defunctionalized"  data type representation on which equality can easily be
 checked. A bit of care must be taken though, because the structure can be
 cyclic. On the JVM there is a particularly neat trick.  We can serialize the
 function objects into a byte array and compare the serialized representations:
@@ -713,7 +713,7 @@ generated code is to be loaded immediately into the running program,  trait
       def compile[A,B](f: Rep[A] => Rep[B]): A=>B
     }
 
-The contract of `compile` is to ''unstage'' a function from staged to staged
+The contract of `compile` is to "unstage" a function from staged to staged
 values into a function operating on  present-stage values that can be used
 just like any other function object in the running program. Of course this
 only works for functions that do not reference externally bound `Rep[T]`
