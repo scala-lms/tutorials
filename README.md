@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/scala-lms/tutorials.svg?branch=master)](https://travis-ci.org/scala-lms/tutorials)
+[![Build Status](https://travis-ci.org/scala-lms/tutorials.svg?branch=macro-lms-0.9.x)](https://travis-ci.org/scala-lms/tutorials)
 
 [Tutorials](http://scala-lms.github.io/tutorials/) on [LMS](http://scala-lms.github.io)
 ======================================================================
