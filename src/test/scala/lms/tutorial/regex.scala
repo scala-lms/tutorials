@@ -93,12 +93,8 @@ trait RegexpMatcher {
   }
 }
 
-class RegexpMatcherTest extends FunSuite with RegexpMatcher {
-  def testmatch(regexp: String, text: String, expected: Boolean) {
-    test(s"""matchsearch("$regexp", "$text") == $expected""") {
-      assertResult(expected){matchsearch(regexp, text)}
-    }
-  }
+trait RegexpMatcherTestCases {
+  def testmatch(regexp: String, text: String, expected: Boolean): Unit
 
   testmatch("^hello$", "hello", true)
   testmatch("^hello$", "hell", false)
@@ -115,6 +111,14 @@ class RegexpMatcherTest extends FunSuite with RegexpMatcher {
   testmatch("^ab*", "ac", true);
   testmatch("^ab*", "bac", false);
   testmatch("^ab*$", "ac", false);
+}
+
+class RegexpMatcherTest extends FunSuite with RegexpMatcher with RegexpMatcherTestCases {
+  override def testmatch(regexp: String, text: String, expected: Boolean) {
+    test(s"""matchsearch("$regexp", "$text") == $expected""") {
+      assertResult(expected){matchsearch(regexp, text)}
+    }
+  }
 }
 
 /**
@@ -173,7 +177,7 @@ trait StagedRegexpMatcher extends Dsl {
   }
 }
 
-class StagedRegexpMatcherTest extends TutorialFunSuite {
+class StagedRegexpMatcherTest extends TutorialFunSuite with RegexpMatcherTestCases {
   val under = "sre"
   var m = Map.empty[String, DslDriver[String,Boolean]]
   def cache(k: String, b: => DslDriver[String,Boolean]): DslDriver[String,Boolean] = {
@@ -184,7 +188,7 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
         m(k)
     }
   }
-  def testmatch(regexp: String, text: String, expected: Boolean) {
+  override def testmatch(regexp: String, text: String, expected: Boolean) {
     test(s"""matchsearch("$regexp", "$text") == $expected""") {
       val snippet = cache(regexp,
         new DslDriver[String,Boolean] with StagedRegexpMatcher {
@@ -195,22 +199,6 @@ class StagedRegexpMatcherTest extends TutorialFunSuite {
       assertResult(expected){snippet.eval(text)}
     }
   }
-
-  testmatch("^hello$", "hello", true)
-  testmatch("^hello$", "hell", false)
-  testmatch("hell", "hello", true)
-  testmatch("hell", "hell", true)
-  testmatch("hel*", "he", true)
-  testmatch("hel*$", "hello", false)
-  testmatch("hel*", "yo hello", true)
-  testmatch("ab", "hello ab hello", true)
-  testmatch("^ab", "hello ab hello", false)
-  testmatch("a*b", "hello aab hello", true)
-  testmatch("^ab*", "abcd", true)
-  testmatch("^ab*", "a", true)
-  testmatch("^ab*", "ac", true)
-  testmatch("^ab*", "bac", false)
-  testmatch("^ab*$", "ac", false)
 }
 
 /**
