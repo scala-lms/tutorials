@@ -63,7 +63,7 @@ package scala.lms.tutorial
 
 import org.scala_lang.virtualized.virtualize
 import org.scalatest.FunSuite
-import scala.virtualization.lms.common._
+import scala.virtualization.lms.stub.common._
 
 /**
 Relational Algebra AST

@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.virtualization.lms.stub.common._
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 
@@ -76,13 +76,14 @@ trait ScannerExp extends ScannerBase with EffectExp { this: DslExp =>
   override def scannerClose(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Unit] =
     reflectWrite(s)(ScannerClose(s))
 
-  override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
-    case Reflect(e@ScannerNew(fn), u, es) => reflectMirrored(Reflect(ScannerNew(f(fn)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
-    case Reflect(ScannerNext(s, d), u, es) => reflectMirrored(Reflect(ScannerNext(f(s), f(d)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
-    case Reflect(ScannerHasNext(s), u, es) => reflectMirrored(Reflect(ScannerHasNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
-    case Reflect(ScannerClose(s), u, es) => reflectMirrored(Reflect(ScannerClose(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
-    case _ => super.mirror(e,f)
-  }).asInstanceOf[Exp[A]]
+  //STUB
+  // override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {
+  //   case Reflect(e@ScannerNew(fn), u, es) => reflectMirrored(Reflect(ScannerNew(f(fn)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
+  //   case Reflect(ScannerNext(s, d), u, es) => reflectMirrored(Reflect(ScannerNext(f(s), f(d)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
+  //   case Reflect(ScannerHasNext(s), u, es) => reflectMirrored(Reflect(ScannerHasNext(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
+  //   case Reflect(ScannerClose(s), u, es) => reflectMirrored(Reflect(ScannerClose(f(s)), mapOver(f,u), f(es)))(mtype(manifest[A]), pos)
+  //   case _ => super.mirror(e,f)
+  // }).asInstanceOf[Exp[A]]
 }
 
 @virtualize

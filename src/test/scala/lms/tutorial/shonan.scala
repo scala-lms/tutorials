@@ -22,7 +22,7 @@ Outline:
 
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common._
+import scala.virtualization.lms.stub.common._
 
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize

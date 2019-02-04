@@ -234,11 +234,12 @@ trait DFAOpsExp extends DslExp with DFAOps {
 trait ScalaGenDFAOps extends DslGen {
   val IR: DFAOpsExp
   import IR._
-  override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case dfa@DFAState(b,f) =>
-      emitValDef(sym, "scala.lms.tutorial.Automaton(" + quote(b) + ", " + quote(f) + ")")
-    case _ => super.emitNode(sym, rhs)
-  }
+  //STUB
+  // override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
+  //   case dfa@DFAState(b,f) =>
+  //     emitValDef(sym, "scala.lms.tutorial.Automaton(" + quote(b) + ", " + quote(f) + ")")
+  //   case _ => super.emitNode(sym, rhs)
+  // }
 }
 
 /**

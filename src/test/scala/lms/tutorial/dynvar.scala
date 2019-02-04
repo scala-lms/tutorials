@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.common.Compile
+import scala.virtualization.lms.stub.common.Compile
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.virtualize
 

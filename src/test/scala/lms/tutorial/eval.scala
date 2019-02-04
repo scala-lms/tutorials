@@ -234,7 +234,7 @@ The LMS bits
 ------------
 */
 import eval._
-import scala.virtualization.lms.common._
+import scala.virtualization.lms.stub.common._
 
 @virtualize
 trait EvalDsl extends Dsl with UncheckedOps {
