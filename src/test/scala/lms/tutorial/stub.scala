@@ -4,6 +4,108 @@ import scala.virtualization.lms.util.OverloadHack
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.EmbeddedControls
 
+import lms.core._
+import Backend._
+
+object Adapter extends FrontEnd {
+  val sc = new lms.util.ScalaCompile {}
+  sc.dumpGeneratedCode = true
+
+
+  def mkClassName(name: String) = {
+    // mangle class name
+    (name).replace("-","_")
+  }
+
+  def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
+    // test(name) {
+      // lms.util.checkOut(name, "scala", {
+        var g = program(x => INT(prog(x.x)))
+
+        if (verbose) {
+          println("// Raw:")
+          g.nodes.foreach(println)
+
+          println("// Generic Codegen:")
+          (new CodeGen)(g)
+
+          println("// Scala Codegen:")
+          (new ScalaCodeGen)(g)
+
+          println("// Compact Scala Codegen:")
+          (new CompactScalaCodeGen)(g)
+        }
+
+        def emitSource() = {
+          val cg = new CompactScalaCodeGen
+          if (!verbose) cg.doRename = true
+          if (eff)      cg.doPrintEffects = true
+
+          val arg = cg.quote(g.block.in.head)
+          val efs = cg.quoteEff(g.block.in.last)
+          var src = utils.captureOut(cg(g))
+
+          if (!verbose) {
+            // remove "()" on a single line
+            src = src.replaceAll(" *\\(\\) *","")
+
+            // remove unused val x1 = ...
+            val names = cg.rename.map(p => p._2).toSet
+            for (n <- names) {
+              val removed = src.replace(s"val $n = ","")
+              if (removed.indexOf(n) < 0)
+                src = removed
+            }
+          }
+
+          val className = mkClassName(name)
+          s"""
+          /*****************************************
+          Emitting Generated Code
+          *******************************************/
+          class ${className} extends ($m1 => $m2){
+            def apply($arg: $m1): $m2$efs = {\n $src\n }
+          }
+          /*****************************************
+          End of Generated Code
+          *******************************************/
+          """
+        }
+
+        println(emitSource())
+
+
+        // // lower zeros, ones, etc to uniform tensor constructor
+        // g = (new TensorTransformer("TensorLowering")).transform(g)
+
+        // println("// After Tensor lowering:")
+        // println(emitSource())
+
+        // val cg = new CompactScalaCodeGen
+        // cg.doRename = true
+
+        // val arg = cg.quote(g.block.in.head)
+        // val src = utils.captureOut(cg(g))
+        // sc.dumpGeneratedCode = true
+
+        // val className = mkClassName(name)
+
+        // val fc = sc.compile[Int,Int](className, {
+        //   s"// Generated code\nclass ${className} extends (Int => Int) {\n def apply($arg: Int): Int = {\n $src\n }\n }"
+        // })
+
+        // println("// Output:")
+
+        // println(fc(0))
+        // println(fc(1))
+        // println(fc(2))
+        // println(fc(3))
+        // println(fc(4))
+      // })
+    }
+
+}
+
 trait Base extends EmbeddedControls with OverloadHack { 
   type Rep[+T] = Exp[T];
   abstract class Exp[+T]
