@@ -113,10 +113,14 @@ trait Base extends EmbeddedControls with OverloadHack {
   abstract class Var[T]
   abstract class Block[T]
 
+  case class Wrap[A](x: lms.core.Backend.Exp) extends Exp[A]
+  def Unwrap(x: Exp[Any]) = x match { case Wrap(x) => x }
+
+
   case class Const[T](x: T) extends Exp[T]
   case class Sym[T](x: Int) extends Exp[T]
 
-  implicit def unit[T](x: T): Rep[T] = ???
+  implicit def unit[T](x: T): Rep[T] = Wrap(Backend.Const(x))
   implicit def toAtom[T](x: Def[T]): Exp[T] = ???
 
   def staticData[T](x: T): Rep[T] = ???
