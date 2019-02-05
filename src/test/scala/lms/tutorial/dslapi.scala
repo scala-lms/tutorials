@@ -328,8 +328,7 @@ abstract class DslDriver[A:Manifest,B:Manifest] extends DslSnippet[A,B] with Dsl
 
   lazy val code: String = {
     val source = new java.io.StringWriter()
-    //STUB
-    // codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))(manifestTyp[A],manifestTyp[B])
+    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))(manifestTyp[A],manifestTyp[B])
     source.toString
   }
 }
@@ -344,8 +343,7 @@ abstract class DslDriverC[A: Manifest, B: Manifest] extends DslSnippet[A, B] wit
     //implicit val mA = manifestTyp[A]
     //implicit val mB = manifestTyp[B]
     val source = new java.io.StringWriter()
-    //STUB
-    // codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
+    codegen.emitSource(snippet, "Snippet", new java.io.PrintWriter(source))
     source.toString
   }
 
