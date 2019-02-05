@@ -198,13 +198,15 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
-  def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = ???
+  def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = {
+      Wrap(Adapter.IF(Adapter.BOOL(Unwrap(c)))
+                     (Adapter.INT(Unwrap(a)))
+                     (Adapter.INT(Unwrap(b))).x)
+  }
   def __whileDo(c: => Rep[Boolean], b: => Rep[Unit]): Rep[Unit] = ???
 
   def unchecked[T](xs: Any*): Rep[T] = ???
   def uncheckedPure[T](xs: Any*): Rep[T] = ???
-
-
 }
 
 trait Compile
