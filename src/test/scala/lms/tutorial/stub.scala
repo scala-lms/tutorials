@@ -222,7 +222,14 @@ trait ScalaGenBase {
   def remap[A](m: Manifest[A]): String = ???
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
-  def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = ???
+  def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
+    val str = utils.captureOut {
+      Adapter.testBE(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    }
+    stream.println(str)
+    Nil
+  //def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(prog: INT => INT) = {
+  }
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = ???
 }
 trait CGenBase {
