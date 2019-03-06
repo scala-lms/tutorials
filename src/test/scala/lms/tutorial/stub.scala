@@ -7,6 +7,10 @@ import org.scala_lang.virtualized.EmbeddedControls
 import lms.core._
 import Backend._
 
+// - XXX hook for optimization is missing
+// - XXX hook for codegen is missing
+
+
 object Adapter extends FrontEnd {
   val sc = new lms.util.ScalaCompile {}
   sc.dumpGeneratedCode = true
@@ -122,6 +126,8 @@ trait Base extends EmbeddedControls with OverloadHack {
   case class Wrap[A](x: lms.core.Backend.Exp) extends Exp[A]
   def Unwrap(x: Exp[Any]) = x match { case Wrap(x) => x }
 
+  case class WrapV[A](x: lms.core.Backend.Exp) extends Var[A]
+  def UnwrapV[T](x: Var[T]) = x match { case WrapV(x) => x }
 
   case class Const[T](x: T) extends Exp[T]
   case class Sym[T](x: Int) extends Exp[T]
@@ -160,21 +166,25 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
-  implicit def readVar[T](x: Var[T]): Rep[T] = ???
-  def var_new[T](x: Rep[T]): Var[T] = ???
-  def __assign[T](lhs: Var[T], rhs: Rep[T]): Unit = ???
-  def __assign[T](lhs: Var[T], rhs: Var[T]): Unit = ???
+  implicit def readVar[T](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflect("var_get", UnwrapV(x)))
+  def var_new[T](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflect("var_new", Unwrap(x)))
+  def __assign[T](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflect("var_set", UnwrapV(lhs), Unwrap(rhs)))
+  def __assign[T](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
+
+
+  def numeric_plus[T:Numeric](lhs: Rep[T], rhs: Rep[T]): Rep[T] =
+    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // not distinguishing types here ...
 
   implicit class OpsInfixVarT[T:Manifest:Numeric](lhs: Var[T]) {
-    def +=(rhs: T): Unit = ???
+    def +=(rhs: T): Unit = __assign(lhs,numeric_plus(readVar(lhs),rhs))
   }
 
 
   implicit class StringOps(lhs: Rep[String]) {
-    def charAt(i: Rep[Int]): Rep[Char] = ???
-    def apply(i: Rep[Int]): Rep[Char] = ???
-    def length: Rep[Int] = ???
-    def toInt: Rep[Int] = ???
+    def charAt(i: Rep[Int]): Rep[Char] = Wrap(Adapter.g.reflect("String.charAt", Unwrap(lhs), Unwrap(i)))
+    def apply(i: Rep[Int]): Rep[Char] = charAt(i)
+    def length: Rep[Int] = Wrap(Adapter.g.reflect("String.length", Unwrap(lhs)))
+    def toInt: Rep[Int] = Wrap(Adapter.g.reflect("String.toInt", Unwrap(lhs)))
   }
 
   // NOTE(trans): it has to be called 'intWrapper' to shadow the standard Range constructor
@@ -221,7 +231,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   implicit def bool2boolOps(lhs: Boolean) = new BoolOps(lhs)
   implicit def var2boolOps(lhs: Var[Boolean]) = new BoolOps(lhs)
   implicit class BoolOps(lhs: Rep[Boolean]) {
-    def unary_!(implicit pos: SourceContext): Rep[Boolean] = ???
+    def unary_!(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("Boolean.!", Unwrap(lhs)))
     def &&(rhs: => Rep[Boolean]): Rep[Boolean] = ???
     def ||(rhs: => Rep[Boolean]): Rep[Boolean] = ???
   }
@@ -235,7 +245,9 @@ trait Base extends EmbeddedControls with OverloadHack {
                      (Adapter.INT(Unwrap(a)))
                      (Adapter.INT(Unwrap(b))).x)
   }
-  def __whileDo(c: => Rep[Boolean], b: => Rep[Unit]): Rep[Unit] = ???
+  def __whileDo(c: => Rep[Boolean], b: => Rep[Unit]): Rep[Unit] = {
+      Adapter.WHILE(Adapter.BOOL(Unwrap(c)))(b)
+  }
 
   def unchecked[T](xs: Any*): Rep[T] = ???
   def uncheckedPure[T](xs: Any*): Rep[T] = ???
@@ -429,14 +441,14 @@ trait OrderingOps extends Base with OverloadHack {
     def compare [B](rhs: B)(implicit c: B => Rep[T], pos: SourceContext) = ordering_compare(lhs, c(rhs))
   }
 
-  def ordering_lt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = ???
-  def ordering_lteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = ???
-  def ordering_gt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = ???
-  def ordering_gteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = ???
-  def ordering_equiv   [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = ???
-  def ordering_max     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = ???
-  def ordering_min     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = ???
-  def ordering_compare [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Int]     = ???
+  def ordering_lt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("<", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_lteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("<=", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_gt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect(">", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_gteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect(">=", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_equiv   [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("==", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_max     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap(Adapter.g.reflect("max", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_min     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap(Adapter.g.reflect("min", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_compare [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Int]     = Wrap(Adapter.g.reflect("compare", Unwrap(lhs), Unwrap(rhs)))
 }
 
 
