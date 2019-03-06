@@ -1,11 +1,9 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class Snippet extends ((Int)=>(Int)) {
-  def apply(x3:Int): Int = {
-    val x4 = x3 * x3
-    val x5 = x3 * x4
-    x5
+class Snippet extends (Int => Int) {
+  def apply(x0: Int): Int = {
+    x0 * x0 * x0 * 1
   }
 }
 /*****************************************

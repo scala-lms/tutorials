@@ -86,9 +86,9 @@ trait DslExp extends Dsl with PrimitiveOpsExpOpt with NumericOpsExpOpt with Bool
   // }
 
   // case class GenerateComment(l: String) extends Def[Unit]
-  def generate_comment(l: String) = ??? //STUB reflectEffect(GenerateComment(l))
+  //def generate_comment(l: String) = ??? //STUB reflectEffect(GenerateComment(l))
   // case class Comment[A:Typ](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
-  def comment[A:Typ](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = ???
+  //def comment[A:Typ](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = ???
 
   //STUB
   // def comment[A:Typ](l: String, verbose: Boolean)(b: => Rep[A]): Rep[A] = {

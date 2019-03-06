@@ -12,10 +12,10 @@ object Adapter extends FrontEnd {
   sc.dumpGeneratedCode = true
 
 
-  def mkClassName(name: String) = {
-    // mangle class name
-    (name).replace("-","_")
-  }
+  // def mkClassName(name: String) = {
+  //   // mangle class name
+  //   (name).replace("-","_")
+  // }
 
   def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
     // test(name) {
@@ -33,11 +33,11 @@ object Adapter extends FrontEnd {
           (new ScalaCodeGen)(g)
 
           println("// Compact Scala Codegen:")
-          (new CompactScalaCodeGen)(g)
+          (new ExtendedScalaCodeGen)(g)
         }
 
         def emitSource() = {
-          val cg = new CompactScalaCodeGen
+          val cg = new ExtendedScalaCodeGen
           if (!verbose) cg.doRename = true
           if (eff)      cg.doPrintEffects = true
 
@@ -58,12 +58,12 @@ object Adapter extends FrontEnd {
             }
           }
 
-          val className = mkClassName(name)
+          val className = name
           s"""
           /*****************************************
           Emitting Generated Code
           *******************************************/
-          class ${className} extends ($m1 => $m2){
+          class ${className} extends ($m1 => $m2) {
             def apply($arg: $m1): $m2$efs = {\n $src\n }
           }
           /*****************************************
@@ -72,7 +72,7 @@ object Adapter extends FrontEnd {
           """
         }
 
-        println(emitSource())
+        emitSource()
 
 
         // // lower zeros, ones, etc to uniform tensor constructor
@@ -106,6 +106,12 @@ object Adapter extends FrontEnd {
 
 }
 
+
+class ExtendedScalaCodeGen extends CompactScalaCodeGen {
+
+}
+
+
 trait Base extends EmbeddedControls with OverloadHack { 
   type Rep[+T] = Exp[T];
   abstract class Exp[+T]
@@ -138,7 +144,11 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
   // def compile[A,B](f: Rep[A] => Rep[B]): A=>B = ???
-  def compile[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): A=>B = ???
+  def compile[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): A=>B = {
+    val src = Adapter.testBE("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val fc = Adapter.sc.compile[A,B]("Snippet", src)
+    fc
+  }
 
   class SeqOpsCls[T](x: Rep[Seq[Char]])
 
@@ -176,17 +186,36 @@ trait Base extends EmbeddedControls with OverloadHack {
 
     def until(end: Int)(implicit pos: SourceContext, o: Overloaded1): Range = new Range(start,end,1)
   }
-  def range_until(start: Rep[Int], end: Rep[Int]): Rep[Range] = ???
+  def range_until(start: Rep[Int], end: Rep[Int]): Rep[Range] = {
+    Wrap(Adapter.g.reflect("range_until", Unwrap(start), Unwrap(end)))
+  }
 
   implicit class RangeConstrOps(lhs: Rep[Int]) {
-    def until(y: Rep[Int]): Rep[Range] = ???
+    def until(y: Rep[Int]): Rep[Range] = range_until(lhs,y)
 
     // unrelated
     def ToString: Rep[String] = ???
   }
 
   implicit class RangeOps(lhs: Rep[Range]) {
-    def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] = ???
+    def foreach(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
+
+      // XXX TODO: it would be good to do this as lowering/codegen
+      // (as done previously in LMS), but for now just construct
+      // a while loop directly
+
+      val Adapter.g.Def("range_until", List(x0:Backend.Exp,x1:Backend.Exp)) = Unwrap(lhs)
+
+      // val b = Adapter.g.reify(i => Unwrap(f(Wrap(i))))
+      // val f1 = Adapter.g.reflect("λ",b)
+      // Wrap(Adapter.g.reflect("range_foreach", x0, x1, b))
+
+      val i = Adapter.VAR(Adapter.INT(x0))
+      Adapter.WHILE(i() !== Adapter.INT(x1)) {
+        f(Wrap(i().x))
+        i() = i() + 1
+      }
+    }
   }
 
   implicit def bool2boolOps(lhs: Boolean) = new BoolOps(lhs)
@@ -198,6 +227,9 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
+  def println(x: Rep[Any]): Unit = 
+    Adapter.g.reflectEffect("P",Unwrap(x))(Adapter.CTRL)
+
   def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = {
       Wrap(Adapter.IF(Adapter.BOOL(Unwrap(c)))
                      (Adapter.INT(Unwrap(a)))
@@ -207,6 +239,22 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   def unchecked[T](xs: Any*): Rep[T] = ???
   def uncheckedPure[T](xs: Any*): Rep[T] = ???
+
+  case class GenerateComment(l: String) extends Def[Unit]
+  case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
+  def generate_comment(l: String): Rep[Unit] = {
+    Wrap(Adapter.g.reflectEffect("generate-comment", Backend.Const(l))(Adapter.CTRL))
+  }
+  def comment[A:Manifest](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A] = {
+    val g = Adapter.g
+    val bb = g.reify(Unwrap(b))
+    if (g.isPure(bb))
+      Wrap(g.reflect("comment",Backend.Const(l),Backend.Const(verbose),bb))
+    else 
+      Wrap(g.reflectEffect("comment",Backend.Const(l),Backend.Const(verbose),bb)(g.getEffKeys(bb):_*))
+  }
+
+
 }
 
 trait Compile
@@ -223,10 +271,8 @@ trait ScalaGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
-    val str = utils.captureOut {
-      Adapter.testBE(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
-    }
-    stream.println(str)
+    val src = Adapter.testBE(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    stream.println(src)
     Nil
   //def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(prog: INT => INT) = {
   }
@@ -902,10 +948,14 @@ trait PrimitiveOps extends Base with OverloadHack {
   def obj_integer_parseInt(s: Rep[String])(implicit pos: SourceContext): Rep[Int] = ???
   def obj_int_max_value(implicit pos: SourceContext): Rep[Int] = ???
   def obj_int_min_value(implicit pos: SourceContext): Rep[Int] = ???
-  def int_plus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
-  def int_minus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
-  def int_times(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
-  def int_divide(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
+  def int_plus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
+    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x)
+  def int_minus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
+    Wrap((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x)
+  def int_times(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
+    Wrap((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x)
+  def int_divide(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
+    Wrap((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x)
 
   def int_mod(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_binaryor(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
