@@ -12,7 +12,7 @@ import Backend._
 
 object Adapter extends FrontEnd {
   val sc = new lms.util.ScalaCompile {}
-  sc.dumpGeneratedCode = true
+  // sc.dumpGeneratedCode = true
 
 
   // def mkClassName(name: String) = {
@@ -111,11 +111,18 @@ object Adapter extends FrontEnd {
 
 
 class ExtendedScalaCodeGen extends CompactScalaCodeGen {
+
+  // XXX proper operator precedence
+  def shallow1(n: Def): String = n match {
+    case InlineSym(n) if n.op != "var_get" => s"(${shallow(n)})"
+    case _ => shallow(n)
+  }
+
   override def shallow(n: Node): String = n match {
     case n @ Node(s,"<",List(a,b),_) => 
       s"${shallow(a)} < ${shallow(b)}"
     case n @ Node(s,"Boolean.!",List(a),_) => 
-      s"!${shallow(a)}"
+      s"!${shallow1(a)}"
     case n @ Node(s,op,args,_) if op.indexOf('.') >= 0 => 
       val (recv::args1) = args.map(shallow)
       s"$recv.${op.drop(op.indexOf('.')+1)}(${args1.mkString(",")})"  
