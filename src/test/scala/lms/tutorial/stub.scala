@@ -8,7 +8,6 @@ import lms.core._
 import Backend._
 
 // - XXX hook for optimization is missing
-// - XXX hook for codegen is missing
 
 
 object Adapter extends FrontEnd {
@@ -26,7 +25,7 @@ object Adapter extends FrontEnd {
       // lms.util.checkOut(name, "scala", {
         var g = program(x => INT(prog(x.x)))
 
-        if (verbose) {
+        val extra =  if (verbose) utils.captureOut {
           println("// Raw:")
           g.nodes.foreach(println)
 
@@ -38,7 +37,7 @@ object Adapter extends FrontEnd {
 
           println("// Compact Scala Codegen:")
           (new ExtendedScalaCodeGen)(g)
-        }
+        } else ""
 
         def emitSource() = {
           val cg = new ExtendedScalaCodeGen
@@ -76,7 +75,7 @@ object Adapter extends FrontEnd {
           """
         }
 
-        emitSource()
+        extra + emitSource()
 
 
         // // lower zeros, ones, etc to uniform tensor constructor
@@ -112,7 +111,19 @@ object Adapter extends FrontEnd {
 
 
 class ExtendedScalaCodeGen extends CompactScalaCodeGen {
-
+  override def shallow(n: Node): String = n match {
+    case n @ Node(s,"<",List(a,b),_) => 
+      s"${shallow(a)} < ${shallow(b)}"
+    case n @ Node(s,"Boolean.!",List(a),_) => 
+      s"!${shallow(a)}"
+    case n @ Node(s,op,args,_) if op.indexOf('.') >= 0 => 
+      val (recv::args1) = args.map(shallow)
+      s"$recv.${op.drop(op.indexOf('.')+1)}(${args1.mkString(",")})"  
+    case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
+      s"${shallow(c)} && ${shallow(a)}"
+    case n => 
+      super.shallow(n)
+  }
 }
 
 
@@ -166,14 +177,14 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
-  implicit def readVar[T](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflect("var_get", UnwrapV(x)))
-  def var_new[T](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflect("var_new", Unwrap(x)))
-  def __assign[T](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflect("var_set", UnwrapV(lhs), Unwrap(rhs)))
+  implicit def readVar[T](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflectEffect("var_get", UnwrapV(x))(UnwrapV(x)))
+  def var_new[T](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflectEffect("var_new", Unwrap(x))(Adapter.STORE))
+  def __assign[T](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflectEffect("var_set", UnwrapV(lhs), Unwrap(rhs))(UnwrapV(lhs)))
   def __assign[T](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
 
 
   def numeric_plus[T:Numeric](lhs: Rep[T], rhs: Rep[T]): Rep[T] =
-    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // not distinguishing types here ...
+    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // XXX: not distinguishing types here ...
 
   implicit class OpsInfixVarT[T:Manifest:Numeric](lhs: Var[T]) {
     def +=(rhs: T): Unit = __assign(lhs,numeric_plus(readVar(lhs),rhs))
@@ -181,10 +192,10 @@ trait Base extends EmbeddedControls with OverloadHack {
 
 
   implicit class StringOps(lhs: Rep[String]) {
-    def charAt(i: Rep[Int]): Rep[Char] = Wrap(Adapter.g.reflect("String.charAt", Unwrap(lhs), Unwrap(i)))
+    def charAt(i: Rep[Int]): Rep[Char] = Wrap(Adapter.g.reflect("String.charAt", Unwrap(lhs), Unwrap(i))) // XXX: may fail! effect?
     def apply(i: Rep[Int]): Rep[Char] = charAt(i)
     def length: Rep[Int] = Wrap(Adapter.g.reflect("String.length", Unwrap(lhs)))
-    def toInt: Rep[Int] = Wrap(Adapter.g.reflect("String.toInt", Unwrap(lhs)))
+    def toInt: Rep[Int] = Wrap(Adapter.g.reflect("String.toInt", Unwrap(lhs))) // XXX: may fail!
   }
 
   // NOTE(trans): it has to be called 'intWrapper' to shadow the standard Range constructor
