@@ -112,6 +112,15 @@ object Adapter extends FrontEnd {
 
 class ExtendedScalaCodeGen extends CompactScalaCodeGen {
 
+  override def quote(x: Def) = x match {
+    case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
+    case Const(x @ '\n') if x.isInstanceOf[Char] => "'\\n'"
+    case Const(x @ '\t') if x.isInstanceOf[Char] => "'\\n'"
+    case Const(x) if x.isInstanceOf[Char] && x == 0 => "'\\0'"
+    case _ => super.quote(x)
+  }
+
+
   // XXX proper operator precedence
   def shallow1(n: Def): String = n match {
     case InlineSym(n) if n.op != "var_get" => s"(${shallow(n)})"
@@ -282,6 +291,11 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   def println(x: Rep[Any]): Unit = 
     Adapter.g.reflectEffect("P",Unwrap(x))(Adapter.CTRL)
+
+  def printf(f: String, x: Rep[Any]*): Unit = {
+    Adapter.g.reflectEffect("printf",Backend.Const(f)::x.map(Unwrap).toList:_*)(Adapter.CTRL)
+  }
+
 
   def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = {
       Wrap(Adapter.IF(Adapter.BOOL(Unwrap(c)))
