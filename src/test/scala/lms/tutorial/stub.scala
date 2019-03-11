@@ -50,7 +50,7 @@ object Adapter extends FrontEnd {
 
           if (!verbose) {
             // remove "()" on a single line
-            src = src.replaceAll(" *\\(\\) *","")
+            src = src.replaceAll("\\n *\\(\\)","")
 
             // remove unused val x1 = ...
             val names = cg.rename.map(p => p._2).toSet
@@ -117,9 +117,9 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
     case Const(x @ '\n') if x.isInstanceOf[Char] => "'\\n'"
     case Const(x @ '\t') if x.isInstanceOf[Char] => "'\\t'"
     case Const(x) if x.isInstanceOf[Char] && x == 0 => "'\\0'"
+    case Const(x) if x.isInstanceOf[Long] => x.toString + "L"
     case _ => super.quote(x)
   }
-
 
   // XXX proper operator precedence
   def shallow1(n: Def): String = n match {
@@ -132,6 +132,7 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
     "ScannerHasNext" -> "Scanner.hasNext",
     "ScannerNext" -> "Scanner.next",
     "ScannerClose" -> "Scanner.close",
+    "ObjHashCode" -> "Object.hashCode",
   )
 
   override def shallow(n: Node): String = n match {
@@ -139,11 +140,16 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
       shallow(n.copy(op = nameMap(n.op)))
     case n @ Node(s,"<",List(a,b),_) => 
       s"${shallow(a)} < ${shallow(b)}"
+    case n @ Node(s,"&",List(a,b),_) => 
+      s"${shallow1(a)} & ${shallow1(b)}"
     case n @ Node(s,"Boolean.!",List(a),_) => 
       s"!${shallow1(a)}"
     case n @ Node(s,op,args,_) if op.contains('.') && !op.contains(' ') => 
-      val (recv::args1) = args.map(shallow)
-      s"$recv.${op.drop(op.lastIndexOf('.')+1)}(${args1.mkString(",")})"  
+      val (recv::args1) = args
+      if (args1.length > 0)
+        s"${shallow1(recv)}.${op.drop(op.lastIndexOf('.')+1)}(${args1.map(shallow).mkString(",")})"
+      else
+        s"${shallow1(recv)}.${op.drop(op.lastIndexOf('.')+1)}"
     case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
       s"${shallow(c)} && ${shallow(a)}"
     case n => 
@@ -209,7 +215,8 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   class SeqOpsCls[T](x: Rep[Seq[Char]])
 
-  def NewArray[T](x: Rep[Int]): Rep[Array[T]] = Wrap(Adapter.g.reflectEffect("array_new", Unwrap(x))(Adapter.STORE))
+  // XXX HACK for generic type!
+  def NewArray[T:Manifest](x: Rep[Int]): Rep[Array[T]] = Wrap(Adapter.g.reflectEffect("new Array["+manifest[T]+"]", Unwrap(x))(Adapter.STORE))
   implicit class ArrayOps[A](x: Rep[Array[A]]) {
     def apply(i: Rep[Int]): Rep[A] = Wrap(Adapter.g.reflectEffect("array_get", Unwrap(x), Unwrap(i))(Unwrap(x)))
     def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = Wrap(Adapter.g.reflectEffect("array_set", Unwrap(x), Unwrap(i), Unwrap(y))(Unwrap(x)))
