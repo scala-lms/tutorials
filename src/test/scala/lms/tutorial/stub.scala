@@ -118,14 +118,23 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
     case _ => shallow(n)
   }
 
+  val nameMap = Map(
+    "ScannerNew" -> "new scala.lms.tutorial.Scanner",
+    "ScannerHasNext" -> "Scanner.hasNext",
+    "ScannerNext" -> "Scanner.next",
+    "ScannerClose" -> "Scanner.close",
+  )
+
   override def shallow(n: Node): String = n match {
+    case n @ Node(s,op,args,_) if nameMap contains op => 
+      shallow(n.copy(op = nameMap(n.op)))
     case n @ Node(s,"<",List(a,b),_) => 
       s"${shallow(a)} < ${shallow(b)}"
     case n @ Node(s,"Boolean.!",List(a),_) => 
       s"!${shallow1(a)}"
-    case n @ Node(s,op,args,_) if op.indexOf('.') >= 0 => 
+    case n @ Node(s,op,args,_) if op.contains('.') && !op.contains(' ') => 
       val (recv::args1) = args.map(shallow)
-      s"$recv.${op.drop(op.indexOf('.')+1)}(${args1.mkString(",")})"  
+      s"$recv.${op.drop(op.lastIndexOf('.')+1)}(${args1.mkString(",")})"  
     case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
       s"${shallow(c)} && ${shallow(a)}"
     case n => 
