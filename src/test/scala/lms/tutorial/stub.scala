@@ -142,7 +142,10 @@ trait Base extends EmbeddedControls with OverloadHack {
   abstract class Block[T]
 
   case class Wrap[A](x: lms.core.Backend.Exp) extends Exp[A]
-  def Unwrap(x: Exp[Any]) = x match { case Wrap(x) => x }
+  def Unwrap(x: Exp[Any]) = x match { 
+    case Wrap(x) => x 
+    case Const(x) => Backend.Const(x)
+  }
 
   case class WrapV[A](x: lms.core.Backend.Exp) extends Var[A]
   def UnwrapV[T](x: Var[T]) = x match { case WrapV(x) => x }
@@ -151,13 +154,25 @@ trait Base extends EmbeddedControls with OverloadHack {
   case class Sym[T](x: Int) extends Exp[T]
 
   implicit def unit[T](x: T): Rep[T] = Wrap(Backend.Const(x))
-  implicit def toAtom[T](x: Def[T]): Exp[T] = ???
+  implicit def toAtom[T](x: Def[T]): Exp[T] = {
+    val p = x.asInstanceOf[Product]
+    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    Wrap(Adapter.g.reflect(p.productPrefix, xs:_*))
+  }
 
   def staticData[T](x: T): Rep[T] = ???
 
   def reflectEffect[T](x: Def[T]): Exp[T] = ???
-  def reflectMutable[T](x: Def[T]): Exp[T] = ???
-  def reflectWrite[T](w: Rep[Any])(x: Def[T]): Exp[T] = ???
+  def reflectMutable[T](x: Def[T]): Exp[T] = {
+    val p = x.asInstanceOf[Product]
+    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Adapter.STORE))
+  }
+  def reflectWrite[T](w: Rep[Any])(x: Def[T]): Exp[T] = {
+    val p = x.asInstanceOf[Product]
+    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Unwrap(w)))
+  }
 
   def emitValDef(sym: Sym[Any], rhs: String): Unit = ???
 
@@ -176,11 +191,11 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   class SeqOpsCls[T](x: Rep[Seq[Char]])
 
-  def NewArray[T](x: Rep[Int]): Rep[Array[T]] = ???
+  def NewArray[T](x: Rep[Int]): Rep[Array[T]] = Wrap(Adapter.g.reflectEffect("array_new", Unwrap(x))(Adapter.STORE))
   implicit class ArrayOps[A](x: Rep[Array[A]]) {
-    def apply(i: Rep[Int]): Rep[A] = ???
-    def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = ???
-    def length: Rep[Int] = ???
+    def apply(i: Rep[Int]): Rep[A] = Wrap(Adapter.g.reflectEffect("array_get", Unwrap(x), Unwrap(i))(Unwrap(x)))
+    def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = Wrap(Adapter.g.reflectEffect("array_set", Unwrap(x), Unwrap(i), Unwrap(y))(Unwrap(x)))
+    def length: Rep[Int] = Wrap(Adapter.g.reflect("Array.length", Unwrap(x)))
   }
 
 
@@ -222,7 +237,8 @@ trait Base extends EmbeddedControls with OverloadHack {
     def until(y: Rep[Int]): Rep[Range] = range_until(lhs,y)
 
     // unrelated
-    def ToString: Rep[String] = ???
+    def ToString: Rep[String] = 
+      Wrap(Adapter.g.reflect("Object.toString", Unwrap(lhs)))
   }
 
   implicit class RangeOps(lhs: Rep[Range]) {
@@ -430,7 +446,8 @@ trait Equal extends Base {
 
   def equals[A:Manifest,B:Manifest](a: Rep[A], b: Rep[B])(implicit pos: SourceContext) : Rep[Boolean] = 
     Wrap(Adapter.g.reflect("==",Unwrap(a),Unwrap(b)))
-  def notequals[A:Manifest,B:Manifest](a: Rep[A], b: Rep[B])(implicit pos: SourceContext) : Rep[Boolean] = ???
+  def notequals[A:Manifest,B:Manifest](a: Rep[A], b: Rep[B])(implicit pos: SourceContext) : Rep[Boolean] = 
+    Wrap(Adapter.g.reflect("!=",Unwrap(a),Unwrap(b)))
 }
 
 trait OrderingOps extends Base with OverloadHack {
@@ -989,7 +1006,8 @@ trait PrimitiveOps extends Base with OverloadHack {
 
   def int_mod(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_binaryor(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
-  def int_binaryand(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
+  def int_binaryand(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = 
+    Wrap(Adapter.g.reflect("&", Unwrap(lhs), Unwrap(rhs)))
   def int_binaryxor(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_bitwise_not(lhs: Rep[Int])(implicit pos: SourceContext) : Rep[Int] = ???
   def int_to_long(lhs: Rep[Int])(implicit pos: SourceContext) : Rep[Long] = ???
@@ -1086,10 +1104,14 @@ trait PrimitiveOps extends Base with OverloadHack {
     def toFloat(implicit pos: SourceContext) = long_to_float(self)
   }
 
-  def long_plus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = ???
-  def long_minus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = ???
-  def long_times(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = ???
-  def long_divide(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = ???
+  def long_plus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
+    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // XXX type
+  def long_minus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
+    Wrap((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x) // XXX type    
+  def long_times(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
+    Wrap((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x) // XXX type
+  def long_divide(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
+    Wrap((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x) // XXX type
 
   def obj_long_parse_long(s: Rep[String])(implicit pos: SourceContext): Rep[Long] = ???
   def obj_long_max_value(implicit pos: SourceContext): Rep[Long] = ???
@@ -1101,7 +1123,8 @@ trait PrimitiveOps extends Base with OverloadHack {
   def long_shiftleft(lhs: Rep[Long], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Long] = ???
   def long_shiftright_signed(lhs: Rep[Long], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Long] = ???
   def long_shiftright_unsigned(lhs: Rep[Long], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Long] = ???
-  def long_to_int(lhs: Rep[Long])(implicit pos: SourceContext): Rep[Int] = ???
+  def long_to_int(lhs: Rep[Long])(implicit pos: SourceContext): Rep[Int] = 
+    Wrap(Adapter.g.reflect("Long.toInt", Unwrap(lhs)))
   def long_to_float(lhs: Rep[Long])(implicit pos: SourceContext): Rep[Float] = ???
   def long_to_double(lhs: Rep[Long])(implicit pos: SourceContext): Rep[Double] = ???
 }
