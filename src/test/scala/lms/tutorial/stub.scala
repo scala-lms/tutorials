@@ -128,11 +128,11 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
   }
 
   val nameMap = Map(
-    "ScannerNew" -> "new scala.lms.tutorial.Scanner",
+    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
     "ScannerHasNext" -> "Scanner.hasNext",
-    "ScannerNext" -> "Scanner.next",
-    "ScannerClose" -> "Scanner.close",
-    "ObjHashCode" -> "Object.hashCode",
+    "ScannerNext"    -> "Scanner.next",
+    "ScannerClose"   -> "Scanner.close",
+    "ObjHashCode"    -> "Object.hashCode",
   )
 
   override def shallow(n: Node): String = n match {
