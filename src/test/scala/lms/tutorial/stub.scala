@@ -20,7 +20,18 @@ object Adapter extends FrontEnd {
   //   (name).replace("-","_")
   // }
 
-  def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
+  def emitScala(name: String)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
+    emitCommon(name, "scala")(m1, m2)(prog)
+  }
+
+  def emitC(name: String)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
+    emitCommon(name, "c")(m1, m2)(prog)
+  }
+
+  def remap(m: Manifest[_]): String = m.toString
+
+
+  def emitCommon(name: String, target: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
     // test(name) {
       // lms.util.checkOut(name, "scala", {
         var g = program(x => INT(prog(x.x)))
@@ -40,12 +51,15 @@ object Adapter extends FrontEnd {
         } else ""
 
         def emitSource() = {
-          val cg = new ExtendedScalaCodeGen
+          val cg: CompactScalaCodeGen = target match {
+            case "scala" => new ExtendedScalaCodeGen
+            case "c"     => new ExtendedCCodeGen
+          }
           if (!verbose) cg.doRename = true
           if (eff)      cg.doPrintEffects = true
 
           val arg = cg.quote(g.block.in.head)
-          val efs = cg.quoteEff(g.block.in.last)
+          val efs = cg.quoteEff(g.block.ein)
           var src = utils.captureOut(cg(g))
 
           if (!verbose) {
@@ -61,18 +75,82 @@ object Adapter extends FrontEnd {
             }
           }
 
-          val className = name
-          s"""
-          /*****************************************
-          Emitting Generated Code
-          *******************************************/
-          class ${className} extends ($m1 => $m2) {
-            def apply($arg: $m1): $m2$efs = {\n $src\n }
+          val (ms1, ms2) = (remap(m1), remap(m2))
+          target match {
+            case "scala" => 
+              val className = name
+              s"""
+              /*****************************************
+              Emitting Generated Code
+              *******************************************/
+              class $className extends ($ms1 => $ms2) {
+                def apply($arg: $ms1): $ms2$efs = {\n $src\n }
+              }
+              /*****************************************
+              End of Generated Code
+              *******************************************/
+              """
+            case "c"     => 
+              val functionName = name
+              """
+              #include <fcntl.h>
+              #include <errno.h>
+              #include <err.h>
+              #include <sys/mman.h>
+              #include <sys/stat.h>
+              #include <stdio.h>
+              #include <stdint.h>
+              #include <unistd.h>
+              #ifndef MAP_FILE
+              #define MAP_FILE MAP_SHARED
+              #endif
+              int fsize(int fd) {
+                struct stat stat;
+                int res = fstat(fd,&stat);
+                return stat.st_size;
+              }
+              int printll(char* s) {
+                while (*s != '\n' && *s != ',' && *s != '\t') {
+                  putchar(*s++);
+                }
+                return 0;
+              }
+              long hash(char *str0, int len)
+              {
+                unsigned char* str = (unsigned char*)str0;
+                unsigned long hash = 5381;
+                int c;
+
+                while ((c = *str++) && len--)
+                  hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+                return hash;
+              }
+              void Snippet(char*);
+              int main(int argc, char *argv[])
+              {
+                if (argc != 2) {
+                  printf("usage: query <filename>\n");
+                  return 0;
+                }
+                Snippet(argv[1]);
+                return 0;
+              }
+              /*****************************************
+              Emitting C Generated Code
+              *******************************************/
+              #include <stdio.h>
+              #include <stdlib.h>
+              #include <string.h>
+              #include <stdbool.h>
+              $ms2 $functionName($ms1 $arg) {
+                $src
+              }
+              /*****************************************
+              End of C Generated Code
+              *******************************************/
+              """
           }
-          /*****************************************
-          End of Generated Code
-          *******************************************/
-          """
         }
 
         extra + emitSource()
@@ -158,6 +236,11 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
 }
 
 
+class ExtendedCCodeGen extends CompactScalaCodeGen {
+}
+
+
+
 trait Base extends EmbeddedControls with OverloadHack { 
   type Rep[+T] = Exp[T];
   abstract class Exp[+T]
@@ -208,7 +291,7 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   // def compile[A,B](f: Rep[A] => Rep[B]): A=>B = ???
   def compile[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): A=>B = {
-    val src = Adapter.testBE("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val src = Adapter.emitScala("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     val fc = Adapter.sc.compile[A,B]("Snippet", src)
     fc
   }
@@ -347,10 +430,9 @@ trait ScalaGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
-    val src = Adapter.testBE(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val src = Adapter.emitScala(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
-  //def testBE(name: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(prog: INT => INT) = {
   }
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = ???
 }
@@ -360,7 +442,11 @@ trait CGenBase {
   def remap[A](m: Manifest[A]): String = ???
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
-  def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = ???
+  def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
+    val src = Adapter.emitC(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    stream.println(src)
+    Nil
+  }
   def emitSource[A : Manifest](args: List[Sym[_]], body: Block[A], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = ???
 }
 
