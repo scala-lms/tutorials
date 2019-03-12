@@ -92,7 +92,7 @@ object Adapter extends FrontEnd {
               """
             case "c"     => 
               val functionName = name
-              """
+              s"""
               #include <fcntl.h>
               #include <errno.h>
               #include <err.h>
@@ -110,7 +110,7 @@ object Adapter extends FrontEnd {
                 return stat.st_size;
               }
               int printll(char* s) {
-                while (*s != '\n' && *s != ',' && *s != '\t') {
+                while (*s != '\\n' && *s != ',' && *s != '\\t') {
                   putchar(*s++);
                 }
                 return 0;
@@ -130,7 +130,7 @@ object Adapter extends FrontEnd {
               int main(int argc, char *argv[])
               {
                 if (argc != 2) {
-                  printf("usage: query <filename>\n");
+                  printf("usage: query <filename>\\n");
                   return 0;
                 }
                 Snippet(argv[1]);
@@ -396,8 +396,16 @@ trait Base extends EmbeddedControls with OverloadHack {
       Adapter.WHILE(Adapter.BOOL(Unwrap(c)))(b)
   }
 
-  def unchecked[T](xs: Any*): Rep[T] = ???
-  def uncheckedPure[T](xs: Any*): Rep[T] = ???
+  def unchecked[T](xs: Any*): Rep[T] = {
+    val strings = xs collect { case s: String => s } mkString "/"
+    val args = xs collect { case e: Exp[Any] => e }
+    Wrap(Adapter.g.reflectEffect(strings, args.map(Unwrap):_*)(Adapter.CTRL))
+  }
+  def uncheckedPure[T](xs: Any*): Rep[T] = {
+    val strings = xs collect { case s: String => s } mkString "/"
+    val args = xs collect { case e: Exp[Any] => e }
+    Wrap(Adapter.g.reflect(strings, args.map(Unwrap):_*))
+  }
 
   case class GenerateComment(l: String) extends Def[Unit]
   case class Comment[A:Manifest](l: String, verbose: Boolean, b: Block[A]) extends Def[A]
@@ -758,8 +766,12 @@ trait PrimitiveOps extends Base with OverloadHack {
 
   class PrimitiveMathOpsCharOpsCls(val self: Rep[Char])(implicit __pos: SourceContext) {
     //STUB
-    def -(rhs: Char)(implicit __pos: SourceContext,__imp1: Overloaded73): Rep[Char] = ???
+    def -(rhs: Char)(implicit __pos: SourceContext,__imp1: Overloaded73): Rep[Char] = char_minus(self, rhs)
   }
+
+  def char_minus(lhs: Rep[Char], rhs: Rep[Char])(implicit pos: SourceContext): Rep[Char] = 
+    Wrap((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x)    
+
 
   implicit def repToPrimitiveMathOpsIntOpsCls(x: Rep[Int])(implicit __pos: SourceContext) = new PrimitiveMathOpsIntOpsCls(x)(__pos)
   implicit def liftToPrimitiveMathOpsIntOpsCls(x: Int)(implicit __pos: SourceContext) = new PrimitiveMathOpsIntOpsCls(unit(x))(__pos)
@@ -1143,7 +1155,8 @@ trait PrimitiveOps extends Base with OverloadHack {
     def toInt(implicit pos: SourceContext) = char_toInt(self)
   }
 
-  def char_toInt(lhs: Rep[Char])(implicit pos: SourceContext): Rep[Int] = ???
+  def char_toInt(lhs: Rep[Char])(implicit pos: SourceContext): Rep[Int] = 
+    Wrap(Adapter.g.reflect("Char.toInt", Unwrap(lhs)))
 
   /**
    * Long
