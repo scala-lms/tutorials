@@ -476,12 +476,10 @@ class QueryTest extends TutorialFunSuite {
   }
 
   testquery("t1", "select * from t.csv")
-  
-  // XXX TEMP
-  // testquery("t2", "select Name from t.csv")
-  // testquery("t3", "select Name from t.csv where Flag='yes'")
-  // testquery("t4", "select * from nestedloops t.csv join (select Name as Name1 from t.csv)")
-  // testquery("t5", "select * from nestedloops t.csv join (select Name from t.csv)")
+  testquery("t2", "select Name from t.csv")
+  testquery("t3", "select Name from t.csv where Flag='yes'")
+  testquery("t4", "select * from nestedloops t.csv join (select Name as Name1 from t.csv)")
+  testquery("t5", "select * from nestedloops t.csv join (select Name from t.csv)")
   // testquery("t4h","select * from t.csv join (select Name as Name1 from t.csv)")
   // testquery("t5h","select * from t.csv join (select Name from t.csv)")
   // testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...

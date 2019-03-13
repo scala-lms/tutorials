@@ -61,14 +61,14 @@ Low-Level Processing Logic
   }
   case class RString(data: Rep[String], len: Rep[Int]) extends RField {
     def print() = prints(data)
-    def compare(o: RField) = o match { case RString(data2, len2) => if (len != len2) false else {
+    def compare(o: RField) = o match { case RString(data2, len2) => if (len == len2) {
       // TODO: we may or may not want to inline this (code bloat and icache considerations).
       var i = 0
       while (i < len && data.charAt(i) == data2.charAt(i)) {
         i += 1
       }
       i == len
-    }}
+    } else false }
     def hash = data.HashCode(len)
   }
   case class RInt(value: Rep[Int]) extends RField {

@@ -85,6 +85,8 @@ object Adapter extends FrontEnd {
                 val tpe1 = cg.remap(tpe)
                 src = src.replace(s"val $n = ",s"$tpe1 $n = ")
                 src = src.replace(s"var $n = ",s"$tpe1 $n = ")
+
+                src = src.replace(" ()"," {}")
               }
             }
 
@@ -254,12 +256,22 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     "ScannerClose"   -> "Scanner.close",
     "ObjHashCode"    -> "Object.hashCode"
   )
+  override def quoteBlock1(y: Block, argType: Boolean = false) = {
+    val res = super.quoteBlock1(y, argType)
+    if (res contains "\n") {
+      assert(res.take(2) == "{\n" && res.takeRight(2) == "\n}")
+      val res1 = res.drop(2).dropRight(2)
+      s"({\n$res1;\n})" // GNU C understands ({ ... ; }), (note the semicolon); TCC will need more unravelling ...
+    } else res
+  }
   override def emitValDef(s: Sym, rhs: String): Unit = {
     emit(s"val ${quote(s)} = " + rhs + ";") 
   }
   override def shallow(n: Node): String = n match {
     case Node(s,"Char.toInt",List(a),_) =>
       s"(int)${shallow1(a)}"
+    case Node(s,"String.charAt",List(a,i),_) =>
+      s"${shallow1(a)}[${shallow(i)}]"
     case Node(s,"array_get",List(a,i),_) =>
       s"${shallow1(a)}[${shallow(i)}]"
     // case Node(s,"var_get",List(a),_) =>
@@ -298,7 +310,7 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   val typeMap = new scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]]()
 
-  case class Wrap[A:Manifest](x: lms.core.Backend.Exp) extends Exp[A] {
+  case class Wrap[+A:Manifest](x: lms.core.Backend.Exp) extends Exp[A] {
     typeMap(x) = manifest[A]
   }
   def Unwrap(x: Exp[Any]) = x match { 
@@ -314,8 +326,8 @@ trait Base extends EmbeddedControls with OverloadHack {
   case class Const[T](x: T) extends Exp[T]
   case class Sym[T](x: Int) extends Exp[T]
 
-  implicit def unit[T](x: T): Rep[T] = Wrap(Backend.Const(x))
-  implicit def toAtom[T](x: Def[T]): Exp[T] = {
+  implicit def unit[T:Manifest](x: T): Rep[T] = Wrap(Backend.Const(x))
+  implicit def toAtom[T:Manifest](x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
     val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
     Wrap(Adapter.g.reflect(p.productPrefix, xs:_*))
@@ -324,12 +336,12 @@ trait Base extends EmbeddedControls with OverloadHack {
   def staticData[T](x: T): Rep[T] = ???
 
   def reflectEffect[T](x: Def[T]): Exp[T] = ???
-  def reflectMutable[T](x: Def[T]): Exp[T] = {
+  def reflectMutable[T:Manifest](x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
     val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
     Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Adapter.STORE))
   }
-  def reflectWrite[T](w: Rep[Any])(x: Def[T]): Exp[T] = {
+  def reflectWrite[T:Manifest](w: Rep[Any])(x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
     val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
     Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Unwrap(w)))
@@ -354,10 +366,10 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   // XXX HACK for generic type!
   def NewArray[T:Manifest](x: Rep[Int]): Rep[Array[T]] = Wrap[Array[T]](Adapter.g.reflectEffect("new Array["+manifest[T]+"]", Unwrap(x))(Adapter.STORE))
-  implicit class ArrayOps[A](x: Rep[Array[A]]) {
+  implicit class ArrayOps[A:Manifest](x: Rep[Array[A]]) {
     def apply(i: Rep[Int]): Rep[A] = Wrap(Adapter.g.reflectEffect("array_get", Unwrap(x), Unwrap(i))(Unwrap(x)))
-    def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = Wrap(Adapter.g.reflectEffect("array_set", Unwrap(x), Unwrap(i), Unwrap(y))(Unwrap(x)))
-    def length: Rep[Int] = Wrap(Adapter.g.reflect("Array.length", Unwrap(x)))
+    def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = Wrap[Unit](Adapter.g.reflectEffect("array_set", Unwrap(x), Unwrap(i), Unwrap(y))(Unwrap(x)))
+    def length: Rep[Int] = Wrap[Int](Adapter.g.reflect("Array.length", Unwrap(x)))
   }
 
 
@@ -367,7 +379,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   def __assign[T:Manifest](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
 
 
-  def numeric_plus[T:Numeric](lhs: Rep[T], rhs: Rep[T]): Rep[T] =
+  def numeric_plus[T:Numeric:Manifest](lhs: Rep[T], rhs: Rep[T]): Rep[T] =
     Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // XXX: not distinguishing types here ...
 
   implicit class OpsInfixVarT[T:Manifest:Numeric](lhs: Var[T]) {
@@ -1180,18 +1192,18 @@ trait PrimitiveOps extends Base with OverloadHack {
   def obj_int_max_value(implicit pos: SourceContext): Rep[Int] = ???
   def obj_int_min_value(implicit pos: SourceContext): Rep[Int] = ???
   def int_plus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
-    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x)
+    Wrap[Int]((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x)
   def int_minus(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
-    Wrap((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x)
+    Wrap[Int]((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x)
   def int_times(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
-    Wrap((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x)
+    Wrap[Int]((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x)
   def int_divide(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] =
-    Wrap((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x)
+    Wrap[Int]((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x)
 
   def int_mod(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_binaryor(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_binaryand(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = 
-    Wrap(Adapter.g.reflect("&", Unwrap(lhs), Unwrap(rhs)))
+    Wrap[Int](Adapter.g.reflect("&", Unwrap(lhs), Unwrap(rhs)))
   def int_binaryxor(lhs: Rep[Int], rhs: Rep[Int])(implicit pos: SourceContext): Rep[Int] = ???
   def int_bitwise_not(lhs: Rep[Int])(implicit pos: SourceContext) : Rep[Int] = ???
   def int_to_long(lhs: Rep[Int])(implicit pos: SourceContext) : Rep[Long] = ???
