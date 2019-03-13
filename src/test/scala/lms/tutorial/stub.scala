@@ -9,6 +9,7 @@ import Backend._
 
 // - XXX hook for optimization is missing
 
+class Unknown
 
 object Adapter extends FrontEnd {
   val sc = new lms.util.ScalaCompile {}
@@ -28,7 +29,7 @@ object Adapter extends FrontEnd {
     emitCommon(name, "c")(m1, m2)(prog)
   }
 
-  def remap(m: Manifest[_]): String = m.toString
+  var typeMap: scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]] = _
 
 
   def emitCommon(name: String, target: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
@@ -51,7 +52,7 @@ object Adapter extends FrontEnd {
         } else ""
 
         def emitSource() = {
-          val cg: CompactScalaCodeGen = target match {
+          val cg: ExtendedCodeGen = target match {
             case "scala" => new ExtendedScalaCodeGen
             case "c"     => new ExtendedCCodeGen
           }
@@ -64,20 +65,39 @@ object Adapter extends FrontEnd {
 
           if (!verbose) {
             // remove "()" on a single line
-            src = src.replaceAll("\\n *\\(\\)","")
+            src = src.replaceAll("\\n *\\(\\) *\\n","\n")
 
-            // remove unused val x1 = ...
+            // XXX hack for types
+            val typeMap1 = typeMap.map(p => (p._1,p._2.asInstanceOf[Manifest[Any]])).toMap
+            val reverseMap = cg.rename.map(p => (p._2,p._1)).toMap
+
+            // remove unused val x1 = ... (and add types for C)
             val names = cg.rename.map(p => p._2).toSet
             for (n <- names) {
               val removed = src.replace(s"val $n = ","")
-              if (removed.indexOf(n) < 0)
+              if (!removed.replaceFirst("\\b"+n+"\\b","!!!!").contains("!!!!")) { // shouldn't match x10 when looking for x1
                 src = removed
+              }
+              if (target == "c") { // XXX HACK: add types for C code!!!
+                val orig = reverseMap(n)
+                // Sysstem.out.println("type map: "+typeMap1)
+                val tpe = typeMap1.getOrElse(orig,manifest[Unknown])
+                val tpe1 = cg.remap(tpe)
+                src = src.replace(s"val $n = ",s"$tpe1 $n = ")
+                src = src.replace(s"var $n = ",s"$tpe1 $n = ")
+              }
             }
+
+            // remove "xNN" on a single line (may overlap, so repeat a few times)
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
+
           }
 
-          val (ms1, ms2) = (remap(m1), remap(m2))
           target match {
             case "scala" => 
+              val (ms1, ms2) = (cg.remap(m1), cg.remap(m2))
               val className = name
               s"""
               /*****************************************
@@ -91,6 +111,7 @@ object Adapter extends FrontEnd {
               *******************************************/
               """
             case "c"     => 
+              val (ms1, ms2) = (cg.remap(m1), cg.remap(m2))
               val functionName = name
               s"""
               #include <fcntl.h>
@@ -154,41 +175,13 @@ object Adapter extends FrontEnd {
         }
 
         extra + emitSource()
-
-
-        // // lower zeros, ones, etc to uniform tensor constructor
-        // g = (new TensorTransformer("TensorLowering")).transform(g)
-
-        // println("// After Tensor lowering:")
-        // println(emitSource())
-
-        // val cg = new CompactScalaCodeGen
-        // cg.doRename = true
-
-        // val arg = cg.quote(g.block.in.head)
-        // val src = utils.captureOut(cg(g))
-        // sc.dumpGeneratedCode = true
-
-        // val className = mkClassName(name)
-
-        // val fc = sc.compile[Int,Int](className, {
-        //   s"// Generated code\nclass ${className} extends (Int => Int) {\n def apply($arg: Int): Int = {\n $src\n }\n }"
-        // })
-
-        // println("// Output:")
-
-        // println(fc(0))
-        // println(fc(1))
-        // println(fc(2))
-        // println(fc(3))
-        // println(fc(4))
-      // })
     }
 
 }
 
 
-class ExtendedScalaCodeGen extends CompactScalaCodeGen {
+
+abstract class ExtendedCodeGen extends CompactScalaCodeGen {
 
   override def quote(x: Def) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
@@ -205,13 +198,8 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
     case _ => shallow(n)
   }
 
-  val nameMap = Map(
-    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
-    "ScannerHasNext" -> "Scanner.hasNext",
-    "ScannerNext"    -> "Scanner.next",
-    "ScannerClose"   -> "Scanner.close",
-    "ObjHashCode"    -> "Object.hashCode",
-  )
+  def remap(m: Manifest[_]): String
+  def nameMap: Map[String, String]
 
   override def shallow(n: Node): String = n match {
     case n @ Node(s,op,args,_) if nameMap contains op => 
@@ -222,7 +210,12 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
       s"${shallow1(a)} & ${shallow1(b)}"
     case n @ Node(s,"Boolean.!",List(a),_) => 
       s"!${shallow1(a)}"
-    case n @ Node(s,op,args,_) if op.contains('.') && !op.contains(' ') => 
+    case n @ Node(s,op,args,_) if op contains "[ ]" => // unchecked
+      var s = op
+      for (a <- args)
+        s = s.replaceFirst("\\[ \\]",shallow(a))
+      s
+    case n @ Node(s,op,args,_) if op.contains('.') && !op.contains(' ') => // method call
       val (recv::args1) = args
       if (args1.length > 0)
         s"${shallow1(recv)}.${op.drop(op.lastIndexOf('.')+1)}(${args1.map(shallow).mkString(",")})"
@@ -235,10 +228,65 @@ class ExtendedScalaCodeGen extends CompactScalaCodeGen {
   }
 }
 
-
-class ExtendedCCodeGen extends CompactScalaCodeGen {
+class ExtendedScalaCodeGen extends ExtendedCodeGen {
+  def remap(m: Manifest[_]): String = m.toString
+  val nameMap = Map(
+    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
+    "ScannerHasNext" -> "Scanner.hasNext",
+    "ScannerNext"    -> "Scanner.next",
+    "ScannerClose"   -> "Scanner.close",
+    "ObjHashCode"    -> "Object.hashCode",
+  )
 }
 
+class ExtendedCCodeGen extends ExtendedCodeGen {
+  def remap(m: Manifest[_]): String = m.toString match {
+    case "Unit" => "void"
+    case "Int" => "int"
+    case "java.lang.String" => "char*"
+    case "Array[Char]" => "char*"
+    case s => s
+  }
+  val nameMap = Map(
+    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
+    "ScannerHasNext" -> "Scanner.hasNext",
+    "ScannerNext"    -> "Scanner.next",
+    "ScannerClose"   -> "Scanner.close",
+    "ObjHashCode"    -> "Object.hashCode"
+  )
+  override def emitValDef(s: Sym, rhs: String): Unit = {
+    emit(s"val ${quote(s)} = " + rhs + ";") 
+  }
+  override def shallow(n: Node): String = n match {
+    case Node(s,"Char.toInt",List(a),_) =>
+      s"(int)${shallow1(a)}"
+    case Node(s,"array_get",List(a,i),_) =>
+      s"${shallow1(a)}[${shallow(i)}]"
+    // case Node(s,"var_get",List(a),_) =>
+      // quote(a)+s"/*${quote(s)}*/"
+    case n @ Node(s,"P",List(x),_) => 
+      s"printf(${"\"%s\""}, ${shallow(x)})"
+    case n => 
+      super.shallow(n)
+  }
+  override def traverse(n: Node): Unit = n match {
+    // case n @ Node(s,"P",_,_) => // Unit result
+    //   emit(shallow(n))
+    // case n @ Node(s,"W",_,_) => // Unit result
+    //   emit(shallow(n))
+    case n @ Node(s,"var_new",List(x),_) => 
+      emit(s"var ${quote(s)} = ${shallow(x)};")
+    case n @ Node(s,"var_set",List(x,y),_) => 
+      emit(s"${quote(x)} = ${shallow(y)};")
+    case n @ Node(s,"array_new",List(x),_) => 
+      emit(s"val ${quote(s)} = new Array[Int](${shallow(x)});")
+    case n @ Node(s,"array_set",List(x,i,y),_) => 
+      emit(s"${shallow(x)}(${shallow(i)}) = ${shallow(y)};")
+    case n @ Node(s,_,_,_) => 
+      // emit(s"val ${quote(s)} = " + shallow(n)) 
+      emitValDef(s, shallow(n))
+  }
+}
 
 
 trait Base extends EmbeddedControls with OverloadHack { 
@@ -248,13 +296,19 @@ trait Base extends EmbeddedControls with OverloadHack {
   abstract class Var[T]
   abstract class Block[T]
 
-  case class Wrap[A](x: lms.core.Backend.Exp) extends Exp[A]
+  val typeMap = new scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]]()
+
+  case class Wrap[A:Manifest](x: lms.core.Backend.Exp) extends Exp[A] {
+    typeMap(x) = manifest[A]
+  }
   def Unwrap(x: Exp[Any]) = x match { 
     case Wrap(x) => x 
     case Const(x) => Backend.Const(x)
   }
 
-  case class WrapV[A](x: lms.core.Backend.Exp) extends Var[A]
+  case class WrapV[A:Manifest](x: lms.core.Backend.Exp) extends Var[A] {
+    typeMap(x) = manifest[A] // could include Var type in manifest
+  }
   def UnwrapV[T](x: Var[T]) = x match { case WrapV(x) => x }
 
   case class Const[T](x: T) extends Exp[T]
@@ -299,7 +353,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   class SeqOpsCls[T](x: Rep[Seq[Char]])
 
   // XXX HACK for generic type!
-  def NewArray[T:Manifest](x: Rep[Int]): Rep[Array[T]] = Wrap(Adapter.g.reflectEffect("new Array["+manifest[T]+"]", Unwrap(x))(Adapter.STORE))
+  def NewArray[T:Manifest](x: Rep[Int]): Rep[Array[T]] = Wrap[Array[T]](Adapter.g.reflectEffect("new Array["+manifest[T]+"]", Unwrap(x))(Adapter.STORE))
   implicit class ArrayOps[A](x: Rep[Array[A]]) {
     def apply(i: Rep[Int]): Rep[A] = Wrap(Adapter.g.reflectEffect("array_get", Unwrap(x), Unwrap(i))(Unwrap(x)))
     def update(i: Rep[Int], y: Rep[A]): Rep[Unit] = Wrap(Adapter.g.reflectEffect("array_set", Unwrap(x), Unwrap(i), Unwrap(y))(Unwrap(x)))
@@ -307,10 +361,10 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
-  implicit def readVar[T](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflectEffect("var_get", UnwrapV(x))(UnwrapV(x)))
-  def var_new[T](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflectEffect("var_new", Unwrap(x))(Adapter.STORE))
-  def __assign[T](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflectEffect("var_set", UnwrapV(lhs), Unwrap(rhs))(UnwrapV(lhs)))
-  def __assign[T](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
+  implicit def readVar[T:Manifest](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflectEffect("var_get", UnwrapV(x))(UnwrapV(x)))
+  def var_new[T:Manifest](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflectEffect("var_new", Unwrap(x))(Adapter.STORE))
+  def __assign[T:Manifest](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflectEffect("var_set", UnwrapV(lhs), Unwrap(rhs))(UnwrapV(lhs)))
+  def __assign[T:Manifest](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
 
 
   def numeric_plus[T:Numeric](lhs: Rep[T], rhs: Rep[T]): Rep[T] =
@@ -396,13 +450,13 @@ trait Base extends EmbeddedControls with OverloadHack {
       Adapter.WHILE(Adapter.BOOL(Unwrap(c)))(b)
   }
 
-  def unchecked[T](xs: Any*): Rep[T] = {
-    val strings = xs collect { case s: String => s } mkString "/"
+  def unchecked[T:Manifest](xs: Any*): Rep[T] = {
+    val strings = xs collect { case s: String => s } mkString "[ ]"
     val args = xs collect { case e: Exp[Any] => e }
     Wrap(Adapter.g.reflectEffect(strings, args.map(Unwrap):_*)(Adapter.CTRL))
   }
-  def uncheckedPure[T](xs: Any*): Rep[T] = {
-    val strings = xs collect { case s: String => s } mkString "/"
+  def uncheckedPure[T:Manifest](xs: Any*): Rep[T] = {
+    val strings = xs collect { case s: String => s } mkString "[ ]"
     val args = xs collect { case e: Exp[Any] => e }
     Wrap(Adapter.g.reflect(strings, args.map(Unwrap):_*))
   }
@@ -438,6 +492,7 @@ trait ScalaGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
+    Adapter.typeMap = typeMap // XXX
     val src = Adapter.emitScala(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
@@ -451,6 +506,7 @@ trait CGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
+    Adapter.typeMap = typeMap // XXX
     val src = Adapter.emitC(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
@@ -600,14 +656,14 @@ trait OrderingOps extends Base with OverloadHack {
     def compare [B](rhs: B)(implicit c: B => Rep[T], pos: SourceContext) = ordering_compare(lhs, c(rhs))
   }
 
-  def ordering_lt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("<", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_lteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("<=", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_gt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect(">", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_gteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect(">=", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_equiv   [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("==", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_max     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap(Adapter.g.reflect("max", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_min     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap(Adapter.g.reflect("min", Unwrap(lhs), Unwrap(rhs)))
-  def ordering_compare [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Int]     = Wrap(Adapter.g.reflect("compare", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_lt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect("<", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_lteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect("<=", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_gt      [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect(">", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_gteq    [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect(">=", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_equiv   [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect("==", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_max     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap[T]      (Adapter.g.reflect("max", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_min     [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[T]       = Wrap[T]      (Adapter.g.reflect("min", Unwrap(lhs), Unwrap(rhs)))
+  def ordering_compare [T:Ordering:Manifest](lhs: Rep[T], rhs: Rep[T])(implicit pos: SourceContext): Rep[Int]     = Wrap[Int]    (Adapter.g.reflect("compare", Unwrap(lhs), Unwrap(rhs)))
 }
 
 

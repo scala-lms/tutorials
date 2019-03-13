@@ -36,7 +36,7 @@ Input File Tokenizer
     }
 
     def nextInt(d: Rep[Char]) = {
-      val start = pos: Rep[Int] // force read
+      //val start = pos: Rep[Int] // force read
       var num = 0
       while (data(pos) != d) {
         num = num * 10 + (data(pos) - '0').toInt
