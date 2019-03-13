@@ -485,15 +485,15 @@ class QueryTest extends TutorialFunSuite {
   testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...
 
   val defaultEvalTable = dataFilePath("t1gram.csv")
-  // val t1gram = "? schema Phrase, Year, MatchCount, VolumeCount delim \\t"
-  // testquery("t1gram1", s"select * from $t1gram")
-  // testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
-  // testquery("t1gram2n", s"select * from nestedloops words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
-  // testquery("t1gram2h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
-  // testquery("t1gram3", s"select * from nestedloops words.csv join (select * from $t1gram)")
-  // testquery("t1gram3h", s"select * from words.csv join (select * from $t1gram)")
-  // testquery("t1gram4", s"select * from nestedloops words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
-  // testquery("t1gram4h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
+  val t1gram = "? schema Phrase, Year, MatchCount, VolumeCount delim \\t"
+  testquery("t1gram1", s"select * from $t1gram")
+  testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
+  testquery("t1gram2n", s"select * from nestedloops words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
+  testquery("t1gram2h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
+  testquery("t1gram3", s"select * from nestedloops words.csv join (select * from $t1gram)")
+  testquery("t1gram3h", s"select * from words.csv join (select * from $t1gram)")
+  testquery("t1gram4", s"select * from nestedloops words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
+  testquery("t1gram4h", s"select * from words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")
 }
 
 
