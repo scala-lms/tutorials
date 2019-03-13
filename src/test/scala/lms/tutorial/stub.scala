@@ -65,7 +65,7 @@ object Adapter extends FrontEnd {
 
           if (!verbose) {
             // remove "()" on a single line
-            src = src.replaceAll("\\n *\\(\\) *\\n","\n")
+            src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
 
             // XXX hack for types
             val typeMap1 = typeMap.map(p => (p._1,p._2.asInstanceOf[Manifest[Any]])).toMap
@@ -90,10 +90,14 @@ object Adapter extends FrontEnd {
               }
             }
 
-            // remove "xNN" on a single line (may overlap, so repeat a few times)
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n","\n")
+            // remove "xNN" on a single line, if not at end of block
+            // (may overlap, so repeat a few times)
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
+            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
+
+            // same for xNN[xNN]
+            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
 
           }
 
@@ -244,9 +248,13 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen {
 class ExtendedCCodeGen extends ExtendedCodeGen {
   def remap(m: Manifest[_]): String = m.toString match {
     case "Unit" => "void"
+    case "Char" => "char"
     case "Int" => "int"
+    case "Long" => "long"
     case "java.lang.String" => "char*"
     case "Array[Char]" => "char*"
+    case "Array[Int]" => "int*"
+    case "Array[java.lang.String]" => "char**"
     case s => s
   }
   val nameMap = Map(
@@ -254,7 +262,8 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     "ScannerHasNext" -> "Scanner.hasNext",
     "ScannerNext"    -> "Scanner.next",
     "ScannerClose"   -> "Scanner.close",
-    "ObjHashCode"    -> "Object.hashCode"
+    "ObjHashCode"    -> "Object.hashCode",
+    "StrSubHashCode" -> "hash"
   )
   override def quoteBlock1(y: Block, argType: Boolean = false) = {
     val res = super.quoteBlock1(y, argType)
@@ -262,6 +271,8 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
       assert(res.take(2) == "{\n" && res.takeRight(2) == "\n}")
       val res1 = res.drop(2).dropRight(2)
       s"({\n$res1;\n})" // GNU C understands ({ ... ; }), (note the semicolon); TCC will need more unravelling ...
+    } else if (res == "()" ){
+      "({})"
     } else res
   }
   override def emitValDef(s: Sym, rhs: String): Unit = {
@@ -270,12 +281,31 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
   override def shallow(n: Node): String = n match {
     case Node(s,"Char.toInt",List(a),_) =>
       s"(int)${shallow1(a)}"
+    case Node(s,"Long.toInt",List(a),_) =>
+      s"(int)${shallow1(a)}"
     case Node(s,"String.charAt",List(a,i),_) =>
       s"${shallow1(a)}[${shallow(i)}]"
     case Node(s,"array_get",List(a,i),_) =>
       s"${shallow1(a)}[${shallow(i)}]"
     // case Node(s,"var_get",List(a),_) =>
       // quote(a)+s"/*${quote(s)}*/"
+
+    case n @ Node(s,"comment",_,_) => 
+      s"(${super.shallow(n).dropRight(1)+";}"})" // GNU C block expr
+    case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
+      s"${shallow(c)} && ${shallow(a)}"
+    case n @ Node(f,"?",c::(a:Block)::(b:Block)::_,_) => 
+      s"(${shallow1(c)} ? " +
+      quoteBlock1(a) +
+      s" : " +
+      quoteBlock1(b) + ")"
+
+    case n @ Node(f,"W",List(c:Block,b:Block),_) => 
+      s"while (" +
+      quoteBlock1(c) +
+      s") " +
+      quoteBlock1(b)
+
     case n @ Node(s,"P",List(x),_) => 
       s"printf(${"\"%s\\n\""}, ${shallow(x)})"
     case n => 
@@ -290,10 +320,18 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
       emit(s"var ${quote(s)} = ${shallow(x)};")
     case n @ Node(s,"var_set",List(x,y),_) => 
       emit(s"${quote(x)} = ${shallow(y)};")
+
     case n @ Node(s,"array_new",List(x),_) => 
-      emit(s"val ${quote(s)} = new Array[Int](${shallow(x)});")
+      emit(s"val ${quote(s)} = (int*)malloc(${shallow1(x)} * sizeof(int));")
+    case n @ Node(s,"new Array[Int]",List(x),_) => 
+      emit(s"val ${quote(s)} = (int*)malloc(${shallow1(x)} * sizeof(int));")
+    case n @ Node(s,"new Array[Char]",List(x),_) => 
+      emit(s"val ${quote(s)} = (char*)malloc(${shallow1(x)} * sizeof(char));")
+    case n @ Node(s,"new Array[java.lang.String]",List(x),_) => 
+      emit(s"val ${quote(s)} = (char**)malloc(${shallow1(x)} * sizeof(char*));")
+
     case n @ Node(s,"array_set",List(x,i,y),_) => 
-      emit(s"${shallow(x)}(${shallow(i)}) = ${shallow(y)};")
+      emit(s"${shallow1(x)}[${shallow(i)}] = ${shallow(y)};")
     case n @ Node(s,_,_,_) => 
       // emit(s"val ${quote(s)} = " + shallow(n)) 
       emitValDef(s, shallow(n))
@@ -374,8 +412,8 @@ trait Base extends EmbeddedControls with OverloadHack {
 
 
   implicit def readVar[T:Manifest](x: Var[T]): Rep[T] = Wrap(Adapter.g.reflectEffect("var_get", UnwrapV(x))(UnwrapV(x)))
-  def var_new[T:Manifest](x: Rep[T]): Var[T] = WrapV(Adapter.g.reflectEffect("var_new", Unwrap(x))(Adapter.STORE))
-  def __assign[T:Manifest](lhs: Var[T], rhs: Rep[T]): Unit = Wrap(Adapter.g.reflectEffect("var_set", UnwrapV(lhs), Unwrap(rhs))(UnwrapV(lhs)))
+  def var_new[T:Manifest](x: Rep[T]): Var[T] = WrapV[T](Adapter.g.reflectEffect("var_new", Unwrap(x))(Adapter.STORE))
+  def __assign[T:Manifest](lhs: Var[T], rhs: Rep[T]): Unit = Wrap[Unit](Adapter.g.reflectEffect("var_set", UnwrapV(lhs), Unwrap(rhs))(UnwrapV(lhs)))
   def __assign[T:Manifest](lhs: Var[T], rhs: Var[T]): Unit = __assign(lhs,readVar(rhs))
 
 
@@ -428,13 +466,18 @@ trait Base extends EmbeddedControls with OverloadHack {
       // val f1 = Adapter.g.reflect("λ",b)
       // Wrap(Adapter.g.reflect("range_foreach", x0, x1, b))
 
-      val i = Adapter.VAR(Adapter.INT(x0))
-      Adapter.WHILE(i() !== Adapter.INT(x1)) {
-        f(Wrap(i().x))
-        i() = i() + 1
-      }
+      val i = var_new(0)
+      __whileDo(notequals(readVar(i), Wrap[Int](x1)), {
+        f(readVar(i))
+        i += 1
+      })
     }
   }
+
+  // implemented in trait Equal
+  def equals[A:Manifest,B:Manifest](a: Rep[A], b: Rep[B])(implicit pos: SourceContext) : Rep[Boolean]
+  def notequals[A:Manifest,B:Manifest](a: Rep[A], b: Rep[B])(implicit pos: SourceContext) : Rep[Boolean]
+
 
   implicit def bool2boolOps(lhs: Boolean) = new BoolOps(lhs)
   implicit def var2boolOps(lhs: Var[Boolean]) = new BoolOps(lhs)
@@ -1302,13 +1345,13 @@ trait PrimitiveOps extends Base with OverloadHack {
   }
 
   def long_plus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
-    Wrap((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // XXX type
+    Wrap[Long]((Adapter.INT(Unwrap(lhs)) + Adapter.INT(Unwrap(rhs))).x) // XXX type
   def long_minus(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
-    Wrap((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x) // XXX type    
+    Wrap[Long]((Adapter.INT(Unwrap(lhs)) - Adapter.INT(Unwrap(rhs))).x) // XXX type
   def long_times(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
-    Wrap((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x) // XXX type
+    Wrap[Long]((Adapter.INT(Unwrap(lhs)) * Adapter.INT(Unwrap(rhs))).x) // XXX type
   def long_divide(lhs: Rep[Long], rhs: Rep[Long])(implicit pos: SourceContext): Rep[Long] = 
-    Wrap((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x) // XXX type
+    Wrap[Long]((Adapter.INT(Unwrap(lhs)) / Adapter.INT(Unwrap(rhs))).x) // XXX type
 
   def obj_long_parse_long(s: Rep[String])(implicit pos: SourceContext): Rep[Long] = ???
   def obj_long_max_value(implicit pos: SourceContext): Rep[Long] = ???
