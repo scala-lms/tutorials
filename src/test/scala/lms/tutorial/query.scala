@@ -480,8 +480,8 @@ class QueryTest extends TutorialFunSuite {
   testquery("t3", "select Name from t.csv where Flag='yes'")
   testquery("t4", "select * from nestedloops t.csv join (select Name as Name1 from t.csv)")
   testquery("t5", "select * from nestedloops t.csv join (select Name from t.csv)")
-  // testquery("t4h","select * from t.csv join (select Name as Name1 from t.csv)")
-  // testquery("t5h","select * from t.csv join (select Name from t.csv)")
+  testquery("t4h","select * from t.csv join (select Name as Name1 from t.csv)")
+  testquery("t5h","select * from t.csv join (select Name from t.csv)")
   testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...
 
   val defaultEvalTable = dataFilePath("t1gram.csv")

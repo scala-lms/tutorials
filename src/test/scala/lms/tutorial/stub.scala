@@ -98,7 +98,8 @@ object Adapter extends FrontEnd {
 
             // same for xNN[xNN]
             src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
-
+            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
+            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
           }
 
           target match {
@@ -248,6 +249,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen {
 class ExtendedCCodeGen extends ExtendedCodeGen {
   def remap(m: Manifest[_]): String = m.toString match {
     case "Unit" => "void"
+    case "Boolean" => "bool"
     case "Char" => "char"
     case "Int" => "int"
     case "Long" => "long"
@@ -482,7 +484,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   implicit def bool2boolOps(lhs: Boolean) = new BoolOps(lhs)
   implicit def var2boolOps(lhs: Var[Boolean]) = new BoolOps(lhs)
   implicit class BoolOps(lhs: Rep[Boolean]) {
-    def unary_!(implicit pos: SourceContext): Rep[Boolean] = Wrap(Adapter.g.reflect("Boolean.!", Unwrap(lhs)))
+    def unary_!(implicit pos: SourceContext): Rep[Boolean] = Wrap[Boolean](Adapter.g.reflect("Boolean.!", Unwrap(lhs)))
     def &&(rhs: => Rep[Boolean]): Rep[Boolean] = ???
     def ||(rhs: => Rep[Boolean]): Rep[Boolean] = ???
   }
