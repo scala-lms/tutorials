@@ -86,7 +86,7 @@ object Adapter extends FrontEnd {
                 src = src.replace(s"val $n = ",s"$tpe1 $n = ")
                 src = src.replace(s"var $n = ",s"$tpe1 $n = ")
 
-                src = src.replace(" ()"," {}")
+                src = src.replace(" else ()","")
               }
             }
 
@@ -187,9 +187,9 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
 
   override def quote(x: Def) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
-    case Const(x @ '\n') if x.isInstanceOf[Char] => "'\\n'"
-    case Const(x @ '\t') if x.isInstanceOf[Char] => "'\\t'"
-    case Const(x) if x.isInstanceOf[Char] && x == 0 => "'\\0'"
+    case Const(x) if x.isInstanceOf[Char] && x == '\n' => "'\\n'"
+    case Const(x) if x.isInstanceOf[Char] && x == '\t' => "'\\t'"
+    case Const(x) if x.isInstanceOf[Char] && x == 0    => "'\\0'"
     case Const(x) if x.isInstanceOf[Long] => x.toString + "L"
     case _ => super.quote(x)
   }
@@ -277,7 +277,7 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     // case Node(s,"var_get",List(a),_) =>
       // quote(a)+s"/*${quote(s)}*/"
     case n @ Node(s,"P",List(x),_) => 
-      s"printf(${"\"%s\""}, ${shallow(x)})"
+      s"printf(${"\"%s\\n\""}, ${shallow(x)})"
     case n => 
       super.shallow(n)
   }
