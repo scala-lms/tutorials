@@ -59,6 +59,8 @@ object Adapter extends FrontEnd {
           if (!verbose) cg.doRename = true
           if (eff)      cg.doPrintEffects = true
 
+          cg.typeMap = typeMap
+
           val arg = cg.quote(g.block.in.head)
           val efs = cg.quoteEff(g.block.ein)
           var src = utils.captureOut(cg(g))
@@ -67,8 +69,7 @@ object Adapter extends FrontEnd {
             // remove "()" on a single line
             src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
 
-            // XXX hack for types
-            val typeMap1 = typeMap.map(p => (p._1,p._2.asInstanceOf[Manifest[Any]])).toMap
+            // // XXX hack for types
             val reverseMap = cg.rename.map(p => (p._2,p._1)).toMap
 
             // remove unused val x1 = ... (and add types for C)
@@ -81,14 +82,15 @@ object Adapter extends FrontEnd {
               if (target == "c") { // XXX HACK: add types for C code!!!
                 val orig = reverseMap(n)
                 // Sysstem.out.println("type map: "+typeMap1)
-                val tpe = typeMap1.getOrElse(orig,manifest[Unknown])
+                val tpe = cg.typeMap.getOrElse(orig,manifest[Unknown])
                 val tpe1 = cg.remap(tpe)
                 src = src.replace(s"val $n = ",s"$tpe1 $n = ")
                 src = src.replace(s"var $n = ",s"$tpe1 $n = ")
 
-                src = src.replace(" else ()","")
               }
             }
+
+            src = src.replace(" else ()","")
 
             // remove "xNN" on a single line, if not at end of block
             // (may overlap, so repeat a few times)
@@ -190,6 +192,9 @@ object Adapter extends FrontEnd {
 
 abstract class ExtendedCodeGen extends CompactScalaCodeGen {
 
+  var typeMap: scala.collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
+
+
   override def quote(x: Def) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
     case Const(x) if x.isInstanceOf[Char] && x == '\n' => "'\\n'"
@@ -279,6 +284,8 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
   }
   override def emitValDef(s: Sym, rhs: String): Unit = {
     emit(s"val ${quote(s)} = " + rhs + ";") 
+    // XXX need use info for symbol first!
+    //emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = ${shallow(x)};")
   }
   override def shallow(n: Node): String = n match {
     case Node(s,"Char.toInt",List(a),_) =>
@@ -320,6 +327,8 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     //   emit(shallow(n))
     case n @ Node(s,"var_new",List(x),_) => 
       emit(s"var ${quote(s)} = ${shallow(x)};")
+      // XXX need use info for symbol first!
+      //emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = ${shallow(x)};") // TODO: emitVarDef
     case n @ Node(s,"var_set",List(x,y),_) => 
       emit(s"${quote(x)} = ${shallow(y)};")
 
