@@ -58,8 +58,8 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
     }
     if (!overwriteCheckFiles) {
       // XXX TEMP
-      if (suffix == "csv")
-        assert(expected == code, name)
+      // if (suffix == "csv")
+      assert(expected == code, name)
     }
   }
   def indent(str: String) = {

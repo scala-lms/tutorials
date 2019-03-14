@@ -46,139 +46,78 @@ Emitting C Generated Code
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-void Snippet(char*  x0) {
-  printf("%s\n","Word,Value,Phrase,Year,MatchCount,VolumeCount");
-  int32_t x5 = 0;
-  int32_t x2 = open("src/data/words.csv",0);
-  int32_t x3 = fsize(x2);
+void Snippet(char* x0) {
+  printf("%s\n", "Word,Value,Phrase,Year,MatchCount,VolumeCount");
+  int x2 = open("src/data/words.csv",0);
+  int x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  for (;;) {
-    int32_t x6 = x5;
-    char x7 = x4[x6];
-    bool x8 = x7 != ',';
-    if (!x8) break;
-    x5 += 1;
-  }
-  int32_t x13 = x5;
-  x5 += 1;
-  int32_t x16 = x5;
-  int32_t x17 = 0;
-  for (;;) {
-    int32_t x18 = x5;
-    char x19 = x4[x18];
-    bool x20 = x19 != '\n';
-    if (!x20) break;
-    int32_t x22 = x17;
-    int32_t x24 = x5;
-    int32_t x23 = x22 * 10;
-    char x25 = x4[x24];
-    char x26 = x25 - '0';
-    int32_t x27 = x23 + x26;
-    x17 = x27;
-    x5 += 1;
-  }
-  x5 += 1;
-  int32_t x33 = x17;
-  int32_t x67 = open(x0,0);
-  int32_t x68 = fsize(x67);
-  char* x69 = mmap(0, x68, PROT_READ, MAP_FILE | MAP_SHARED, x67, 0);
-  for (;;) {
-    int32_t x34 = x5;
-    bool x35 = x34 < x3;
-    if (!x35) break;
-    int32_t x37 = x5;
-    for (;;) {
-      int32_t x38 = x5;
-      char x39 = x4[x38];
-      bool x40 = x39 != ',';
-      if (!x40) break;
-      x5 += 1;
-    }
-    int32_t x45 = x5;
-    x5 += 1;
-    int32_t x49 = x5;
-    int32_t x50 = 0;
-    for (;;) {
-      int32_t x51 = x5;
-      char x52 = x4[x51];
-      bool x53 = x52 != '\n';
-      if (!x53) break;
-      int32_t x55 = x50;
-      int32_t x57 = x5;
-      int32_t x56 = x55 * 10;
-      char x58 = x4[x57];
-      char x59 = x58 - '0';
-      int32_t x60 = x56 + x59;
-      x50 = x60;
-      x5 += 1;
-    }
-    x5 += 1;
-    int32_t x66 = x50;
-    int32_t x70 = 0;
-    char* x48 = x4+x37;
-    for (;;) {
-      int32_t x71 = x70;
-      bool x72 = x71 < x68;
-      if (!x72) break;
-      int32_t x74 = x70;
-      for (;;) {
-        int32_t x75 = x70;
-        char x76 = x69[x75];
-        bool x77 = x76 != '\t';
-        if (!x77) break;
-        x70 += 1;
-      }
-      int32_t x82 = x70;
-      x70 += 1;
-      int32_t x86 = x70;
-      for (;;) {
-        int32_t x87 = x70;
-        char x88 = x69[x87];
-        bool x89 = x88 != '\t';
-        if (!x89) break;
-        x70 += 1;
-      }
-      int32_t x94 = x70;
-      x70 += 1;
-      int32_t x98 = x70;
-      for (;;) {
-        int32_t x99 = x70;
-        char x100 = x69[x99];
-        bool x101 = x100 != '\t';
-        if (!x101) break;
-        x70 += 1;
-      }
-      int32_t x106 = x70;
-      x70 += 1;
-      int32_t x110 = x70;
-      for (;;) {
-        int32_t x111 = x70;
-        char x112 = x69[x111];
-        bool x113 = x112 != '\n';
-        if (!x113) break;
-        x70 += 1;
-      }
-      int32_t x118 = x70;
-      x70 += 1;
-      int32_t x122 = printll(x48);
-      printf(",");
-      printf("%d",x66);
-      printf(",");
-      char* x85 = x69+x74;
-      int32_t x126 = printll(x85);
-      printf(",");
-      char* x97 = x69+x86;
-      int32_t x128 = printll(x97);
-      printf(",");
-      char* x109 = x69+x98;
-      int32_t x130 = printll(x109);
-      printf(",");
-      char* x121 = x69+x110;
-      int32_t x132 = printll(x121);
-      printf("%s\n","");
-    }
-    close(x67);
-  }
+  int x5 = 0;
+  while (x4[x5] != ',') ({
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  int x9 = 0;
+  while (x4[x5] != '\n') ({
+    x9 = x9 * 10 + (int)(x4[x5] - '0');
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  int x12 = open(x0,0);
+  int x13 = fsize(x12);
+  char* x14 = mmap(0, x13, PROT_READ, MAP_FILE | MAP_SHARED, x12, 0);
+  while (x5 < x3) ({
+    int x15 = x5;
+    while (x4[x5] != ',') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    char* x18 = x4 + x15;
+    int x19 = 0;
+    while (x4[x5] != '\n') ({
+      x19 = x19 * 10 + (int)(x4[x5] - '0');
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    int x21 = x19;
+    int x22 = 0;
+    while (x22 < x13) ({
+      int x23 = x22;
+      while (x14[x22] != '\t') ({
+        x22 = x22 + 1;
+      });
+      x22 = x22 + 1;
+      int x26 = x22;
+      while (x14[x22] != '\t') ({
+        x22 = x22 + 1;
+      });
+      x22 = x22 + 1;
+      int x29 = x22;
+      while (x14[x22] != '\t') ({
+        x22 = x22 + 1;
+      });
+      x22 = x22 + 1;
+      int x32 = x22;
+      while (x14[x22] != '\n') ({
+        x22 = x22 + 1;
+      });
+      x22 = x22 + 1;
+      (true ? ({
+        printll(x18);
+        printf(",");
+        printf("%d", x21);
+        printf(",");
+        printll(x14 + x23);
+        printf(",");
+        printll(x14 + x26);
+        printf(",");
+        printll(x14 + x29);
+        printf(",");
+        printll(x14 + x32);
+        printf("%s\n", "");
+      }) : ({}));
+    });
+    close(x12);
+  });
   close(x2);
 }
 /*****************************************

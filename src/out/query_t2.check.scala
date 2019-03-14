@@ -3,16 +3,16 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends (java.lang.String => Unit) {
   def apply(x0: java.lang.String): Unit = {
-    val x1 = println("Name")
+    println("Name")
     val x2 = new scala.lms.tutorial.Scanner("src/data/t.csv")
     x2.next(',')
     x2.next(',')
     x2.next('\n')
     while (x2.hasNext) {
-      val x7 = x2.next(',')
+      val x6 = x2.next(',')
       x2.next(',')
       x2.next('\n')
-      printf("%s\n", x7)
+      printf("%s\n", x6)
     }
     x2.close
   }

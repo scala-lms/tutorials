@@ -46,95 +46,45 @@ Emitting C Generated Code
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-void Snippet(char*  x0) {
-  printf("%s\n","Name");
-  int32_t x5 = 0;
-  int32_t x2 = open("src/data/t.csv",0);
-  int32_t x3 = fsize(x2);
+void Snippet(char* x0) {
+  printf("%s\n", "Name");
+  int x2 = open("src/data/t.csv",0);
+  int x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  for (;;) {
-    int32_t x6 = x5;
-    char x7 = x4[x6];
-    bool x8 = x7 != ',';
-    if (!x8) break;
-    x5 += 1;
-  }
-  int32_t x13 = x5;
-  x5 += 1;
-  int32_t x16 = x5;
-  int32_t x17 = 0;
-  for (;;) {
-    int32_t x18 = x5;
-    char x19 = x4[x18];
-    bool x20 = x19 != ',';
-    if (!x20) break;
-    int32_t x22 = x17;
-    int32_t x24 = x5;
-    int32_t x23 = x22 * 10;
-    char x25 = x4[x24];
-    char x26 = x25 - '0';
-    int32_t x27 = x23 + x26;
-    x17 = x27;
-    x5 += 1;
-  }
-  x5 += 1;
-  int32_t x33 = x17;
-  int32_t x34 = x5;
-  for (;;) {
-    int32_t x35 = x5;
-    char x36 = x4[x35];
-    bool x37 = x36 != '\n';
-    if (!x37) break;
-    x5 += 1;
-  }
-  int32_t x42 = x5;
-  x5 += 1;
-  for (;;) {
-    int32_t x46 = x5;
-    bool x47 = x46 < x3;
-    if (!x47) break;
-    int32_t x49 = x5;
-    for (;;) {
-      int32_t x50 = x5;
-      char x51 = x4[x50];
-      bool x52 = x51 != ',';
-      if (!x52) break;
-      x5 += 1;
-    }
-    int32_t x57 = x5;
-    x5 += 1;
-    int32_t x61 = x5;
-    int32_t x62 = 0;
-    for (;;) {
-      int32_t x63 = x5;
-      char x64 = x4[x63];
-      bool x65 = x64 != ',';
-      if (!x65) break;
-      int32_t x67 = x62;
-      int32_t x69 = x5;
-      int32_t x68 = x67 * 10;
-      char x70 = x4[x69];
-      char x71 = x70 - '0';
-      int32_t x72 = x68 + x71;
-      x62 = x72;
-      x5 += 1;
-    }
-    x5 += 1;
-    int32_t x78 = x62;
-    int32_t x79 = x5;
-    for (;;) {
-      int32_t x80 = x5;
-      char x81 = x4[x80];
-      bool x82 = x81 != '\n';
-      if (!x82) break;
-      x5 += 1;
-    }
-    int32_t x87 = x5;
-    x5 += 1;
-    char* x60 = x4+x49;
-    int32_t x91 = printll(x60);
-    printf("%s\n","");
-  }
+  int x5 = 0;
+  while (x4[x5] != ',') ({
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  int x9 = 0;
+  while (x4[x5] != ',') ({
+    x9 = x9 * 10 + (int)(x4[x5] - '0');
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  while (x4[x5] != '\n') ({
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  while (x5 < x3) ({
+    int x15 = x5;
+    while (x4[x5] != ',') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    int x18 = 0;
+    while (x4[x5] != ',') ({
+      x18 = x18 * 10 + (int)(x4[x5] - '0');
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    while (x4[x5] != '\n') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    printll(x4 + x15);
+    printf("%s\n", "");
+  });
   close(x2);
 }
 /*****************************************

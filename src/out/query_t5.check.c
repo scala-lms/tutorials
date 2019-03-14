@@ -46,216 +46,100 @@ Emitting C Generated Code
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-void Snippet(char*  x0) {
-  printf("%s\n","Name,Value,Flag,Name");
-  int32_t x5 = 0;
-  int32_t x2 = open("src/data/t.csv",0);
-  int32_t x3 = fsize(x2);
+void Snippet(char* x0) {
+  printf("%s\n", "Name,Value,Flag,Name");
+  int x2 = open("src/data/t.csv",0);
+  int x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  for (;;) {
-    int32_t x6 = x5;
-    char x7 = x4[x6];
-    bool x8 = x7 != ',';
-    if (!x8) break;
-    x5 += 1;
-  }
-  int32_t x13 = x5;
-  x5 += 1;
-  int32_t x16 = x5;
-  int32_t x17 = 0;
-  for (;;) {
-    int32_t x18 = x5;
-    char x19 = x4[x18];
-    bool x20 = x19 != ',';
-    if (!x20) break;
-    int32_t x22 = x17;
-    int32_t x24 = x5;
-    int32_t x23 = x22 * 10;
-    char x25 = x4[x24];
-    char x26 = x25 - '0';
-    int32_t x27 = x23 + x26;
-    x17 = x27;
-    x5 += 1;
-  }
-  x5 += 1;
-  int32_t x33 = x17;
-  int32_t x34 = x5;
-  for (;;) {
-    int32_t x35 = x5;
-    char x36 = x4[x35];
-    bool x37 = x36 != '\n';
-    if (!x37) break;
-    x5 += 1;
-  }
-  int32_t x42 = x5;
-  x5 += 1;
-  for (;;) {
-    int32_t x46 = x5;
-    bool x47 = x46 < x3;
-    if (!x47) break;
-    int32_t x49 = x5;
-    for (;;) {
-      int32_t x50 = x5;
-      char x51 = x4[x50];
-      bool x52 = x51 != ',';
-      if (!x52) break;
-      x5 += 1;
-    }
-    int32_t x57 = x5;
-    x5 += 1;
-    int32_t x61 = x5;
-    int32_t x62 = 0;
-    for (;;) {
-      int32_t x63 = x5;
-      char x64 = x4[x63];
-      bool x65 = x64 != ',';
-      if (!x65) break;
-      int32_t x67 = x62;
-      int32_t x69 = x5;
-      int32_t x68 = x67 * 10;
-      char x70 = x4[x69];
-      char x71 = x70 - '0';
-      int32_t x72 = x68 + x71;
-      x62 = x72;
-      x5 += 1;
-    }
-    x5 += 1;
-    int32_t x78 = x62;
-    int32_t x79 = x5;
-    for (;;) {
-      int32_t x80 = x5;
-      char x81 = x4[x80];
-      bool x82 = x81 != '\n';
-      if (!x82) break;
-      x5 += 1;
-    }
-    int32_t x87 = x5;
-    x5 += 1;
-    int32_t x91 = 0;
-    for (;;) {
-      int32_t x92 = x91;
-      char x93 = x4[x92];
-      bool x94 = x93 != ',';
-      if (!x94) break;
-      x91 += 1;
-    }
-    int32_t x99 = x91;
-    x91 += 1;
-    int32_t x101 = x91;
-    int32_t x102 = 0;
-    for (;;) {
-      int32_t x103 = x91;
-      char x104 = x4[x103];
-      bool x105 = x104 != ',';
-      if (!x105) break;
-      int32_t x107 = x102;
-      int32_t x109 = x91;
-      int32_t x108 = x107 * 10;
-      char x110 = x4[x109];
-      char x111 = x110 - '0';
-      int32_t x112 = x108 + x111;
-      x102 = x112;
-      x91 += 1;
-    }
-    x91 += 1;
-    int32_t x118 = x102;
-    int32_t x119 = x91;
-    for (;;) {
-      int32_t x120 = x91;
-      char x121 = x4[x120];
-      bool x122 = x121 != '\n';
-      if (!x122) break;
-      x91 += 1;
-    }
-    int32_t x127 = x91;
-    x91 += 1;
-    int32_t x58 = x57 - x49;
-    char* x60 = x4+x49;
-    char* x90 = x4+x79;
-    for (;;) {
-      int32_t x131 = x91;
-      bool x132 = x131 < x3;
-      if (!x132) break;
-      int32_t x134 = x91;
-      for (;;) {
-        int32_t x135 = x91;
-        char x136 = x4[x135];
-        bool x137 = x136 != ',';
-        if (!x137) break;
-        x91 += 1;
-      }
-      int32_t x142 = x91;
-      x91 += 1;
-      int32_t x146 = x91;
-      int32_t x147 = 0;
-      for (;;) {
-        int32_t x148 = x91;
-        char x149 = x4[x148];
-        bool x150 = x149 != ',';
-        if (!x150) break;
-        int32_t x152 = x147;
-        int32_t x154 = x91;
-        int32_t x153 = x152 * 10;
-        char x155 = x4[x154];
-        char x156 = x155 - '0';
-        int32_t x157 = x153 + x156;
-        x147 = x157;
-        x91 += 1;
-      }
-      x91 += 1;
-      int32_t x163 = x147;
-      int32_t x164 = x91;
-      for (;;) {
-        int32_t x165 = x91;
-        char x166 = x4[x165];
-        bool x167 = x166 != '\n';
-        if (!x167) break;
-        x91 += 1;
-      }
-      int32_t x172 = x91;
-      x91 += 1;
-      int32_t x143 = x142 - x134;
-      bool x177 = x58 == x143;
-      bool x192;
-      if (x177) {
-        int32_t x178 = 0;
-        char* x145 = x4+x134;
-        for (;;) {
-          int32_t x179 = x178;
-          bool x180 = x179 < x58;
-          bool x184;
-          if (x180) {
-            char x181 = x60[x179];
-            char x182 = x145[x179];
-            bool x183 = x181 == x182;
-            x184 = x183;
-          } else {
-            x184 = false;
-          }
-          if (!x184) break;
-          x178 += 1;
-        }
-        int32_t x189 = x178;
-        bool x190 = x189 == x58;
-        x192 = x190;
-      } else {
-        x192 = false;
-      }
-      if (x192) {
-        int32_t x193 = printll(x60);
+  int x5 = 0;
+  while (x4[x5] != ',') ({
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  int x9 = 0;
+  while (x4[x5] != ',') ({
+    x9 = x9 * 10 + (int)(x4[x5] - '0');
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  while (x4[x5] != '\n') ({
+    x5 = x5 + 1;
+  });
+  x5 = x5 + 1;
+  while (x5 < x3) ({
+    int x15 = x5;
+    while (x4[x5] != ',') ({
+      x5 = x5 + 1;
+    });
+    int x17 = x5 - x15;
+    x5 = x5 + 1;
+    char* x18 = x4 + x15;
+    int x19 = 0;
+    while (x4[x5] != ',') ({
+      x19 = x19 * 10 + (int)(x4[x5] - '0');
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    int x21 = x19;
+    int x22 = x5;
+    while (x4[x5] != '\n') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    char* x25 = x4 + x22;
+    int x26 = 0;
+    while (x4[x26] != ',') ({
+      x26 = x26 + 1;
+    });
+    x26 = x26 + 1;
+    int x30 = 0;
+    while (x4[x26] != ',') ({
+      x30 = x30 * 10 + (int)(x4[x26] - '0');
+      x26 = x26 + 1;
+    });
+    x26 = x26 + 1;
+    while (x4[x26] != '\n') ({
+      x26 = x26 + 1;
+    });
+    x26 = x26 + 1;
+    while (x26 < x3) ({
+      int x36 = x26;
+      while (x4[x26] != ',') ({
+        x26 = x26 + 1;
+      });
+      int x38 = x26;
+      x26 = x26 + 1;
+      int x39 = 0;
+      while (x4[x26] != ',') ({
+        x39 = x39 * 10 + (int)(x4[x26] - '0');
+        x26 = x26 + 1;
+      });
+      x26 = x26 + 1;
+      while (x4[x26] != '\n') ({
+        x26 = x26 + 1;
+      });
+      x26 = x26 + 1;
+      ((x17 == x38 - x36 && ({
+        char* x45 = x4 + x36;
+        int x46 = 0;
+        while (x46 < x17 && x18[x46] == x45[x46]) ({
+          x46 = x46 + 1;
+        });
+        x46 == x17;
+      })) ? ({
+        char* x45 = x4 + x36;
+        printll(x18);
         printf(",");
-        printf("%d",x78);
+        printf("%d", x21);
         printf(",");
-        int32_t x197 = printll(x90);
+        printll(x25);
         printf(",");
-        char* x145 = x4+x134;
-        int32_t x199 = printll(x145);
-        printf("%s\n","");
-      } else {
-      }
-    }
+        printll(x45);
+        printf("%s\n", "");
+      }) : ({}));
+    });
     close(x2);
-  }
+  });
   close(x2);
 }
 /*****************************************

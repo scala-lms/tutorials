@@ -3,28 +3,28 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends (java.lang.String => Unit) {
   def apply(x0: java.lang.String): Unit = {
-    val x1 = println("Name,Value,Flag,Name")
+    println("Name,Value,Flag,Name")
     val x2 = new scala.lms.tutorial.Scanner("src/data/t.csv")
     x2.next(',')
     x2.next(',')
     x2.next('\n')
     while (x2.hasNext) {
+      val x6 = x2.next(',')
       val x7 = x2.next(',')
-      val x8 = x2.next(',')
-      val x9 = x2.next('\n')
-      val x10 = new scala.lms.tutorial.Scanner("src/data/t.csv")
-      x10.next(',')
-      x10.next(',')
-      x10.next('\n')
-      while (x10.hasNext) {
-        val x15 = x10.next(',')
-        x10.next(',')
-        x10.next('\n')
-        if (true && x7 == x15) {
-          printf("%s,%s,%s,%s\n", x7, x8, x9, x15)
-        } else ()
+      val x8 = x2.next('\n')
+      val x9 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+      x9.next(',')
+      x9.next(',')
+      x9.next('\n')
+      while (x9.hasNext) {
+        val x13 = x9.next(',')
+        x9.next(',')
+        x9.next('\n')
+        if (true && x6 == x13) {
+          printf("%s,%s,%s,%s\n", x6, x7, x8, x13)
+        }
       }
-      x10.close
+      x9.close
     }
     x2.close
   }

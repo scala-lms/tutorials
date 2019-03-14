@@ -46,99 +46,53 @@ Emitting C Generated Code
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-void Snippet(char*  x0) {
-  printf("%s\n","Phrase,Year,MatchCount,VolumeCount");
-  int32_t x5 = 0;
-  int32_t x2 = open(x0,0);
-  int32_t x3 = fsize(x2);
+void Snippet(char* x0) {
+  printf("%s\n", "Phrase,Year,MatchCount,VolumeCount");
+  int x2 = open(x0,0);
+  int x3 = fsize(x2);
   char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  for (;;) {
-    int32_t x6 = x5;
-    bool x7 = x6 < x3;
-    if (!x7) break;
-    int32_t x9 = x5;
-    for (;;) {
-      int32_t x10 = x5;
-      char x11 = x4[x10];
-      bool x12 = x11 != '\t';
-      if (!x12) break;
-      x5 += 1;
-    }
-    int32_t x17 = x5;
-    x5 += 1;
-    int32_t x21 = x5;
-    for (;;) {
-      int32_t x22 = x5;
-      char x23 = x4[x22];
-      bool x24 = x23 != '\t';
-      if (!x24) break;
-      x5 += 1;
-    }
-    int32_t x29 = x5;
-    x5 += 1;
-    int32_t x33 = x5;
-    for (;;) {
-      int32_t x34 = x5;
-      char x35 = x4[x34];
-      bool x36 = x35 != '\t';
-      if (!x36) break;
-      x5 += 1;
-    }
-    int32_t x41 = x5;
-    x5 += 1;
-    int32_t x45 = x5;
-    for (;;) {
-      int32_t x46 = x5;
-      char x47 = x4[x46];
-      bool x48 = x47 != '\n';
-      if (!x48) break;
-      x5 += 1;
-    }
-    int32_t x53 = x5;
-    x5 += 1;
-    int32_t x18 = x17 - x9;
-    bool x58 = x18 == 12;
-    bool x73;
-    if (x58) {
-      int32_t x59 = 0;
-      char* x20 = x4+x9;
-      for (;;) {
-        int32_t x60 = x59;
-        bool x61 = x60 < x18;
-        bool x65;
-        if (x61) {
-          char x62 = x20[x60];
-          char x63 = "Auswanderung"[x60];
-          bool x64 = x62 == x63;
-          x65 = x64;
-        } else {
-          x65 = false;
-        }
-        if (!x65) break;
-        x59 += 1;
-      }
-      int32_t x70 = x59;
-      bool x71 = x70 == x18;
-      x73 = x71;
-    } else {
-      x73 = false;
-    }
-    if (x73) {
-      char* x20 = x4+x9;
-      int32_t x74 = printll(x20);
+  int x5 = 0;
+  while (x5 < x3) ({
+    int x6 = x5;
+    while (x4[x5] != '\t') ({
+      x5 = x5 + 1;
+    });
+    int x8 = x5 - x6;
+    x5 = x5 + 1;
+    int x9 = x5;
+    while (x4[x5] != '\t') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    int x12 = x5;
+    while (x4[x5] != '\t') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    int x15 = x5;
+    while (x4[x5] != '\n') ({
+      x5 = x5 + 1;
+    });
+    x5 = x5 + 1;
+    ((x8 == 12 && ({
+      char* x18 = x4 + x6;
+      int x19 = 0;
+      while (x19 < x8 && x18[x19] == "Auswanderung"[x19]) ({
+        x19 = x19 + 1;
+      });
+      x19 == x8;
+    })) ? ({
+      char* x18 = x4 + x6;
+      printll(x18);
       printf(",");
-      char* x32 = x4+x21;
-      int32_t x76 = printll(x32);
+      printll(x4 + x9);
       printf(",");
-      char* x44 = x4+x33;
-      int32_t x78 = printll(x44);
+      printll(x4 + x12);
       printf(",");
-      char* x56 = x4+x45;
-      int32_t x80 = printll(x56);
-      printf("%s\n","");
-    } else {
-    }
-  }
+      printll(x4 + x15);
+      printf("%s\n", "");
+    }) : ({}));
+  });
   close(x2);
 }
 /*****************************************
