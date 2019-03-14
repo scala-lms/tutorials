@@ -4,6 +4,8 @@ import scala.virtualization.lms.util.OverloadHack
 import org.scala_lang.virtualized.SourceContext
 import org.scala_lang.virtualized.EmbeddedControls
 
+import scala.collection.{mutable, immutable}
+
 import lms.core._
 import Backend._
 
@@ -29,7 +31,7 @@ object Adapter extends FrontEnd {
     emitCommon(name, "c")(m1, m2)(prog)
   }
 
-  var typeMap: scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]] = _
+  var typeMap: scala.collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
 
 
   def emitCommon(name: String, target: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
@@ -68,28 +70,7 @@ object Adapter extends FrontEnd {
           if (!verbose) {
             // remove "()" on a single line
             src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
-
-            // // XXX hack for types
-            val reverseMap = cg.rename.map(p => (p._2,p._1)).toMap
-
-            // remove unused val x1 = ... (and add types for C)
-            val names = cg.rename.map(p => p._2).toSet
-            for (n <- names) {
-              val removed = src.replace(s"val $n = ","")
-              if (!removed.replaceFirst("\\b"+n+"\\b","!!!!").contains("!!!!")) { // shouldn't match x10 when looking for x1
-                src = removed
-              }
-              if (target == "c") { // XXX HACK: add types for C code!!!
-                val orig = reverseMap(n)
-                // Sysstem.out.println("type map: "+typeMap1)
-                val tpe = cg.typeMap.getOrElse(orig,manifest[Unknown])
-                val tpe1 = cg.remap(tpe)
-                src = src.replace(s"val $n = ",s"$tpe1 $n = ")
-                src = src.replace(s"var $n = ",s"$tpe1 $n = ")
-
-              }
-            }
-
+            // remove dangling else
             src = src.replace(" else ()","")
 
             // remove "xNN" on a single line, if not at end of block
@@ -190,9 +171,40 @@ object Adapter extends FrontEnd {
 
 
 
+class DeadCodeElim {
+
+  def valueSyms(n: Node): List[Sym] = 
+    directSyms(n) ++ blocks(n).collect { case Block(_,res:Sym,_,_) => res }
+
+  var live: collection.Set[Sym] = _
+  var reach: collection.Set[Sym] = _
+
+  def apply(g: Graph): Unit = {
+
+    live = new mutable.HashSet[Sym]
+    reach = new mutable.HashSet[Sym]
+
+    reach ++= g.block.used
+
+    if (g.block.res.isInstanceOf[Sym])
+      live += g.block.res.asInstanceOf[Sym]
+    
+    for (d <- g.nodes.reverseIterator) {
+      if (reach(d.n)) {
+        live ++= valueSyms(d)
+        reach ++= syms(d)
+      }
+    }
+
+    //Graph(g.nodes.filter(d => live(d.n)), g.block)
+  }
+}
+
 abstract class ExtendedCodeGen extends CompactScalaCodeGen {
 
-  var typeMap: scala.collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
+  var typeMap: collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
+
+  val dce = new DeadCodeElim
 
 
   override def quote(x: Def) = x match {
@@ -237,6 +249,11 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
       s"${shallow(c)} && ${shallow(a)}"
     case n => 
       super.shallow(n)
+  }
+
+  override def apply(g: Graph): Unit = {
+    dce(g)
+    super.apply(g)
   }
 }
 
@@ -283,9 +300,19 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     } else res
   }
   override def emitValDef(s: Sym, rhs: String): Unit = {
-    emit(s"val ${quote(s)} = " + rhs + ";") 
-    // XXX need use info for symbol first!
-    //emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = ${shallow(x)};")
+    // emit(s"val ${quote(s)} = $rhs; // ${dce.reach(s)} ${dce.live(s)} ") 
+    if (dce.live(s))
+      emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = $rhs;")
+    else
+      emit(s"$rhs;")
+  }
+  def emitVarDef(s: Sym, rhs: String): Unit = {
+    // emit(s"var ${quote(s)} = $rhs; // ${dce.reach(s)} ${dce.live(s)} ") 
+    // TODO: enable dce for vars ... but currently getting unused expression warnings ...
+    // if (dce.live(s))
+      emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = $rhs;")
+    // else
+      // emit(s"$rhs;")
   }
   override def shallow(n: Node): String = n match {
     case Node(s,"Char.toInt",List(a),_) =>
@@ -326,20 +353,18 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     // case n @ Node(s,"W",_,_) => // Unit result
     //   emit(shallow(n))
     case n @ Node(s,"var_new",List(x),_) => 
-      emit(s"var ${quote(s)} = ${shallow(x)};")
-      // XXX need use info for symbol first!
-      //emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = ${shallow(x)};") // TODO: emitVarDef
+      emitVarDef(s, shallow(x))
     case n @ Node(s,"var_set",List(x,y),_) => 
       emit(s"${quote(x)} = ${shallow(y)};")
 
     case n @ Node(s,"array_new",List(x),_) => 
-      emit(s"val ${quote(s)} = (int*)malloc(${shallow1(x)} * sizeof(int));")
+      emitValDef(s, s"(int*)malloc(${shallow1(x)} * sizeof(int));")
     case n @ Node(s,"new Array[Int]",List(x),_) => 
-      emit(s"val ${quote(s)} = (int*)malloc(${shallow1(x)} * sizeof(int));")
+      emitValDef(s, s"(int*)malloc(${shallow1(x)} * sizeof(int));")
     case n @ Node(s,"new Array[Char]",List(x),_) => 
-      emit(s"val ${quote(s)} = (char*)malloc(${shallow1(x)} * sizeof(char));")
+      emitValDef(s, s"(char*)malloc(${shallow1(x)} * sizeof(char));")
     case n @ Node(s,"new Array[java.lang.String]",List(x),_) => 
-      emit(s"val ${quote(s)} = (char**)malloc(${shallow1(x)} * sizeof(char*));")
+      emitValDef(s, s"(char**)malloc(${shallow1(x)} * sizeof(char*));")
 
     case n @ Node(s,"array_set",List(x,i,y),_) => 
       emit(s"${shallow1(x)}[${shallow(i)}] = ${shallow(y)};")
