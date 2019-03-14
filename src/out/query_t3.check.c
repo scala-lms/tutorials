@@ -48,55 +48,55 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Name");
-  int x2 = open("src/data/t.csv",0);
-  int x3 = fsize(x2);
-  char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
+  int x1 = open("src/data/t.csv",0);
+  int x2 = fsize(x1);
+  char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
+  int x4 = 0;
+  while (x3[x4] != ',') ({
+    x4 = x4 + 1;
+  });
+  x4 = x4 + 1;
   int x5 = 0;
-  while (x4[x5] != ',') ({
-    x5 = x5 + 1;
+  while (x3[x4] != ',') ({
+    x5 = x5 * 10 + (int)(x3[x4] - '0');
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  int x9 = 0;
-  while (x4[x5] != ',') ({
-    x9 = x9 * 10 + (int)(x4[x5] - '0');
-    x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x3[x4] != '\n') ({
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  while (x4[x5] != '\n') ({
-    x5 = x5 + 1;
-  });
-  x5 = x5 + 1;
-  while (x5 < x3) ({
-    int x15 = x5;
-    while (x4[x5] != ',') ({
-      x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x4 < x2) ({
+    int x6 = x4;
+    while (x3[x4] != ',') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x18 = 0;
-    while (x4[x5] != ',') ({
-      x18 = x18 * 10 + (int)(x4[x5] - '0');
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x7 = 0;
+    while (x3[x4] != ',') ({
+      x7 = x7 * 10 + (int)(x3[x4] - '0');
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x21 = x5;
-    while (x4[x5] != '\n') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x8 = x4;
+    while (x3[x4] != '\n') ({
+      x4 = x4 + 1;
     });
-    int x23 = x5 - x21;
-    x5 = x5 + 1;
-    ((x23 == 3 && ({
-      char* x24 = x4 + x21;
-      int x25 = 0;
-      while (x25 < x23 && x24[x25] == "yes"[x25]) ({
-        x25 = x25 + 1;
+    int x9 = x4 - x8;
+    x4 = x4 + 1;
+    ((x9 == 3 && ({
+      char* x10 = x3 + x8;
+      int x11 = 0;
+      while (x11 < x9 && x10[x11] == "yes"[x11]) ({
+        x11 = x11 + 1;
       });
-      x25 == x23;
+      x11 == x9;
     })) ? ({
-      printll(x4 + x15);
+      printll(x3 + x6);
       printf("%s\n", "");
     }) : ({}));
   });
-  close(x2);
+  close(x1);
 }
 /*****************************************
 End of C Generated Code

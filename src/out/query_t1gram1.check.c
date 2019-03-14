@@ -48,41 +48,41 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Phrase,Year,MatchCount,VolumeCount");
-  int x2 = open(x0,0);
-  int x3 = fsize(x2);
-  char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
-  int x5 = 0;
-  while (x5 < x3) ({
-    int x6 = x5;
-    while (x4[x5] != '\t') ({
-      x5 = x5 + 1;
+  int x1 = open(x0,0);
+  int x2 = fsize(x1);
+  char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
+  int x4 = 0;
+  while (x4 < x2) ({
+    int x5 = x4;
+    while (x3[x4] != '\t') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x9 = x5;
-    while (x4[x5] != '\t') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x6 = x4;
+    while (x3[x4] != '\t') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x12 = x5;
-    while (x4[x5] != '\t') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x7 = x4;
+    while (x3[x4] != '\t') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x15 = x5;
-    while (x4[x5] != '\n') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x8 = x4;
+    while (x3[x4] != '\n') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    printll(x4 + x6);
+    x4 = x4 + 1;
+    printll(x3 + x5);
     printf(",");
-    printll(x4 + x9);
+    printll(x3 + x6);
     printf(",");
-    printll(x4 + x12);
+    printll(x3 + x7);
     printf(",");
-    printll(x4 + x15);
+    printll(x3 + x8);
     printf("%s\n", "");
   });
-  close(x2);
+  close(x1);
 }
 /*****************************************
 End of C Generated Code

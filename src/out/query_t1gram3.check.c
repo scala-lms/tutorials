@@ -48,77 +48,77 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Word,Value,Phrase,Year,MatchCount,VolumeCount");
-  int x2 = open("src/data/words.csv",0);
-  int x3 = fsize(x2);
-  char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
+  int x1 = open("src/data/words.csv",0);
+  int x2 = fsize(x1);
+  char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
+  int x4 = 0;
+  while (x3[x4] != ',') ({
+    x4 = x4 + 1;
+  });
+  x4 = x4 + 1;
   int x5 = 0;
-  while (x4[x5] != ',') ({
-    x5 = x5 + 1;
+  while (x3[x4] != '\n') ({
+    x5 = x5 * 10 + (int)(x3[x4] - '0');
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  int x9 = 0;
-  while (x4[x5] != '\n') ({
-    x9 = x9 * 10 + (int)(x4[x5] - '0');
-    x5 = x5 + 1;
-  });
-  x5 = x5 + 1;
-  int x12 = open(x0,0);
-  int x13 = fsize(x12);
-  char* x14 = mmap(0, x13, PROT_READ, MAP_FILE | MAP_SHARED, x12, 0);
-  while (x5 < x3) ({
-    int x15 = x5;
-    while (x4[x5] != ',') ({
-      x5 = x5 + 1;
+  x4 = x4 + 1;
+  int x6 = open(x0,0);
+  int x7 = fsize(x6);
+  char* x8 = mmap(0, x7, PROT_READ, MAP_FILE | MAP_SHARED, x6, 0);
+  while (x4 < x2) ({
+    int x9 = x4;
+    while (x3[x4] != ',') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    char* x18 = x4 + x15;
-    int x19 = 0;
-    while (x4[x5] != '\n') ({
-      x19 = x19 * 10 + (int)(x4[x5] - '0');
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    char* x10 = x3 + x9;
+    int x11 = 0;
+    while (x3[x4] != '\n') ({
+      x11 = x11 * 10 + (int)(x3[x4] - '0');
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x21 = x19;
-    int x22 = 0;
-    while (x22 < x13) ({
-      int x23 = x22;
-      while (x14[x22] != '\t') ({
-        x22 = x22 + 1;
+    x4 = x4 + 1;
+    int x12 = x11;
+    int x13 = 0;
+    while (x13 < x7) ({
+      int x14 = x13;
+      while (x8[x13] != '\t') ({
+        x13 = x13 + 1;
       });
-      x22 = x22 + 1;
-      int x26 = x22;
-      while (x14[x22] != '\t') ({
-        x22 = x22 + 1;
+      x13 = x13 + 1;
+      int x15 = x13;
+      while (x8[x13] != '\t') ({
+        x13 = x13 + 1;
       });
-      x22 = x22 + 1;
-      int x29 = x22;
-      while (x14[x22] != '\t') ({
-        x22 = x22 + 1;
+      x13 = x13 + 1;
+      int x16 = x13;
+      while (x8[x13] != '\t') ({
+        x13 = x13 + 1;
       });
-      x22 = x22 + 1;
-      int x32 = x22;
-      while (x14[x22] != '\n') ({
-        x22 = x22 + 1;
+      x13 = x13 + 1;
+      int x17 = x13;
+      while (x8[x13] != '\n') ({
+        x13 = x13 + 1;
       });
-      x22 = x22 + 1;
+      x13 = x13 + 1;
       (true ? ({
-        printll(x18);
+        printll(x10);
         printf(",");
-        printf("%d", x21);
+        printf("%d", x12);
         printf(",");
-        printll(x14 + x23);
+        printll(x8 + x14);
         printf(",");
-        printll(x14 + x26);
+        printll(x8 + x15);
         printf(",");
-        printll(x14 + x29);
+        printll(x8 + x16);
         printf(",");
-        printll(x14 + x32);
+        printll(x8 + x17);
         printf("%s\n", "");
       }) : ({}));
     });
-    close(x12);
+    close(x6);
   });
-  close(x2);
+  close(x1);
 }
 /*****************************************
 End of C Generated Code

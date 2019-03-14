@@ -58,7 +58,7 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
     }
     if (!overwriteCheckFiles) {
       // XXX TEMP
-      if (suffix == "csv")
+      // if (suffix == "csv")
         assert(expected == code, name)
     }
   }

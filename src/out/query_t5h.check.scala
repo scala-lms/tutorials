@@ -3,13 +3,13 @@ Emitting Generated Code
 *******************************************/
 class Snippet extends (java.lang.String => Unit) {
   def apply(x0: java.lang.String): Unit = {
-    println("Name,Value,Flag,Name")
+    val x1 = println("Name,Value,Flag,Name")
     val x2 = new Array[java.lang.String](256)
     var x3 = 0
     var x4 = 0
     val x5 = new Array[Int](256)
     var x6 = 0
-    while (x6 != 256) {
+    val x7 = while (x6 != 256) {
       x5(x6) = -1
       x6 = x6 + 1
     }
@@ -21,11 +21,11 @@ class Snippet extends (java.lang.String => Unit) {
     val x13 = new Array[Int](65536)
     val x14 = new Array[Int](256)
     val x15 = new scala.lms.tutorial.Scanner("src/data/t.csv")
-    x15.next(',')
-    x15.next(',')
-    x15.next('\n')
+    val x16 = x15.next(',')
+    val x17 = x15.next(',')
+    val x18 = x15.next('\n')
     val x19 = 0L * 41L
-    while (x15.hasNext) {
+    val x29 = while (x15.hasNext) {
       val x20 = x15.next(',')
       val x21 = x12
       x8(x21) = x20
@@ -37,7 +37,7 @@ class Snippet extends (java.lang.String => Unit) {
         //#hash_lookup
         // generated code for hash lookup
         var x23 = x22
-        while ({
+        val x25 = while ({
           x5(x23) != -1 && {
             val x24 = x2(x5(x23))
             !(true && x24 == x20)
@@ -58,21 +58,21 @@ class Snippet extends (java.lang.String => Unit) {
       x13(x27 * 256 + x28) = x21
       x14(x27) = x28 + 1
     }
-    x15.close
+    val x30 = x15.close
     val x31 = new scala.lms.tutorial.Scanner("src/data/t.csv")
-    x31.next(',')
-    x31.next(',')
-    x31.next('\n')
-    while (x31.hasNext) {
+    val x32 = x31.next(',')
+    val x33 = x31.next(',')
+    val x34 = x31.next('\n')
+    val x50 = while (x31.hasNext) {
       val x35 = x31.next(',')
-      x31.next(',')
-      x31.next('\n')
+      val x36 = x31.next(',')
+      val x37 = x31.next('\n')
       val x38 = ((x19 + x35.hashCode).toInt) & 255
       val x42 = {
         //#hash_lookup
         // generated code for hash lookup
         var x39 = x38
-        while ({
+        val x41 = while ({
           x5(x39) != -1 && {
             val x40 = x2(x5(x39))
             !(true && x40 == x35)
@@ -82,18 +82,18 @@ class Snippet extends (java.lang.String => Unit) {
         }
         x5(x39)//#hash_lookup
       }
-      if (x42 != -1) {
+      val x49 = if (x42 != -1) {
         val x43 = x42 * 256
         val x44 = x43 + x14(x42)
         var x45 = x43
-        while (x45 != x44) {
+        val x48 = while (x45 != x44) {
           val x46 = x13(x45)
-          printf("%s,%s,%s,%s\n", x8(x46), x9(x46), x10(x46), x35)
+          val x47 = printf("%s,%s,%s,%s\n", x8(x46), x9(x46), x10(x46), x35)
           x45 = x45 + 1
         }
       }
     }
-    x31.close
+    val x51 = x31.close
   }
 }
 /*****************************************

@@ -48,99 +48,99 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Name,Value,Flag,Name");
-  int x2 = open("src/data/t.csv",0);
-  int x3 = fsize(x2);
-  char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
+  int x1 = open("src/data/t.csv",0);
+  int x2 = fsize(x1);
+  char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
+  int x4 = 0;
+  while (x3[x4] != ',') ({
+    x4 = x4 + 1;
+  });
+  x4 = x4 + 1;
   int x5 = 0;
-  while (x4[x5] != ',') ({
-    x5 = x5 + 1;
+  while (x3[x4] != ',') ({
+    x5 = x5 * 10 + (int)(x3[x4] - '0');
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  int x9 = 0;
-  while (x4[x5] != ',') ({
-    x9 = x9 * 10 + (int)(x4[x5] - '0');
-    x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x3[x4] != '\n') ({
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  while (x4[x5] != '\n') ({
-    x5 = x5 + 1;
-  });
-  x5 = x5 + 1;
-  while (x5 < x3) ({
-    int x15 = x5;
-    while (x4[x5] != ',') ({
-      x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x4 < x2) ({
+    int x6 = x4;
+    while (x3[x4] != ',') ({
+      x4 = x4 + 1;
     });
-    int x17 = x5 - x15;
-    x5 = x5 + 1;
-    char* x18 = x4 + x15;
-    int x19 = 0;
-    while (x4[x5] != ',') ({
-      x19 = x19 * 10 + (int)(x4[x5] - '0');
-      x5 = x5 + 1;
+    int x7 = x4 - x6;
+    x4 = x4 + 1;
+    char* x8 = x3 + x6;
+    int x9 = 0;
+    while (x3[x4] != ',') ({
+      x9 = x9 * 10 + (int)(x3[x4] - '0');
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x21 = x19;
-    int x22 = x5;
-    while (x4[x5] != '\n') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x10 = x9;
+    int x11 = x4;
+    while (x3[x4] != '\n') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    char* x25 = x4 + x22;
-    int x26 = 0;
-    while (x4[x26] != ',') ({
-      x26 = x26 + 1;
+    x4 = x4 + 1;
+    char* x12 = x3 + x11;
+    int x13 = 0;
+    while (x3[x13] != ',') ({
+      x13 = x13 + 1;
     });
-    x26 = x26 + 1;
-    int x30 = 0;
-    while (x4[x26] != ',') ({
-      x30 = x30 * 10 + (int)(x4[x26] - '0');
-      x26 = x26 + 1;
+    x13 = x13 + 1;
+    int x14 = 0;
+    while (x3[x13] != ',') ({
+      x14 = x14 * 10 + (int)(x3[x13] - '0');
+      x13 = x13 + 1;
     });
-    x26 = x26 + 1;
-    while (x4[x26] != '\n') ({
-      x26 = x26 + 1;
+    x13 = x13 + 1;
+    while (x3[x13] != '\n') ({
+      x13 = x13 + 1;
     });
-    x26 = x26 + 1;
-    while (x26 < x3) ({
-      int x36 = x26;
-      while (x4[x26] != ',') ({
-        x26 = x26 + 1;
+    x13 = x13 + 1;
+    while (x13 < x2) ({
+      int x15 = x13;
+      while (x3[x13] != ',') ({
+        x13 = x13 + 1;
       });
-      int x38 = x26;
-      x26 = x26 + 1;
-      int x39 = 0;
-      while (x4[x26] != ',') ({
-        x39 = x39 * 10 + (int)(x4[x26] - '0');
-        x26 = x26 + 1;
+      int x16 = x13;
+      x13 = x13 + 1;
+      int x17 = 0;
+      while (x3[x13] != ',') ({
+        x17 = x17 * 10 + (int)(x3[x13] - '0');
+        x13 = x13 + 1;
       });
-      x26 = x26 + 1;
-      while (x4[x26] != '\n') ({
-        x26 = x26 + 1;
+      x13 = x13 + 1;
+      while (x3[x13] != '\n') ({
+        x13 = x13 + 1;
       });
-      x26 = x26 + 1;
-      ((x17 == x38 - x36 && ({
-        char* x45 = x4 + x36;
-        int x46 = 0;
-        while (x46 < x17 && x18[x46] == x45[x46]) ({
-          x46 = x46 + 1;
+      x13 = x13 + 1;
+      ((x7 == x16 - x15 && ({
+        char* x18 = x3 + x15;
+        int x19 = 0;
+        while (x19 < x7 && x8[x19] == x18[x19]) ({
+          x19 = x19 + 1;
         });
-        x46 == x17;
+        x19 == x7;
       })) ? ({
-        char* x45 = x4 + x36;
+        char* x18 = x3 + x15;
+        printll(x8);
+        printf(",");
+        printf("%d", x10);
+        printf(",");
+        printll(x12);
+        printf(",");
         printll(x18);
-        printf(",");
-        printf("%d", x21);
-        printf(",");
-        printll(x25);
-        printf(",");
-        printll(x45);
         printf("%s\n", "");
       }) : ({}));
     });
-    close(x2);
+    close(x1);
   });
-  close(x2);
+  close(x1);
 }
 /*****************************************
 End of C Generated Code

@@ -48,169 +48,169 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Word,Value,Word,Year,MatchCount,VolumeCount");
-  char** x2 = (char**)malloc(256 * sizeof(char*));
-  int* x3 = (int*)malloc(256 * sizeof(int));
+  char** x1 = (char**)malloc(256 * sizeof(char*));;
+  int* x2 = (int*)malloc(256 * sizeof(int));;
+  int x3 = 0;
   int x4 = 0;
-  int x5 = 0;
-  int* x6 = (int*)malloc(256 * sizeof(int));
-  int x7 = 0;
-  while (x7 != 256) ({
-    x6[x7] = -1;
-    x7 = x7 + 1;
+  int* x5 = (int*)malloc(256 * sizeof(int));;
+  int x6 = 0;
+  while (x6 != 256) ({
+    x5[x6] = -1;
+    x6 = x6 + 1;
   });
-  char** x9 = (char**)malloc(65536 * sizeof(char*));
-  int* x10 = (int*)malloc(65536 * sizeof(int));
-  int* x11 = (int*)malloc(65536 * sizeof(int));
-  int x12 = 0;
-  int x13 = 0;
-  int* x14 = (int*)malloc(65536 * sizeof(int));
-  int* x15 = (int*)malloc(256 * sizeof(int));
-  int x16 = open("src/data/words.csv",0);
-  int x17 = fsize(x16);
-  char* x18 = mmap(0, x17, PROT_READ, MAP_FILE | MAP_SHARED, x16, 0);
-  int x19 = 0;
-  while (x18[x19] != ',') ({
-    x19 = x19 + 1;
+  char** x7 = (char**)malloc(65536 * sizeof(char*));;
+  int* x8 = (int*)malloc(65536 * sizeof(int));;
+  int* x9 = (int*)malloc(65536 * sizeof(int));;
+  int x10 = 0;
+  int x11 = 0;
+  int* x12 = (int*)malloc(65536 * sizeof(int));;
+  int* x13 = (int*)malloc(256 * sizeof(int));;
+  int x14 = open("src/data/words.csv",0);
+  int x15 = fsize(x14);
+  char* x16 = mmap(0, x15, PROT_READ, MAP_FILE | MAP_SHARED, x14, 0);
+  int x17 = 0;
+  while (x16[x17] != ',') ({
+    x17 = x17 + 1;
   });
-  x19 = x19 + 1;
-  int x23 = 0;
-  while (x18[x19] != '\n') ({
-    x23 = x23 * 10 + (int)(x18[x19] - '0');
-    x19 = x19 + 1;
+  x17 = x17 + 1;
+  int x18 = 0;
+  while (x16[x17] != '\n') ({
+    x18 = x18 * 10 + (int)(x16[x17] - '0');
+    x17 = x17 + 1;
   });
-  x19 = x19 + 1;
-  long x26 = 0L * 41L;
-  while (x19 < x17) ({
-    int x27 = x19;
-    while (x18[x19] != ',') ({
-      x19 = x19 + 1;
+  x17 = x17 + 1;
+  long x19 = 0L * 41L;
+  while (x17 < x15) ({
+    int x20 = x17;
+    while (x16[x17] != ',') ({
+      x17 = x17 + 1;
     });
-    int x29 = x19 - x27;
-    x19 = x19 + 1;
-    char* x30 = x18 + x27;
-    int x31 = 0;
-    while (x18[x19] != '\n') ({
-      x31 = x31 * 10 + (int)(x18[x19] - '0');
-      x19 = x19 + 1;
+    int x21 = x17 - x20;
+    x17 = x17 + 1;
+    char* x22 = x16 + x20;
+    int x23 = 0;
+    while (x16[x17] != '\n') ({
+      x23 = x23 * 10 + (int)(x16[x17] - '0');
+      x17 = x17 + 1;
     });
-    x19 = x19 + 1;
-    int x33 = x13;
-    x9[x33] = x30;
-    x10[x33] = x29;
-    x11[x33] = x31;
-    x13 = x13 + 1;
-    int x34 = ((int)(x26 + hash(x30, x29))) & 255;
-    int x43 = ({
+    x17 = x17 + 1;
+    int x24 = x11;
+    x7[x24] = x22;
+    x8[x24] = x21;
+    x9[x24] = x23;
+    x11 = x11 + 1;
+    int x25 = ((int)(x19 + hash(x22, x21))) & 255;
+    int x32 = ({
       //#hash_lookup
       // generated code for hash lookup
-      int x35 = x34;
+      int x26 = x25;
       while (({
-        x6[x35] != -1 && ({
-          int x36 = x6[x35];
-          char* x37 = x2[x36];
-          int x38 = x3[x36];
-          !(x38 == x29 && ({
-            int x39 = 0;
-            while (x39 < x38 && x37[x39] == x30[x39]) ({
-              x39 = x39 + 1;
+        x5[x26] != -1 && ({
+          int x27 = x5[x26];
+          char* x28 = x1[x27];
+          int x29 = x2[x27];
+          !(x29 == x21 && ({
+            int x30 = 0;
+            while (x30 < x29 && x28[x30] == x22[x30]) ({
+              x30 = x30 + 1;
             });
-            x39 == x38;
+            x30 == x29;
           }));
         });
       })) ({
-        x35 = (x35 + 1) & 255;
+        x26 = (x26 + 1) & 255;
       });
-      ((x6[x35] == -1) ? ({
-        int x42 = x5;
-        x2[x42] = x30;
-        x3[x42] = x29;
-        x5 = x5 + 1;
-        x6[x35] = x42;
-        x15[x42] = 0;
-        x42;
-      }) : x6[x35])//#hash_lookup
+      ((x5[x26] == -1) ? ({
+        int x31 = x4;
+        x1[x31] = x22;
+        x2[x31] = x21;
+        x4 = x4 + 1;
+        x5[x26] = x31;
+        x13[x31] = 0;
+        x31;
+      }) : x5[x26])//#hash_lookup
       ;});
-    int x44 = x15[x43];
-    x14[x43 * 256 + x44] = x33;
-    x15[x43] = x44 + 1;
+    int x33 = x13[x32];
+    x12[x32 * 256 + x33] = x24;
+    x13[x32] = x33 + 1;
   });
-  close(x16);
-  int x47 = open(x0,0);
-  int x48 = fsize(x47);
-  char* x49 = mmap(0, x48, PROT_READ, MAP_FILE | MAP_SHARED, x47, 0);
-  int x50 = 0;
-  while (x50 < x48) ({
-    int x51 = x50;
-    while (x49[x50] != '\t') ({
-      x50 = x50 + 1;
+  close(x14);
+  int x34 = open(x0,0);
+  int x35 = fsize(x34);
+  char* x36 = mmap(0, x35, PROT_READ, MAP_FILE | MAP_SHARED, x34, 0);
+  int x37 = 0;
+  while (x37 < x35) ({
+    int x38 = x37;
+    while (x36[x37] != '\t') ({
+      x37 = x37 + 1;
     });
-    int x53 = x50 - x51;
-    x50 = x50 + 1;
-    char* x54 = x49 + x51;
-    int x55 = x50;
-    while (x49[x50] != '\t') ({
-      x50 = x50 + 1;
+    int x39 = x37 - x38;
+    x37 = x37 + 1;
+    char* x40 = x36 + x38;
+    int x41 = x37;
+    while (x36[x37] != '\t') ({
+      x37 = x37 + 1;
     });
-    x50 = x50 + 1;
-    int x58 = x50;
-    while (x49[x50] != '\t') ({
-      x50 = x50 + 1;
+    x37 = x37 + 1;
+    int x42 = x37;
+    while (x36[x37] != '\t') ({
+      x37 = x37 + 1;
     });
-    x50 = x50 + 1;
-    int x61 = x50;
-    while (x49[x50] != '\n') ({
-      x50 = x50 + 1;
+    x37 = x37 + 1;
+    int x43 = x37;
+    while (x36[x37] != '\n') ({
+      x37 = x37 + 1;
     });
-    x50 = x50 + 1;
-    int x64 = ((int)(x26 + hash(x54, x53))) & 255;
-    int x72 = ({
+    x37 = x37 + 1;
+    int x44 = ((int)(x19 + hash(x40, x39))) & 255;
+    int x50 = ({
       //#hash_lookup
       // generated code for hash lookup
-      int x65 = x64;
+      int x45 = x44;
       while (({
-        x6[x65] != -1 && ({
-          int x66 = x6[x65];
-          char* x67 = x2[x66];
-          int x68 = x3[x66];
-          !(x68 == x53 && ({
-            int x69 = 0;
-            while (x69 < x68 && x67[x69] == x54[x69]) ({
-              x69 = x69 + 1;
+        x5[x45] != -1 && ({
+          int x46 = x5[x45];
+          char* x47 = x1[x46];
+          int x48 = x2[x46];
+          !(x48 == x39 && ({
+            int x49 = 0;
+            while (x49 < x48 && x47[x49] == x40[x49]) ({
+              x49 = x49 + 1;
             });
-            x69 == x68;
+            x49 == x48;
           }));
         });
       })) ({
-        x65 = (x65 + 1) & 255;
+        x45 = (x45 + 1) & 255;
       });
-      x6[x65]//#hash_lookup
+      x5[x45]//#hash_lookup
       ;});
-    ((x72 != -1) ? ({
-      char* x73 = x49 + x55;
-      char* x74 = x49 + x58;
-      char* x75 = x49 + x61;
-      int x76 = x72 * 256;
-      int x77 = x76 + x15[x72];
-      int x78 = x76;
-      while (x78 != x77) ({
-        int x79 = x14[x78];
-        printll(x9[x79]);
+    ((x50 != -1) ? ({
+      char* x51 = x36 + x41;
+      char* x52 = x36 + x42;
+      char* x53 = x36 + x43;
+      int x54 = x50 * 256;
+      int x55 = x54 + x13[x50];
+      int x56 = x54;
+      while (x56 != x55) ({
+        int x57 = x12[x56];
+        printll(x7[x57]);
         printf(",");
-        printf("%d", x11[x79]);
+        printf("%d", x9[x57]);
         printf(",");
-        printll(x54);
+        printll(x40);
         printf(",");
-        printll(x73);
+        printll(x51);
         printf(",");
-        printll(x74);
+        printll(x52);
         printf(",");
-        printll(x75);
+        printll(x53);
         printf("%s\n", "");
-        x78 = x78 + 1;
+        x56 = x56 + 1;
       });
     }) : ({}));
   });
-  close(x47);
+  close(x34);
 }
 /*****************************************
 End of C Generated Code

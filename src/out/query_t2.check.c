@@ -48,44 +48,44 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Name");
-  int x2 = open("src/data/t.csv",0);
-  int x3 = fsize(x2);
-  char* x4 = mmap(0, x3, PROT_READ, MAP_FILE | MAP_SHARED, x2, 0);
+  int x1 = open("src/data/t.csv",0);
+  int x2 = fsize(x1);
+  char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
+  int x4 = 0;
+  while (x3[x4] != ',') ({
+    x4 = x4 + 1;
+  });
+  x4 = x4 + 1;
   int x5 = 0;
-  while (x4[x5] != ',') ({
-    x5 = x5 + 1;
+  while (x3[x4] != ',') ({
+    x5 = x5 * 10 + (int)(x3[x4] - '0');
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  int x9 = 0;
-  while (x4[x5] != ',') ({
-    x9 = x9 * 10 + (int)(x4[x5] - '0');
-    x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x3[x4] != '\n') ({
+    x4 = x4 + 1;
   });
-  x5 = x5 + 1;
-  while (x4[x5] != '\n') ({
-    x5 = x5 + 1;
-  });
-  x5 = x5 + 1;
-  while (x5 < x3) ({
-    int x15 = x5;
-    while (x4[x5] != ',') ({
-      x5 = x5 + 1;
+  x4 = x4 + 1;
+  while (x4 < x2) ({
+    int x6 = x4;
+    while (x3[x4] != ',') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    int x18 = 0;
-    while (x4[x5] != ',') ({
-      x18 = x18 * 10 + (int)(x4[x5] - '0');
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    int x7 = 0;
+    while (x3[x4] != ',') ({
+      x7 = x7 * 10 + (int)(x3[x4] - '0');
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    while (x4[x5] != '\n') ({
-      x5 = x5 + 1;
+    x4 = x4 + 1;
+    while (x3[x4] != '\n') ({
+      x4 = x4 + 1;
     });
-    x5 = x5 + 1;
-    printll(x4 + x15);
+    x4 = x4 + 1;
+    printll(x3 + x6);
     printf("%s\n", "");
   });
-  close(x2);
+  close(x1);
 }
 /*****************************************
 End of C Generated Code
