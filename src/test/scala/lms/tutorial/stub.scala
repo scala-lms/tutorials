@@ -477,7 +477,7 @@ trait Base extends EmbeddedControls with OverloadHack {
       // val f1 = Adapter.g.reflect("λ",b)
       // Wrap(Adapter.g.reflect("range_foreach", x0, x1, b))
 
-      val i = var_new(0)
+      val i = var_new(Wrap[Int](x0))
       __whileDo(notequals(readVar(i), Wrap[Int](x1)), {
         f(readVar(i))
         i += 1

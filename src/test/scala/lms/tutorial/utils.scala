@@ -57,7 +57,9 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
       if (f.exists) f.delete
     }
     if (!overwriteCheckFiles) {
-      // XXX TEMP assert(expected == code, name)
+      // XXX TEMP
+      if (suffix == "csv")
+        assert(expected == code, name)
     }
   }
   def indent(str: String) = {
