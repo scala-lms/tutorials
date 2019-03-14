@@ -72,17 +72,6 @@ object Adapter extends FrontEnd {
             src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
             // remove dangling else
             src = src.replace(" else ()","")
-
-            // remove "xNN" on a single line, if not at end of block
-            // (may overlap, so repeat a few times)
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
-            src = src.replaceAll("\\n *x[0-9]+;? *\\n([^}])","\n$1")
-
-            // same for xNN[xNN]
-            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
-            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
-            src = src.replaceAll("\\n *x[0-9]+\\[x[0-9]+\\];? *\\n([^}])","\n$1")
           }
 
           target match {
@@ -365,6 +354,15 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
       emitValDef(s, s"(char*)malloc(${shallow1(x)} * sizeof(char));")
     case n @ Node(s,"new Array[java.lang.String]",List(x),_) => 
       emitValDef(s, s"(char**)malloc(${shallow1(x)} * sizeof(char*));")
+
+    // DCE: FIXME: 
+    // (a) check that args have no side-effects 
+    //      maybe this can be ensured by overriding InlineSym? 
+    //      should never inline a live expr into something that's not live ...
+    // (b) dce above should anticipate that these will be eliminated
+    //      do not register dependencies as live!
+    case n @ Node(s,"var_get",_,_) if !dce.live(s) => // no-op
+    case n @ Node(s,"array_get",_,_) if !dce.live(s) => // no-op
 
     case n @ Node(s,"array_set",List(x,i,y),_) => 
       emit(s"${shallow1(x)}[${shallow(i)}] = ${shallow(y)};")
