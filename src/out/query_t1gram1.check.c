@@ -52,28 +52,28 @@ void Snippet(char* x0) {
   int x2 = fsize(x1);
   char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
   int x4 = 0;
-  while (x4 < x2) ({
-    int x5 = x4;;
-    while (x3[x4] != '\t') x4 = x4 + 1;;;
-    x4 = x4 + 1;;
-    int x6 = x4;;
-    while (x3[x4] != '\t') x4 = x4 + 1;;;
-    x4 = x4 + 1;;
-    int x7 = x4;;
-    while (x3[x4] != '\t') x4 = x4 + 1;;;
-    x4 = x4 + 1;;
-    int x8 = x4;;
-    while (x3[x4] != '\n') x4 = x4 + 1;;;
-    x4 = x4 + 1;;
-    printll(x3 + x5);;
-    printf(",");;
-    printll(x3 + x6);;
-    printf(",");;
-    printll(x3 + x7);;
-    printf(",");;
-    printll(x3 + x8);;
-    printf("%s\n", "");;
-  });
+  while (x4 < x2) {
+    int x5 = x4;
+    while (x3[x4] != '\t') x4 = x4 + 1;
+    x4 = x4 + 1;
+    int x6 = x4;
+    while (x3[x4] != '\t') x4 = x4 + 1;
+    x4 = x4 + 1;
+    int x7 = x4;
+    while (x3[x4] != '\t') x4 = x4 + 1;
+    x4 = x4 + 1;
+    int x8 = x4;
+    while (x3[x4] != '\n') x4 = x4 + 1;
+    x4 = x4 + 1;
+    printll(x3 + x5);
+    printf(",");
+    printll(x3 + x6);
+    printf(",");
+    printll(x3 + x7);
+    printf(",");
+    printll(x3 + x8);
+    printf("%s\n", "");
+  }
   close(x1);
 }
 /*****************************************

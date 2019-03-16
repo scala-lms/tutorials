@@ -300,12 +300,31 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
       "({})"
     } else res
   }*/
+  // block of statements
   override def quoteBlock(f: => Unit) = {
     val ls = captureLines(f)
     if (ls.length != 1) {
-      "({\n" + ls.mkString(";\n") + ";\n})"
+      "{\n" + ls.mkString("\n") + "\n}"
     } else ls.mkString("\n")
   }  
+  // block of statements with result expression
+  def quoteBlockP(f: => Unit) = {
+    val ls = captureLines(f)
+    if (ls.length != 1) {
+      "({\n" + ls.mkString("\n") + ";\n})"
+    } else ls.mkString("\n")
+  }
+  // override def traverseCompact(ns: Seq[Node], y: Block): Unit = {
+  //   // FIXME: ugly repetition
+  //   for (n <- ns) {
+  //     if (shouldInline(n.n).isEmpty)
+  //       traverse(n)
+  //   }
+  //   if (y.res != Const(()))
+  //     emit(shallow(y.res) + ";" + quoteEff(y.eff))
+  //   else
+  //     emit(quoteEff(y.eff))
+  // }
   override def emitValDef(s: Sym, rhs: =>String): Unit = {
     // emit(s"val ${quote(s)} = $rhs; // ${dce.reach(s)} ${dce.live(s)} ") 
     if (dce.live(s))
@@ -335,19 +354,30 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
 
     // case n @ Node(s,"comment",_,_) => 
       // s"(${super.shallow(n)})" // GNU C block expr
-    case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
-      s"${shallow(c)} && ${shallow(a)}"
+    case n @ Node(s,"?",List(c,a:Block,b:Block),_) if b.isPure && b.res == Const(false) => 
+      s"${shallow(c)} && ${quoteBlockP(traverse(a))}"
     case n @ Node(f,"?",c::(a:Block)::(b:Block)::_,_) => 
-      s"(${shallow1(c)} ? " +
-      quoteBlock1(a) +
+      s"${shallow1(c)} ? " +
+      quoteBlockP(traverse(a)) +
       s" : " +
-      quoteBlock1(b) + ")"
+      quoteBlockP(traverse(b)) + ""
 
     case n @ Node(f,"W",List(c:Block,b:Block),_) => 
       s"while (" +
-      quoteBlock1(c) +
+      quoteBlockP(traverse(c)) +
       s") " +
       quoteBlock1(b)
+    case n @ Node(s,"comment",Const(str: String)::Const(verbose: Boolean)::(b:Block)::_,_) => 
+      quoteBlockP {
+        emit("//#" + str)
+        if (verbose) {
+          emit("// generated code for " + str.replace('_', ' '))
+        } else {
+          emit("// generated code")
+        }
+        traverse(b)
+        emit(";//#" + str)
+      }
 
     case n @ Node(s,"P",List(x),_) => 
       s"printf(${"\"%s\\n\""}, ${shallow(x)})"
@@ -384,6 +414,30 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
 
     case n @ Node(s,"array_set",List(x,i,y),_) => 
       emit(s"${shallow1(x)}[${shallow(i)}] = ${shallow(y)};")
+
+
+    case n @ Node(s,"?",c::(a:Block)::(b:Block)::_,_) if !dce.live(s) => 
+      emit(s"if (${shallow(c)}) " +
+      quoteBlock(traverse(a)) +
+      s" else " +
+      quoteBlock(traverse(b)) + "")
+
+    case n @ Node(s,"W",List(c:Block,b:Block),_) if !dce.live(s) => 
+      emit(s"while (" +
+      quoteBlockP(traverse(c)) +
+      s") " +
+      quoteBlock(traverse(b)))
+
+    case n @ Node(s,"comment",Const(str: String)::Const(verbose: Boolean)::(b:Block)::_,_)  if !dce.live(s) => 
+        emit("//#" + str)
+        if (verbose) {
+          emit("// generated code for " + str.replace('_', ' '))
+        } else {
+          emit("// generated code")
+        }
+        traverse(b)
+        emit(";//#" + str)
+
     case n @ Node(s,_,_,_) => 
       // emit(s"val ${quote(s)} = " + shallow(n)) 
       emitValDef(s, shallow(n))
