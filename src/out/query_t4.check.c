@@ -52,83 +52,69 @@ void Snippet(char* x0) {
   int x2 = fsize(x1);
   char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
   int x4 = 0;
-  while (x3[x4] != ',') ({
-    x4 = x4 + 1;
-  });
+  while (x3[x4] != ',') x4 = x4 + 1;;
   x4 = x4 + 1;
   int x5 = 0;
   while (x3[x4] != ',') ({
-    x5 = x5 * 10 + (int)(x3[x4] - '0');
-    x4 = x4 + 1;
+    x5 = x5 * 10 + (int)(x3[x4] - '0');;
+    x4 = x4 + 1;;
   });
   x4 = x4 + 1;
-  while (x3[x4] != '\n') ({
-    x4 = x4 + 1;
-  });
+  while (x3[x4] != '\n') x4 = x4 + 1;;
   x4 = x4 + 1;
   while (x4 < x2) ({
-    int x6 = x4;
+    int x6 = x4;;
+    while (x3[x4] != ',') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    char* x7 = x3 + x6;;
+    int x8 = 0;;
     while (x3[x4] != ',') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    char* x7 = x3 + x6;
-    int x8 = 0;
-    while (x3[x4] != ',') ({
-      x8 = x8 * 10 + (int)(x3[x4] - '0');
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x9 = x8;
-    int x10 = x4;
-    while (x3[x4] != '\n') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    char* x11 = x3 + x10;
-    int x12 = 0;
+      x8 = x8 * 10 + (int)(x3[x4] - '0');;
+      x4 = x4 + 1;;
+    });;
+    x4 = x4 + 1;;
+    int x9 = x8;;
+    int x10 = x4;;
+    while (x3[x4] != '\n') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    char* x11 = x3 + x10;;
+    int x12 = 0;;
+    while (x3[x12] != ',') x12 = x12 + 1;;;
+    x12 = x12 + 1;;
+    int x13 = 0;;
     while (x3[x12] != ',') ({
-      x12 = x12 + 1;
-    });
-    x12 = x12 + 1;
-    int x13 = 0;
-    while (x3[x12] != ',') ({
-      x13 = x13 * 10 + (int)(x3[x12] - '0');
-      x12 = x12 + 1;
-    });
-    x12 = x12 + 1;
-    while (x3[x12] != '\n') ({
-      x12 = x12 + 1;
-    });
-    x12 = x12 + 1;
+      x13 = x13 * 10 + (int)(x3[x12] - '0');;
+      x12 = x12 + 1;;
+    });;
+    x12 = x12 + 1;;
+    while (x3[x12] != '\n') x12 = x12 + 1;;;
+    x12 = x12 + 1;;
     while (x12 < x2) ({
-      int x14 = x12;
+      int x14 = x12;;
+      while (x3[x12] != ',') x12 = x12 + 1;;;
+      x12 = x12 + 1;;
+      int x15 = 0;;
       while (x3[x12] != ',') ({
-        x12 = x12 + 1;
-      });
-      x12 = x12 + 1;
-      int x15 = 0;
-      while (x3[x12] != ',') ({
-        x15 = x15 * 10 + (int)(x3[x12] - '0');
-        x12 = x12 + 1;
-      });
-      x12 = x12 + 1;
-      while (x3[x12] != '\n') ({
-        x12 = x12 + 1;
-      });
-      x12 = x12 + 1;
+        x15 = x15 * 10 + (int)(x3[x12] - '0');;
+        x12 = x12 + 1;;
+      });;
+      x12 = x12 + 1;;
+      while (x3[x12] != '\n') x12 = x12 + 1;;;
+      x12 = x12 + 1;;
       (true ? ({
-        printll(x7);
-        printf(",");
-        printf("%d", x9);
-        printf(",");
-        printll(x11);
-        printf(",");
-        printll(x3 + x14);
-        printf("%s\n", "");
-      }) : ({}));
-    });
-    close(x1);
+        printll(x7);;
+        printf(",");;
+        printf("%d", x9);;
+        printf(",");;
+        printll(x11);;
+        printf(",");;
+        printll(x3 + x14);;
+        printf("%s\n", "");;
+      }) : ({
+        ;
+      }));;
+    });;
+    close(x1);;
   });
   close(x1);
 }

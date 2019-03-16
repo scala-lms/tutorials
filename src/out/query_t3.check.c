@@ -52,49 +52,41 @@ void Snippet(char* x0) {
   int x2 = fsize(x1);
   char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
   int x4 = 0;
-  while (x3[x4] != ',') ({
-    x4 = x4 + 1;
-  });
+  while (x3[x4] != ',') x4 = x4 + 1;;
   x4 = x4 + 1;
   int x5 = 0;
   while (x3[x4] != ',') ({
-    x5 = x5 * 10 + (int)(x3[x4] - '0');
-    x4 = x4 + 1;
+    x5 = x5 * 10 + (int)(x3[x4] - '0');;
+    x4 = x4 + 1;;
   });
   x4 = x4 + 1;
-  while (x3[x4] != '\n') ({
-    x4 = x4 + 1;
-  });
+  while (x3[x4] != '\n') x4 = x4 + 1;;
   x4 = x4 + 1;
   while (x4 < x2) ({
-    int x6 = x4;
+    int x6 = x4;;
+    while (x3[x4] != ',') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    int x7 = 0;;
     while (x3[x4] != ',') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x7 = 0;
-    while (x3[x4] != ',') ({
-      x7 = x7 * 10 + (int)(x3[x4] - '0');
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x8 = x4;
-    while (x3[x4] != '\n') ({
-      x4 = x4 + 1;
-    });
-    int x9 = x4 - x8;
-    x4 = x4 + 1;
+      x7 = x7 * 10 + (int)(x3[x4] - '0');;
+      x4 = x4 + 1;;
+    });;
+    x4 = x4 + 1;;
+    int x8 = x4;;
+    while (x3[x4] != '\n') x4 = x4 + 1;;;
+    int x9 = x4 - x8;;
+    x4 = x4 + 1;;
     ((x9 == 3 && ({
-      char* x10 = x3 + x8;
-      int x11 = 0;
-      while (x11 < x9 && x10[x11] == "yes"[x11]) ({
-        x11 = x11 + 1;
-      });
+      char* x10 = x3 + x8;;
+      int x11 = 0;;
+      while (x11 < x9 && x10[x11] == "yes"[x11]) x11 = x11 + 1;;;
       x11 == x9;
     })) ? ({
-      printll(x3 + x6);
-      printf("%s\n", "");
-    }) : ({}));
+      printll(x3 + x6);;
+      printf("%s\n", "");;
+    }) : ({
+      ;
+    }));;
   });
   close(x1);
 }

@@ -69,9 +69,9 @@ object Adapter extends FrontEnd {
 
           if (!verbose) {
             // remove "()" on a single line
-            src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
+            // src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
             // remove dangling else
-            src = src.replace(" else ()","")
+            // src = src.replace(" else ()","")
           }
 
           target match {
@@ -214,6 +214,13 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
   def remap(m: Manifest[_]): String
   def nameMap: Map[String, String]
 
+  override def emitValDef(s: Sym, rhs: =>String): Unit = {
+    if (dce.live(s))
+      super.emitValDef(s,rhs)
+    else
+      emit(rhs)
+  }
+
   override def shallow(n: Node): String = n match {
     case n @ Node(s,op,args,_) if nameMap contains op => 
       shallow(n.copy(op = nameMap(n.op)))
@@ -239,7 +246,12 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
     case n => 
       super.shallow(n)
   }
-
+  override def traverse(n: Node): Unit = n match {
+    case n @ Node(s,"var_get",_,_) if !dce.live(s) => // no-op
+    case n @ Node(s,"array_get",_,_) if !dce.live(s) => // no-op
+    case n @ Node(s,_,_,_) => 
+      super.traverse(n)
+  }
   override def apply(g: Graph): Unit = {
     dce(g)
     super.apply(g)
@@ -278,7 +290,7 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     "ObjHashCode"    -> "Object.hashCode",
     "StrSubHashCode" -> "hash"
   )
-  override def quoteBlock1(y: Block, argType: Boolean = false) = {
+  /*override def quoteBlock1(y: Block, argType: Boolean = false) = {
     val res = super.quoteBlock1(y, argType)
     if (res contains "\n") {
       assert(res.take(2) == "{\n" && res.takeRight(2) == "\n}")
@@ -287,15 +299,21 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     } else if (res == "()" ){
       "({})"
     } else res
-  }
-  override def emitValDef(s: Sym, rhs: String): Unit = {
+  }*/
+  override def quoteBlock(f: => Unit) = {
+    val ls = captureLines(f)
+    if (ls.length != 1) {
+      "({\n" + ls.mkString(";\n") + ";\n})"
+    } else ls.mkString("\n")
+  }  
+  override def emitValDef(s: Sym, rhs: =>String): Unit = {
     // emit(s"val ${quote(s)} = $rhs; // ${dce.reach(s)} ${dce.live(s)} ") 
     if (dce.live(s))
       emit(s"${remap(typeMap.getOrElse(s, manifest[Unknown]))} ${quote(s)} = $rhs;")
     else
       emit(s"$rhs;")
   }
-  def emitVarDef(s: Sym, rhs: String): Unit = {
+  def emitVarDef(s: Sym, rhs: =>String): Unit = {
     // emit(s"var ${quote(s)} = $rhs; // ${dce.reach(s)} ${dce.live(s)} ") 
     // TODO: enable dce for vars ... but currently getting unused expression warnings ...
     // if (dce.live(s))
@@ -315,8 +333,8 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
     // case Node(s,"var_get",List(a),_) =>
       // quote(a)+s"/*${quote(s)}*/"
 
-    case n @ Node(s,"comment",_,_) => 
-      s"(${super.shallow(n).dropRight(1)+";}"})" // GNU C block expr
+    // case n @ Node(s,"comment",_,_) => 
+      // s"(${super.shallow(n)})" // GNU C block expr
     case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
       s"${shallow(c)} && ${shallow(a)}"
     case n @ Node(f,"?",c::(a:Block)::(b:Block)::_,_) => 

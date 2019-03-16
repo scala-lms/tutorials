@@ -53,45 +53,37 @@ void Snippet(char* x0) {
   char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
   int x4 = 0;
   while (x4 < x2) ({
-    int x5 = x4;
-    while (x3[x4] != '\t') ({
-      x4 = x4 + 1;
-    });
-    int x6 = x4 - x5;
-    x4 = x4 + 1;
-    int x7 = x4;
-    while (x3[x4] != '\t') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x8 = x4;
-    while (x3[x4] != '\t') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x9 = x4;
-    while (x3[x4] != '\n') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
+    int x5 = x4;;
+    while (x3[x4] != '\t') x4 = x4 + 1;;;
+    int x6 = x4 - x5;;
+    x4 = x4 + 1;;
+    int x7 = x4;;
+    while (x3[x4] != '\t') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    int x8 = x4;;
+    while (x3[x4] != '\t') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    int x9 = x4;;
+    while (x3[x4] != '\n') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
     ((x6 == 12 && ({
-      char* x10 = x3 + x5;
-      int x11 = 0;
-      while (x11 < x6 && x10[x11] == "Auswanderung"[x11]) ({
-        x11 = x11 + 1;
-      });
+      char* x10 = x3 + x5;;
+      int x11 = 0;;
+      while (x11 < x6 && x10[x11] == "Auswanderung"[x11]) x11 = x11 + 1;;;
       x11 == x6;
     })) ? ({
-      char* x10 = x3 + x5;
-      printll(x10);
-      printf(",");
-      printll(x3 + x7);
-      printf(",");
-      printll(x3 + x8);
-      printf(",");
-      printll(x3 + x9);
-      printf("%s\n", "");
-    }) : ({}));
+      char* x10 = x3 + x5;;
+      printll(x10);;
+      printf(",");;
+      printll(x3 + x7);;
+      printf(",");;
+      printll(x3 + x8);;
+      printf(",");;
+      printll(x3 + x9);;
+      printf("%s\n", "");;
+    }) : ({
+      ;
+    }));;
   });
   close(x1);
 }

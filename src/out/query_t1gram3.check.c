@@ -52,71 +52,61 @@ void Snippet(char* x0) {
   int x2 = fsize(x1);
   char* x3 = mmap(0, x2, PROT_READ, MAP_FILE | MAP_SHARED, x1, 0);
   int x4 = 0;
-  while (x3[x4] != ',') ({
-    x4 = x4 + 1;
-  });
+  while (x3[x4] != ',') x4 = x4 + 1;;
   x4 = x4 + 1;
   int x5 = 0;
   while (x3[x4] != '\n') ({
-    x5 = x5 * 10 + (int)(x3[x4] - '0');
-    x4 = x4 + 1;
+    x5 = x5 * 10 + (int)(x3[x4] - '0');;
+    x4 = x4 + 1;;
   });
   x4 = x4 + 1;
   int x6 = open(x0,0);
   int x7 = fsize(x6);
   char* x8 = mmap(0, x7, PROT_READ, MAP_FILE | MAP_SHARED, x6, 0);
   while (x4 < x2) ({
-    int x9 = x4;
-    while (x3[x4] != ',') ({
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    char* x10 = x3 + x9;
-    int x11 = 0;
+    int x9 = x4;;
+    while (x3[x4] != ',') x4 = x4 + 1;;;
+    x4 = x4 + 1;;
+    char* x10 = x3 + x9;;
+    int x11 = 0;;
     while (x3[x4] != '\n') ({
-      x11 = x11 * 10 + (int)(x3[x4] - '0');
-      x4 = x4 + 1;
-    });
-    x4 = x4 + 1;
-    int x12 = x11;
-    int x13 = 0;
+      x11 = x11 * 10 + (int)(x3[x4] - '0');;
+      x4 = x4 + 1;;
+    });;
+    x4 = x4 + 1;;
+    int x12 = x11;;
+    int x13 = 0;;
     while (x13 < x7) ({
-      int x14 = x13;
-      while (x8[x13] != '\t') ({
-        x13 = x13 + 1;
-      });
-      x13 = x13 + 1;
-      int x15 = x13;
-      while (x8[x13] != '\t') ({
-        x13 = x13 + 1;
-      });
-      x13 = x13 + 1;
-      int x16 = x13;
-      while (x8[x13] != '\t') ({
-        x13 = x13 + 1;
-      });
-      x13 = x13 + 1;
-      int x17 = x13;
-      while (x8[x13] != '\n') ({
-        x13 = x13 + 1;
-      });
-      x13 = x13 + 1;
+      int x14 = x13;;
+      while (x8[x13] != '\t') x13 = x13 + 1;;;
+      x13 = x13 + 1;;
+      int x15 = x13;;
+      while (x8[x13] != '\t') x13 = x13 + 1;;;
+      x13 = x13 + 1;;
+      int x16 = x13;;
+      while (x8[x13] != '\t') x13 = x13 + 1;;;
+      x13 = x13 + 1;;
+      int x17 = x13;;
+      while (x8[x13] != '\n') x13 = x13 + 1;;;
+      x13 = x13 + 1;;
       (true ? ({
-        printll(x10);
-        printf(",");
-        printf("%d", x12);
-        printf(",");
-        printll(x8 + x14);
-        printf(",");
-        printll(x8 + x15);
-        printf(",");
-        printll(x8 + x16);
-        printf(",");
-        printll(x8 + x17);
-        printf("%s\n", "");
-      }) : ({}));
-    });
-    close(x6);
+        printll(x10);;
+        printf(",");;
+        printf("%d", x12);;
+        printf(",");;
+        printll(x8 + x14);;
+        printf(",");;
+        printll(x8 + x15);;
+        printf(",");;
+        printll(x8 + x16);;
+        printf(",");;
+        printll(x8 + x17);;
+        printf("%s\n", "");;
+      }) : ({
+        ;
+      }));;
+    });;
+    close(x6);;
   });
   close(x1);
 }
