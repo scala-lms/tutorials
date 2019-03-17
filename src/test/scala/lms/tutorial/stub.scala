@@ -156,6 +156,33 @@ object Adapter extends FrontEnd {
         extra + emitSource()
     }
 
+  override def mkGraphBuilder() = new MyGraphBuilder()
+
+  class MyGraphBuilder extends GraphBuilder {
+
+    // override def rewrite(s: String, as: List[Def]): Option[Exp] = {
+    //   rewrites(name)((s,as))
+    // }
+
+
+    override def reflect(s: String, as: Def*): Exp = (s,as.toList) match {
+      case ("+", List(Const(a:Int),Const(b:Int))) => Const(a+b)
+      case ("-", List(Const(a:Int),Const(b:Int))) => Const(a-b)
+      case ("*", List(Const(a:Int),Const(b:Int))) => Const(a*b)
+      case ("/", List(Const(a:Int),Const(b:Int))) => Const(a/b)
+      case ("%", List(Const(a:Int),Const(b:Int))) => Const(a%b)
+      
+      // TBD: can't just rewrite, need to reflect block!
+      // case ("?", List(Const(true),a:Block,b:Block)) => a
+
+      // for now we implement the front-end method as a
+      // a smart constructor (might revisit later)
+
+      case p =>
+        super.reflect(s, as:_*)
+    }
+  }
+
 }
 
 
@@ -602,7 +629,10 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
 
-  def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = {
+  def __ifThenElse[T:Manifest](c: Rep[Boolean], a: => Rep[T], b: => Rep[T])(implicit pos: SourceContext): Rep[T] = c match {
+    case Wrap(Backend.Const(true))  => a
+    case Wrap(Backend.Const(false)) => b
+    case _ =>
       Wrap(Adapter.IF(Adapter.BOOL(Unwrap(c)))
                      (Adapter.INT(Unwrap(a)))
                      (Adapter.INT(Unwrap(b))).x)

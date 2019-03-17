@@ -20,8 +20,7 @@ class Snippet extends (java.lang.String => Unit) {
         val x6 = x5.next(',')
         x5.next(',')
         x5.next('\n')
-        if (true) printf("%s,%s,%s,%s\n", x2, x3, x4, x6) else {
-        }
+        printf("%s,%s,%s,%s\n", x2, x3, x4, x6)
       }
       x5.close
     }

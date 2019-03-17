@@ -29,29 +29,26 @@ class Snippet extends (java.lang.String => Unit) {
         //#hash_lookup
         // generated code for hash lookup
         var x14 = x12
-        while (x4(x14) != -1 && {
-          val x15 = x1(x4(x14))
-          !(true && x15 == x10)
-        }) x14 = (x14 + 1) & 255
+        while (x4(x14) != -1 && !(x1(x4(x14)) == x10)) x14 = (x14 + 1) & 255
         if (x4(x14) == -1) {
-          val x16 = x3
-          x1(x16) = x10
+          val x15 = x3
+          x1(x15) = x10
           x3 = x3 + 1
-          x4(x14) = x16
-          x6(x16) = 0
-          x16
+          x4(x14) = x15
+          x6(x15) = 0
+          x15
         } else x4(x14)
         //#hash_lookup
       }
       x6(x13) = x6(x13) + x11.toInt
     }
     x8.close
-    val x17 = x3
-    var x18 = 0
-    while (x18 != x17) {
-      val x19 = x18
-      printf("%s,%s\n", x1(x19), (x6(x19)).toString)
-      x18 = x18 + 1
+    val x16 = x3
+    var x17 = 0
+    while (x17 != x16) {
+      val x18 = x17
+      printf("%s,%s\n", x1(x18), (x6(x18)).toString)
+      x17 = x17 + 1
     }
   }
 }

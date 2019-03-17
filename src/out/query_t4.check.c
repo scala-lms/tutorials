@@ -101,17 +101,14 @@ void Snippet(char* x0) {
       x12 = x12 + 1;
       while (x3[x12] != '\n') x12 = x12 + 1;
       x12 = x12 + 1;
-      if (true) {
-        printll(x7);
-        printf(",");
-        printf("%d", x9);
-        printf(",");
-        printll(x11);
-        printf(",");
-        printll(x3 + x14);
-        printf("%s\n", "");
-      } else {
-      }
+      printll(x7);
+      printf(",");
+      printf("%d", x9);
+      printf(",");
+      printll(x11);
+      printf(",");
+      printll(x3 + x14);
+      printf("%s\n", "");
     }
     close(x1);
   }

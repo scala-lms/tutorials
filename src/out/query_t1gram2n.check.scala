@@ -16,7 +16,7 @@ class Snippet extends (java.lang.String => Unit) {
         val x6 = x4.next('\t')
         val x7 = x4.next('\t')
         val x8 = x4.next('\n')
-        if (true && x2 == x5) printf("%s,%s,%s,%s,%s,%s\n", x2, x3, x5, x6, x7, x8) else {
+        if (x2 == x5) printf("%s,%s,%s,%s,%s,%s\n", x2, x3, x5, x6, x7, x8) else {
         }
       }
       x4.close
