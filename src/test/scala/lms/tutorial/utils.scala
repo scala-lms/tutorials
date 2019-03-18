@@ -37,10 +37,8 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
     out.close()
   }
   def checkOut(label: String, suffix: String, thunk: => Unit) = {
-    val output = new ByteArrayOutputStream()
-    scala.Console.setOut(new PrintStream(output))
-    thunk
-    check(label, output.toString(), suffix = suffix)
+    val output = utils.captureOut(thunk)
+    check(label, output, suffix = suffix)
   }
   def check(label: String, raw_code: String, suffix: String = "scala") = {
     val fileprefix = prefix+under+label
@@ -111,12 +109,12 @@ object utils {
     val now = System.nanoTime
     val result = a
     val micros = (System.nanoTime - now) / 1000
-    println("%d microseconds".format(micros))
+    println("%d µs".format(micros))
     result
   }
   def captureOut(func: => Any): String = {
     val source = new java.io.ByteArrayOutputStream()
-    withOutputFull(new java.io.PrintStream(source))(func)
+    withOutput(new java.io.PrintStream(source))(func)
     source.toString
   }
   def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
