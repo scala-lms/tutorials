@@ -9,14 +9,13 @@ import scala.collection.{mutable, immutable}
 import lms.core._
 import Backend._
 
-// - XXX hook for optimization is missing
+import scala.lms.tutorial.utils.time
 
 class Unknown
 
 object Adapter extends FrontEnd {
   val sc = new lms.util.ScalaCompile {}
   // sc.dumpGeneratedCode = true
-
 
   // def mkClassName(name: String) = {
   //   // mangle class name
@@ -37,9 +36,10 @@ object Adapter extends FrontEnd {
   def emitCommon(name: String, target: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
     // test(name) {
       // lms.util.checkOut(name, "scala", {
-        var g = program(x => INT(prog(x.x)))
+        var g = time("staging") { program(x => INT(prog(x.x))) }
 
-        val extra =  if (verbose) utils.captureOut {
+
+        def extra() =  if (verbose) utils.captureOut {
           println("// Raw:")
           g.nodes.foreach(println)
 
@@ -54,45 +54,46 @@ object Adapter extends FrontEnd {
         } else ""
 
         def emitSource() = {
-          val cg: ExtendedCodeGen = target match {
+
+          val btstrm = new java.io.ByteArrayOutputStream()
+          val stream = new java.io.PrintStream(btstrm)
+
+          val cg: ExtendedCodeGen0 = target match {
             case "scala" => new ExtendedScalaCodeGen
             case "c"     => new ExtendedCCodeGen
           }
-          if (!verbose) cg.doRename = true
-          if (eff)      cg.doPrintEffects = true
+          // if (!verbose) cg.doRename = true
+          // if (eff)      cg.doPrintEffects = true
 
           cg.typeMap = typeMap
+          cg.stream = stream
 
           val arg = cg.quote(g.block.in.head)
-          val efs = cg.quoteEff(g.block.ein)
-          var src = utils.captureOut(cg(g))
-
-          if (!verbose) {
-            // remove "()" on a single line
-            // src = src.replaceAll("\\n *\\(\\);? *\\n","\n")
-            // remove dangling else
-            // src = src.replace(" else ()","")
-          }
+          val efs = "" //cg.quoteEff(g.block.ein)
 
           target match {
             case "scala" => 
               val (ms1, ms2) = (cg.remap(m1), cg.remap(m2))
               val className = name
-              s"""
+              stream.println("""
               /*****************************************
               Emitting Generated Code
               *******************************************/
-              class $className extends ($ms1 => $ms2) {
-                def apply($arg: $ms1): $ms2$efs = {\n $src\n }
-              }
+              """)
+              stream.println(s"class $className extends ($ms1 => $ms2) {")
+              stream.println(s"  def apply($arg: $ms1): $ms2$efs = {")
+              cg(g)
+              stream.println( "  }")
+              stream.println( "}")
+              stream.println("""
               /*****************************************
               End of Generated Code
               *******************************************/
-              """
+              """)
             case "c"     => 
               val (ms1, ms2) = (cg.remap(m1), cg.remap(m2))
               val functionName = name
-              s"""
+              stream.println("""
               #include <fcntl.h>
               #include <errno.h>
               #include <err.h>
@@ -110,7 +111,7 @@ object Adapter extends FrontEnd {
                 return stat.st_size;
               }
               int printll(char* s) {
-                while (*s != '\\n' && *s != ',' && *s != '\\t') {
+                while (*s != '\n' && *s != ',' && *s != '\t') {
                   putchar(*s++);
                 }
                 return 0;
@@ -130,7 +131,7 @@ object Adapter extends FrontEnd {
               int main(int argc, char *argv[])
               {
                 if (argc != 2) {
-                  printf("usage: query <filename>\\n");
+                  printf("usage: query <filename>\n");
                   return 0;
                 }
                 Snippet(argv[1]);
@@ -143,17 +144,20 @@ object Adapter extends FrontEnd {
               #include <stdlib.h>
               #include <string.h>
               #include <stdbool.h>
-              $ms2 $functionName($ms1 $arg) {
-                $src
-              }
+              """)
+              stream.println(s"$ms2 $functionName($ms1 $arg) {")
+              cg(g)
+              stream.println("}")
+              stream.println("""
               /*****************************************
               End of C Generated Code
               *******************************************/
-              """
+              """)
           }
+          btstrm.toString
         }
 
-        extra + emitSource()
+        time("codegen") { /*extra() + */emitSource() }
     }
 
   override def mkGraphBuilder() = new MyGraphBuilder()
@@ -216,12 +220,206 @@ class DeadCodeElim {
   }
 }
 
-abstract class ExtendedCodeGen extends CompactScalaCodeGen {
+trait ExtendedCodeGen0 extends CompactTraverser {
 
   var typeMap: collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
 
   val dce = new DeadCodeElim
 
+  var stream: java.io.PrintStream = _
+
+  def quote(s: Def): String
+  def remap(m: Manifest[_]): String
+}
+
+
+class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
+
+  val rename = new mutable.HashMap[Sym,String]
+
+
+  var doRename = true
+  var doPrintEffects = false
+
+  def quote(s: Def): String = s match {
+    case s @ Sym(n) if doRename => rename.getOrElseUpdate(s, s"x${rename.size}")
+    case Sym(n) => s.toString
+    case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
+    case Const(x) if x.isInstanceOf[Char] && x == '\n' => "'\\n'"
+    case Const(x) if x.isInstanceOf[Char] && x == '\t' => "'\\t'"
+    case Const(x) if x.isInstanceOf[Char] && x == 0    => "'\\0'"
+    case Const(x) if x.isInstanceOf[Char] => s"'${x.asInstanceOf[Char]}'"
+    case Const(x) if x.isInstanceOf[Long] => x.toString + "L"
+    case Const(x) => x.toString
+    // case Eff(x) => x.map(quote).mkString("")
+  }
+
+  def quoteEff(x: Def) = ""
+
+  def remap(m: Manifest[_]): String = m.toString
+  val nameMap: Map[String, String] = Map(
+    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
+    "ScannerHasNext" -> "Scanner.hasNext",
+    "ScannerNext"    -> "Scanner.next",
+    "ScannerClose"   -> "Scanner.close",
+    "ObjHashCode"    -> "Object.hashCode",
+  )
+
+
+  def shallow1(n: Def): Unit = n match {
+    case InlineSym(n) if n.op != "var_get" => emit("("); shallow(n); emit(")")
+    case _ => shallow(n)
+  }
+
+
+  // process and print block results
+  override def traverseCompact(ns: Seq[Node], y: Block): Unit = {
+    // if (numStms > 0) emit("{\n")
+    super.traverseCompact(ns, y)
+    if (y.res != Const(())) {
+      shallow(y.res); //emitln()
+    }
+    // if (numStms > 0) emit("\n}")
+  }
+
+  def quoteBlockp(x: => Unit) {
+    emitln("{")
+    x
+    emit("}")
+  }
+
+  def shallow(n: Def): Unit = n match {
+    case InlineSym(n) => shallow(n)
+    case b:Block => quoteBlockp(traverse(b)) // FIXME: lambda args
+    case _ => emit(quote(n))
+  }
+
+
+  val binop = Set("+","-","*","/","%","==","!=","<",">","&","!")
+
+  // generate string for node's right-hand-size
+  // (either inline or as part of val def)
+  // XXX TODO: precedence of nested expressions!!
+  def shallow(n: Node): Unit = n match {
+    case n @ Node(f,"λ",List(y:Block),_) => 
+      // XXX what should we do for functions? 
+      // proper inlining will likely work better 
+      // as a separate phase b/c it may trigger
+      // further optimizations
+      ??? // quoteBlock1(y, true)
+    case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
+      shallow1(c); emit(" && "); shallow1(a)
+    case n @ Node(f,"?",c::(a:Block)::(b:Block)::_,_) => 
+      emit(s"if ("); shallow(c); emit(") ")
+      quoteBlockp(traverse(a))
+      emit(s" else ")
+      quoteBlockp(traverse(b))
+    case n @ Node(f,"W",List(c:Block,b:Block),_) => 
+      emit(s"while (")
+      quoteBlockp(traverse(c))
+      emit(s") ")
+      quoteBlockp(traverse(b))
+    case n @ Node(s,"var_get",List(x),_) => 
+      shallow(x)
+    case n @ Node(s,"array_get",List(x,i),_) => 
+      shallow1(x); emit("("); shallow(i); emit(")")
+    case n @ Node(s,"@",x::y::_,_) => 
+      shallow1(x); emit("("); shallow(y); emit(")")
+    case n @ Node(s,"P",List(x),_) => 
+      emit("println"); emit("("); shallow(x); emit(")")
+    case n @ Node(s,"comment",Const(str: String)::Const(verbose: Boolean)::(b:Block)::_,_) => 
+      quoteBlockp {
+        emitln("//#" + str)
+        if (verbose) {
+          emitln("// generated code for " + str.replace('_', ' '))
+        } else {
+          emitln("// generated code")
+        }
+        traverse(b)
+        emitln("//#" + str)
+      }
+    case n @ Node(s,"Boolean.!",List(a),_) => 
+      emit("!"); shallow1(a)
+
+    case n @ Node(s,op,args,_) if nameMap contains op => 
+      shallow(n.copy(op = nameMap(n.op)))
+
+    case n @ Node(s,op,List(x,y),_) if binop(op) => 
+      shallow1(x); emit(" "); emit(op); emit(" "); shallow1(y)
+
+    case n @ Node(s,op,args,_) if op contains "[ ]" => // unchecked
+      var s = op
+      for (a <- args) {
+        val i = s.indexOf("[ ]")
+        emit(s.substring(0,i))
+        shallow(a)
+        s = s.substring(i+3)
+      }
+      emit(s)
+
+    case n @ Node(s,op,args,_) if op.contains('.') && !op.contains(' ') => // method call
+      val (recv::args1) = args
+      shallow1(recv); emit("."); emit(op.drop(op.lastIndexOf('.')+1))
+      if (args1.nonEmpty) {
+        emit("(")
+        shallow(args1.head)
+        args1.tail.foreach { a =>
+          emit(", "); shallow(a)
+        }
+        emit(")")
+      }
+  
+    case n @ Node(_,op,args,_) => 
+      emit(s"$op("); 
+      if (args.nonEmpty) { 
+        shallow(args.head)
+        args.tail.foreach { a =>
+          emit(", "); shallow(a)
+        }
+      }
+      emit(")")
+  }
+
+
+  override def traverse(n: Node): Unit = n match {
+    case n @ Node(f,"λ",List(y:Block),_) => 
+      val x = y.in.head
+      emit(s"def ${quote(f)}(${quote(x)}: Int): Int${quoteEff(y.ein)} = ")
+      ??? // TODO
+      //quoteBlock(traverse(y,f))
+
+    case n @ Node(s,"var_new",List(x),_) => 
+      /*if (dce.live(s))*/ emit(s"var ${quote(s)} = "); shallow(x); emitln()
+    case n @ Node(s,"var_set",List(x,y),_) => 
+      emit(s"${quote(x)} = "); shallow(y); emitln()
+    case n @ Node(s,"array_new",List(x),_) => 
+      /*if (dce.live(s))*/ emit(s"val ${quote(s)} = "); emit("new Array[Int]("); shallow(x); emit(")"); emitln()
+    case n @ Node(s,"array_set",List(x,i,y),_) => 
+      shallow(x); emit("("); shallow(i); emit(") = "); shallow(y); emitln()
+
+    case n @ Node(s,"var_get",_,_) if !dce.live(s) => // no-op
+    case n @ Node(s,"array_get",_,_) if !dce.live(s) => // no-op
+
+    case n @ Node(s,_,_,_) => 
+      if (dce.live(s)) emit(s"val ${quote(s)} = "); shallow(n); emitln()
+  }
+
+  def emit(s: String) = stream.print(s)
+  def emitln(s: String) = stream.println(s)
+  def emitln() = stream.println()
+
+  override def apply(g: Graph): Unit = {
+    dce(g)
+    super.apply(g)
+  }
+}
+
+abstract class ExtendedCodeGen extends CompactScalaCodeGen with ExtendedCodeGen0 {
+
+  // var typeMap: collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
+
+  // val dce = new DeadCodeElim
+  doRename = true
 
   override def quote(x: Def) = x match {
     case Const(s: String) => "\""+s.replace("\"", "\\\"").replace("\n","\\n").replace("\t","\\t")+"\"" // TODO: more escapes?
@@ -253,6 +451,8 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
       shallow(n.copy(op = nameMap(n.op)))
     case n @ Node(s,"<",List(a,b),_) => 
       s"${shallow(a)} < ${shallow(b)}"
+    case n @ Node(s,">",List(a,b),_) => 
+      s"${shallow(a)} > ${shallow(b)}"
     case n @ Node(s,"&",List(a,b),_) => 
       s"${shallow1(a)} & ${shallow1(b)}"
     case n @ Node(s,"Boolean.!",List(a),_) => 
@@ -281,20 +481,10 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen {
   }
   override def apply(g: Graph): Unit = {
     dce(g)
-    super.apply(g)
+    stream.println(utils.captureOut(super.apply(g)))
   }
 }
 
-class ExtendedScalaCodeGen extends ExtendedCodeGen {
-  def remap(m: Manifest[_]): String = m.toString
-  val nameMap = Map(
-    "ScannerNew"     -> "new scala.lms.tutorial.Scanner",
-    "ScannerHasNext" -> "Scanner.hasNext",
-    "ScannerNext"    -> "Scanner.next",
-    "ScannerClose"   -> "Scanner.close",
-    "ObjHashCode"    -> "Object.hashCode",
-  )
-}
 
 class ExtendedCCodeGen extends ExtendedCodeGen {
   def remap(m: Manifest[_]): String = m.toString match {
@@ -504,7 +694,9 @@ trait Base extends EmbeddedControls with OverloadHack {
     Wrap(Adapter.g.reflect(p.productPrefix, xs:_*))
   }
 
-  def staticData[T](x: T): Rep[T] = ???
+  def staticData[T](x: T): Rep[T] = 
+    Wrap(Adapter.g.reflect("staticData", Backend.Const(x)))
+
 
   def reflectEffect[T](x: Def[T]): Exp[T] = ???
   def reflectMutable[T:Manifest](x: Def[T]): Exp[T] = {
@@ -529,7 +721,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   // def compile[A,B](f: Rep[A] => Rep[B]): A=>B = ???
   def compile[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): A=>B = {
     val src = Adapter.emitScala("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
-    val fc = Adapter.sc.compile[A,B]("Snippet", src)
+    val fc = time("scalac") { Adapter.sc.compile[A,B]("Snippet", src) }
     fc
   }
 
