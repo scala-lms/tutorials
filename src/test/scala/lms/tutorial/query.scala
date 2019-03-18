@@ -436,16 +436,15 @@ class QueryTest extends TutorialFunSuite {
   }
 
   def testquery(name: String, query: String = "") {
-    val drivers: List[TestDriver] =
-      List(
-        new ScalaPlainQueryDriver(name, query) with query_unstaged.QueryInterpreter,
-        new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
-        new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler,
-        new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
-         // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
-         override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
-        }
-      )
+    val drivers: List[TestDriver] = List(
+      new ScalaPlainQueryDriver(name, query) with query_unstaged.QueryInterpreter,
+      new ScalaStagedQueryDriver(name, query) with query_staged0.QueryCompiler,
+      new ScalaStagedQueryDriver(name, query) with query_staged.QueryCompiler,
+      new CStagedQueryDriver(name, query) with query_optc.QueryCompiler {
+       // FIXME: hack so i don't need to replace Value -> #Value in all the files right now
+       override def isNumericCol(s: String) = s == "Value" || super.isNumericCol(s)
+      }
+    )
     drivers.foreach(_.runtest)
   }
 
