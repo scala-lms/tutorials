@@ -277,7 +277,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     // if (numStms > 0) emit("{\n")
     super.traverseCompact(ns, y)
     if (y.res != Const(())) {
-      shallow(y.res); //emitln()
+      shallow(y.res); emitln()
     }
     // if (numStms > 0) emit("\n}")
   }
