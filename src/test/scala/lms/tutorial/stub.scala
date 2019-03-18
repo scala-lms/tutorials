@@ -164,15 +164,36 @@ object Adapter extends FrontEnd {
 
   class MyGraphBuilder extends GraphBuilder {
 
-    // override def rewrite(s: String, as: List[Def]): Option[Exp] = {
-    //   rewrites(name)((s,as))
-    // }
+    override def rewrite(s: String, as: List[Def]): Option[Exp] = (s,as) match {
+      // staticData(as)(i) => staticData(as(i))
+      case ("array_get", List(Def("staticData", List(Const(as: Array[_]))), Const(i:Int))) =>
+        as(i) match {
+          case a: Int => Some(Const(a))
+          case a => Some(reflect("staticData", Const(a)))
+        }
+
+      // as(i) = as(i) => ()   side condition: no write in-between!
+      case ("array_set", List(as:Exp, i, rs @ Def("array_get", List(as1, i1)))) 
+        if as == as1 && i == i1 && curEffects.get(as) == Some(rs) =>
+        Some(Const(()))
+
+      case _  =>
+        super.rewrite(s,as)
+    }
 
 
     override def reflect(s: String, as: Def*): Exp = (s,as.toList) match {
       case ("+", List(Const(a:Int),Const(b:Int))) => Const(a+b)
+      case ("+", List(Const(0),b:Exp)) => b
+      case ("+", List(a:Exp,Const(0))) => a
       case ("-", List(Const(a:Int),Const(b:Int))) => Const(a-b)
+      // case ("-", List(Const(0),b)) => b
+      case ("-", List(a:Exp,Const(0))) => a
       case ("*", List(Const(a:Int),Const(b:Int))) => Const(a*b)
+      case ("*", List(Const(1),b:Exp)) => b
+      case ("*", List(a:Exp,Const(1))) => a
+      case ("*", List(Const(0),b:Exp)) => Const(0)
+      case ("*", List(a:Exp,Const(0))) => Const(0)
       case ("/", List(Const(a:Int),Const(b:Int))) => Const(a/b)
       case ("%", List(Const(a:Int),Const(b:Int))) => Const(a%b)
       
