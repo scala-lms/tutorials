@@ -105,11 +105,11 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
 }
 
 object utils {
-  def time[A](a: => A) = {
+  def time[A](key: String)(a: => A) = {
     val now = System.nanoTime
     val result = a
     val micros = (System.nanoTime - now) / 1000
-    println("%d µs".format(micros))
+    println(s"$key: $micros µs")
     result
   }
   def captureOut(func: => Any): String = {

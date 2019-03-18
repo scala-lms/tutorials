@@ -346,7 +346,7 @@ object Run {
 
     try {
       engine.prepare
-      utils.time(engine.eval)
+      utils.time("eval")(engine.eval)
     } catch {
       case ex: Exception =>
         println("ERROR: " + ex)

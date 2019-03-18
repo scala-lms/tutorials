@@ -411,7 +411,7 @@ class QueryLiveStepsTest extends TutorialFunSuite {
         println(snippet.code)
         println("--- now running: ---")
         snippet.precompile
-        utils.time {
+        utils.time("eval") {
           snippet.eval(4)
         }
 
