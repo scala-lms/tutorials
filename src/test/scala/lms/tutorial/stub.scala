@@ -765,10 +765,44 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   def emitValDef(sym: Sym[Any], rhs: String): Unit = ???
 
-  def fun[A,B](f: Rep[A] => Rep[B]): Rep[A => B] = ???
-  def doLambda[A,B](f: Rep[A] => Rep[B]): Rep[A => B] = ???
-  implicit class FunOps[A,B](f: Rep[A => B]) {
-    def apply(x: Rep[A]): Rep[B] = ???
+/*
+  def FUN(f: INT => INT): INT => INT = FUN((_,x) => f(x))
+
+  def FUN(f: ((INT=>INT),INT) => INT): INT => INT = {
+    val fn = Sym(g.fresh)
+    //val xn = Sym(g.fresh)
+    val f1 = (x: INT) => APP(fn,x)
+    // NOTE: lambda expression itself does not have
+    // an effect, so body block should not count as 
+    // latent effect of the lambda
+    g.reflect(fn,"λ",g.reify(xn => f(f1,INT(xn)).x))()()
+    f1
+  }
+*/
+
+  var nest: Option[Rep[_]] = None // TODO: make it based on a key
+
+  def fun[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): Rep[A => B] = {
+    if (nest.nonEmpty) return nest.get.asInstanceOf[Rep[A=>B]]
+
+    val save = nest
+
+    val fn = Backend.Sym(Adapter.g.fresh)
+
+    nest = Some(fn)
+
+    //val xn = Sym(g.fresh)
+    //val f1 = (x: INT) => APP(fn,x)
+    // NOTE: lambda expression itself does not have
+    // an effect, so body block should not count as 
+    // latent effect of the lambda
+    try Wrap[A=>B](Adapter.g.reflect(fn,"λ",Adapter.g.reify(xn => Unwrap(f(Wrap[A](xn)))))()())
+    finally nest = save
+  }
+  def doLambda[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): Rep[A => B] = fun(f)
+  implicit class FunOps[A:Manifest,B:Manifest](f: Rep[A => B]) {
+    def apply(x: Rep[A]): Rep[B] =
+      Wrap[B](Adapter.g.reflectEffect("@",Unwrap(f),Unwrap(x))(Adapter.CTRL))
   }
 
   // def compile[A,B](f: Rep[A] => Rep[B]): A=>B = ???
