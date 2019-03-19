@@ -60,6 +60,7 @@ class AckermannTest extends TutorialFunSuite {
   test("specialize ackermann to m=2") {
     val ack2 = specialize(2)
     check("m2", ack2.code)
+    assert(ack2.eval(2) == 7)
   }
 }
 

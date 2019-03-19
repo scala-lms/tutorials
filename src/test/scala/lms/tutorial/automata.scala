@@ -73,7 +73,7 @@ of producing matchers from textual regular expressions. However, the point
 here is to demonstrate how the implementation works.
 */
 
-trait NFAOps extends scala.virtualization.lms.util.ClosureCompare {
+trait NFAOps extends lms.util.ClosureCompare {
 /**
 The given matcher uses an API that models nondeterministic finite automata
 (NFA):

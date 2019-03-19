@@ -7,6 +7,7 @@ import org.scala_lang.virtualized.EmbeddedControls
 import scala.collection.{mutable, immutable}
 
 import lms.core._
+import lms.util._
 import Backend._
 
 import scala.lms.tutorial.utils.time
@@ -30,12 +31,16 @@ object Adapter extends FrontEnd {
     emitCommon(name, "c")(m1, m2)(prog)
   }
 
-  var typeMap: scala.collection.Map[lms.core.Backend.Exp, Manifest[_]] = _
-
+  var typeMap: mutable.Map[lms.core.Backend.Exp, Manifest[_]] = _
+  var funTable: List[(Backend.Exp, Any)] = _
 
   def emitCommon(name: String, target: String, verbose: Boolean = false, alt: Boolean = false, eff: Boolean = false)(m1:Manifest[_],m2:Manifest[_])(prog: Exp => Exp) = {
     // test(name) {
       // lms.util.checkOut(name, "scala", {
+        // TODO: proper way to deal with state (move into graphBoilder?)
+        typeMap = new scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]]()
+        funTable = Nil
+
         var g = time("staging") { program(x => INT(prog(x.x))) }
 
 
@@ -354,7 +359,8 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
       // proper inlining will likely work better 
       // as a separate phase b/c it may trigger
       // further optimizations
-      ??? // quoteBlock1(y, true)
+      // quoteBlock1(y, true)
+      quoteBlockp(traverse(y))
     case n @ Node(s,"?",List(c,a,b:Block),_) if b.isPure && b.res == Const(false) => 
       shallow1(c); emit(" && "); shallow1(a)
     case n @ Node(f,"?",c::(a:Block)::(b:Block)::_,_) => 
@@ -436,8 +442,13 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     case n @ Node(f,"λ",List(y:Block),_) => 
       val x = y.in.head
       emit(s"def ${quote(f)}(${quote(x)}: Int): Int${quoteEff(y.ein)} = ")
-      ??? // TODO
+      // ??? // TODO
       //quoteBlock(traverse(y,f))
+      quoteBlockp(traverse(y,f))
+      emitln()
+
+    case n @ Node(s,"generate-comment",List(Const(x)),_) => 
+      emit("// "); emitln(x.toString)
 
     case n @ Node(s,"var_new",List(x),_) => 
       /*if (dce.live(s))*/ emit(s"var ${quote(s)} = "); shallow(x); emitln()
@@ -715,17 +726,15 @@ class ExtendedCCodeGen extends ExtendedCodeGen {
 }
 
 
-trait Base extends EmbeddedControls with OverloadHack { 
+trait Base extends EmbeddedControls with OverloadHack with lms.util.ClosureCompare {
   type Rep[+T] = Exp[T];
   abstract class Exp[+T]
   abstract class Def[+T]
   abstract class Var[T]
   abstract class Block[T]
 
-  val typeMap = new scala.collection.mutable.HashMap[lms.core.Backend.Exp, Manifest[_]]()
-
   case class Wrap[+A:Manifest](x: lms.core.Backend.Exp) extends Exp[A] {
-    typeMap(x) = manifest[A]
+    Adapter.typeMap(x) = manifest[A]
   }
   def Unwrap(x: Exp[Any]) = x match { 
     case Wrap(x) => x 
@@ -733,7 +742,7 @@ trait Base extends EmbeddedControls with OverloadHack {
   }
 
   case class WrapV[A:Manifest](x: lms.core.Backend.Exp) extends Var[A] {
-    typeMap(x) = manifest[A] // could include Var type in manifest
+    Adapter.typeMap(x) = manifest[A] // could include Var type in manifest
   }
   def UnwrapV[T](x: Var[T]) = x match { case WrapV(x) => x }
 
@@ -778,26 +787,39 @@ trait Base extends EmbeddedControls with OverloadHack {
     g.reflect(fn,"λ",g.reify(xn => f(f1,INT(xn)).x))()()
     f1
   }
+
+  var funTable: List[(Sym[_], Any)] = List()
+  override def doLambda[A:Manifest,B:Manifest](f: Exp[A] => Exp[B])(implicit pos: SourceContext): Exp[A => B] = {
+    val can = canonicalize(f)
+    funTable.find(_._2 == can) match {
+      case Some((funSym, _)) =>
+        funSym.asInstanceOf[Exp[A=>B]]
+      case _ =>
+        val funSym = fresh[A=>B]
+        funTable = (funSym,can)::funTable
+        createDefinition(funSym, doLambdaDef(f))
+        funSym
+    }
+  }
 */
 
-  var nest: Option[Rep[_]] = None // TODO: make it based on a key
+
 
   def fun[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): Rep[A => B] = {
-    if (nest.nonEmpty) return nest.get.asInstanceOf[Rep[A=>B]]
-
-    val save = nest
-
-    val fn = Backend.Sym(Adapter.g.fresh)
-
-    nest = Some(fn)
-
-    //val xn = Sym(g.fresh)
-    //val f1 = (x: INT) => APP(fn,x)
-    // NOTE: lambda expression itself does not have
-    // an effect, so body block should not count as 
-    // latent effect of the lambda
-    try Wrap[A=>B](Adapter.g.reflect(fn,"λ",Adapter.g.reify(xn => Unwrap(f(Wrap[A](xn)))))()())
-    finally nest = save
+    val can = canonicalize(f)
+    Adapter.funTable.find(_._2 == can) match {
+      case Some((funSym, _)) =>
+        Wrap[A=>B](funSym)
+      case _ =>
+        val fn = Backend.Sym(Adapter.g.fresh)
+        Adapter.funTable = (fn,can)::Adapter.funTable
+        //val xn = Sym(g.fresh)
+        //val f1 = (x: INT) => APP(fn,x)
+        // NOTE: lambda expression itself does not have
+        // an effect, so body block should not count as 
+        // latent effect of the lambda
+        Wrap[A=>B](Adapter.g.reflect(fn,"λ",Adapter.g.reify(xn => Unwrap(f(Wrap[A](xn)))))()())
+    }
   }
   def doLambda[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): Rep[A => B] = fun(f)
   implicit class FunOps[A:Manifest,B:Manifest](f: Rep[A => B]) {
@@ -962,7 +984,6 @@ trait ScalaGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
-    Adapter.typeMap = typeMap // XXX
     val (src,_) = Adapter.emitScala(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
@@ -976,7 +997,6 @@ trait CGenBase {
   def quote(x: Exp[Any]) : String = ???
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
-    Adapter.typeMap = typeMap // XXX
     val (src,_) = Adapter.emitC(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
