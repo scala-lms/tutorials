@@ -68,8 +68,27 @@ object Adapter extends FrontEnd {
           cg.typeMap = typeMap
           cg.stream = stream
 
+          cg.init(g) // will run dce, compute statics
+
           val arg = cg.quote(g.block.in.head)
           val efs = "" //cg.quoteEff(g.block.ein)
+
+          def quoteStatic(n: Node) = n match {
+            case Node(s, "staticData", List(Const(a)), _) =>
+              val arg = "p"+cg.quote(s)
+              val tpe = a match { // FIXME: hardcoded ...
+                case a: Array[Array[Int]] => "Array[Array[Int]]"
+                case a: Array[Int] => "Array[Int]"
+              }
+              s"$arg: $tpe"
+          }
+
+          def extractStatic(n: Node) = n match {
+            case Node(s, "staticData", List(Const(a)), _) =>
+              (a.getClass, a)
+          }
+
+          val stt = cg.dce.statics.map(quoteStatic).mkString(", ")
 
           target match {
             case "scala" => 
@@ -80,7 +99,7 @@ object Adapter extends FrontEnd {
               Emitting Generated Code
               *******************************************/
               """)
-              stream.println(s"class $className extends ($ms1 => $ms2) {")
+              stream.println(s"class $className($stt) extends ($ms1 => $ms2) {")
               stream.println(s"  def apply($arg: $ms1): $ms2$efs = {")
               cg(g)
               stream.println( "  }")
@@ -154,7 +173,7 @@ object Adapter extends FrontEnd {
               *******************************************/
               """)
           }
-          btstrm.toString
+          (btstrm.toString, cg.dce.statics.map(extractStatic))
         }
 
         time("codegen") { /*extra() + */emitSource() }
@@ -220,10 +239,14 @@ class DeadCodeElim {
   var live: collection.Set[Sym] = _
   var reach: collection.Set[Sym] = _
 
+  // staticData -- not really a DCE task, but hey
+  var statics: collection.Set[Node] = _
+
   def apply(g: Graph): Unit = {
 
     live = new mutable.HashSet[Sym]
     reach = new mutable.HashSet[Sym]
+    statics = new mutable.HashSet[Node]
 
     reach ++= g.block.used
 
@@ -234,6 +257,8 @@ class DeadCodeElim {
       if (reach(d.n)) {
         live ++= valueSyms(d)
         reach ++= syms(d)
+        if (d.op == "staticData")
+          statics += d
       }
     }
 
@@ -251,6 +276,8 @@ trait ExtendedCodeGen0 extends CompactTraverser {
 
   def quote(s: Def): String
   def remap(m: Manifest[_]): String
+
+  def init(g: Graph): Unit = {}
 }
 
 
@@ -361,6 +388,9 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
       }
     case n @ Node(s,"Boolean.!",List(a),_) => 
       emit("!"); shallow1(a)
+    case n @ Node(s,"staticData",List(Const(a)),_) => 
+      val q = a match { case x: Array[_] => "Array("+x.mkString(",")+")" case _ => a }
+      emit("p"+quote(s)); emit(s" /* staticData $q */")
 
     case n @ Node(s,op,args,_) if nameMap contains op => 
       shallow(n.copy(op = nameMap(n.op)))
@@ -429,10 +459,12 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
   def emitln(s: String) = stream.println(s)
   def emitln() = stream.println()
 
-  override def apply(g: Graph): Unit = {
-    dce(g)
-    super.apply(g)
-  }
+  override def init(g: Graph): Unit = dce(g)
+
+  // override def apply(g: Graph): Unit = {
+  //   dce(g)
+  //   super.apply(g)
+  // }
 }
 
 abstract class ExtendedCodeGen extends CompactScalaCodeGen with ExtendedCodeGen0 {
@@ -741,8 +773,8 @@ trait Base extends EmbeddedControls with OverloadHack {
 
   // def compile[A,B](f: Rep[A] => Rep[B]): A=>B = ???
   def compile[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): A=>B = {
-    val src = Adapter.emitScala("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
-    val fc = time("scalac") { Adapter.sc.compile[A,B]("Snippet", src) }
+    val (src, statics) = Adapter.emitScala("Snippet")(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val fc = time("scalac") { Adapter.sc.compile[A,B]("Snippet", src, statics.toList) }
     fc
   }
 
