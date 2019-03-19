@@ -929,7 +929,7 @@ trait ScalaGenBase {
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
     Adapter.typeMap = typeMap // XXX
-    val src = Adapter.emitScala(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val (src,_) = Adapter.emitScala(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
   }
@@ -943,7 +943,7 @@ trait CGenBase {
   def emitNode(sym: Sym[Any], rhs: Def[Any]): Unit = ???
   def emitSource[A : Manifest, B : Manifest](f: Rep[A]=>Rep[B], className: String, stream: java.io.PrintWriter): List[(Sym[Any], Any)] = {
     Adapter.typeMap = typeMap // XXX
-    val src = Adapter.emitC(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
+    val (src,_) = Adapter.emitC(className)(manifest[A],manifest[B])(x => Unwrap(f(Wrap(x))))
     stream.println(src)
     Nil
   }
