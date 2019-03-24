@@ -749,10 +749,15 @@ trait Base extends EmbeddedControls with OverloadHack with lms.util.ClosureCompa
   case class Const[T](x: T) extends Exp[T]
   case class Sym[T](x: Int) extends Exp[T]
 
+  def convertToExp(x: Any) = x match {
+    case e: Exp[Any] => Unwrap(e)
+    case c => Backend.Const(c)
+  }
+
   implicit def unit[T:Manifest](x: T): Rep[T] = Wrap(Backend.Const(x))
   implicit def toAtom[T:Manifest](x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
-    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    val xs = p.productIterator.map(convertToExp).toSeq
     Wrap(Adapter.g.reflect(p.productPrefix, xs:_*))
   }
 
@@ -763,12 +768,12 @@ trait Base extends EmbeddedControls with OverloadHack with lms.util.ClosureCompa
   def reflectEffect[T](x: Def[T]): Exp[T] = ???
   def reflectMutable[T:Manifest](x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
-    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    val xs = p.productIterator.map(convertToExp).toSeq
     Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Adapter.STORE))
   }
   def reflectWrite[T:Manifest](w: Rep[Any])(x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
-    val xs = p.productIterator.map(_.asInstanceOf[Exp[Any]]).map(Unwrap).toSeq
+    val xs = p.productIterator.map(convertToExp).toSeq
     Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Unwrap(w)))
   }
 
