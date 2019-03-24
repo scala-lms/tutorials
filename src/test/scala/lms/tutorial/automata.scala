@@ -56,14 +56,15 @@ Here is a simple example for the fixed regular expression `.*AAB`:
       }
     }
 
+
+    // The generated code for the DFA is shown at the end.
+    check("aab", p.code)
+
     // Some tests.
     assertResult(true){p.matches("AAB")}
     assertResult(false){p.matches("AAC")}
     assertResult(true){p.matches("AACAAB")}
     assertResult(true){p.matches("AACAABAAC")}
-
-    // The generated code for the DFA is shown at the end.
-    check("aab", p.code)
   }
 }
 
