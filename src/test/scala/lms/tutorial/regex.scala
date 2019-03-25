@@ -34,6 +34,8 @@ a bytecode compiler.
 package scala.lms.tutorial
 
 import org.scalatest.FunSuite
+
+import lms.core.stub._
 import lms.core.virtualize
 import lms.macros.SourceContext
 

@@ -61,9 +61,9 @@ More details on running the benchmarks are available [here](https://github.com/s
 
 package scala.lms.tutorial
 
+import lms.core.stub._
 import lms.core.virtualize
 import org.scalatest.FunSuite
-import lms.core.stub._
 
 /**
 Relational Algebra AST

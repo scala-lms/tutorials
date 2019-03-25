@@ -24,6 +24,7 @@ by client code. Thus, they are similar to coroutines.
 
 package scala.lms.tutorial
 
+import lms.core.stub._
 import lms.core.virtualize
 import lms.macros.SourceContext
 

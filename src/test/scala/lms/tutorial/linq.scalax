@@ -19,6 +19,7 @@ package scala.lms.tutorial
 
 import scala.reflect.SourceContext
 
+import lms.core.stub._
 import lms.core.virtualize
 import lms.macros.SourceContext
 import lms.macros.EmbeddedControls
