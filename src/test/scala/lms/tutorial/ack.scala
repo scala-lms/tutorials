@@ -13,7 +13,8 @@ Outline:
 
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized._
+import lms.core.virtualize
+import lms.macros.SourceContext
 
 /**
 Ackermann's Function

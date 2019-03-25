@@ -1,6 +1,6 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.stub.common._
+import lms.core.stub._
 
 object query_live {
 trait QueryInterpreter extends PlainQueryProcessor {

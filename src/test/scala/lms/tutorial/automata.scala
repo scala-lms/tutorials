@@ -24,8 +24,8 @@ by client code. Thus, they are similar to coroutines.
 
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.virtualize
-import org.scala_lang.virtualized.SourceContext
+import lms.core.virtualize
+import lms.macros.SourceContext
 
 /**
 Regexp Matchers as Nondeterministic Finite Automata (NFA)

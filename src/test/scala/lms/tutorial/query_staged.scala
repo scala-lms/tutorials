@@ -8,10 +8,10 @@ Outline:
 */
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
+import lms.macros.SourceContext
+import lms.core.virtualize
 
-import scala.virtualization.lms.stub.common._
+import lms.core.stub._
 
 @virtualize
 object query_staged {

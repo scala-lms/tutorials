@@ -19,8 +19,8 @@ interpreter is a compiler" but with a twist: parametric staging!
 
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
+import lms.macros.SourceContext
+import lms.core.virtualize
 
 /**
 Our Base Evaluator

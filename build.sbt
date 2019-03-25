@@ -4,7 +4,7 @@ scalaVersion := "2.12.4"
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-libraryDependencies += "org.scala-lang.lms" %% "lms-core-macrovirt" % "0.9.0-SNAPSHOT"
+// libraryDependencies += "org.scala-lang.lms" %% "lms-core-macrovirt" % "0.9.0-SNAPSHOT"
 
 libraryDependencies += "org.scalatest" % "scalatest_2.12" % "3.0.4"
 
@@ -23,6 +23,6 @@ addCompilerPlugin("org.scalamacros" % "paradise" % paradiseVersion cross CrossVe
 // tests are not thread safe
 parallelExecution in Test := false
 
-lazy val root = (project in file(".")).dependsOn(lmsSub)
+lazy val root = (project in file(".")).dependsOn(lmsSub % "test->test")
 
 lazy val lmsSub = ProjectRef(file("../lms-clean"), "lms-clean")

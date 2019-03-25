@@ -1,9 +1,11 @@
 package scala.lms.tutorial
 
-import org.scala_lang.virtualized.virtualize
-import org.scala_lang.virtualized.SourceContext
+import lms.core.virtualize
+import lms.macros.SourceContext
 
-import scala.virtualization.lms.stub.common._
+// import scala.virtualization.lms.stub.common._
+
+import lms.core.stub._
 
 // TODO: clean up at least, maybe add to LMS?
 //@virtualize

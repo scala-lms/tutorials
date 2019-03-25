@@ -1,8 +1,7 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.stub.common.Compile
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
+import lms.macros.SourceContext
+import lms.core.virtualize
 
 trait TrackConditionals extends Dsl {
   var cs1: Set[Rep[Boolean]] = Set.empty

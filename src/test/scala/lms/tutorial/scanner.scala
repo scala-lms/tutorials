@@ -1,8 +1,8 @@
 package scala.lms.tutorial
 
-import scala.virtualization.lms.stub.common._
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
+import lms.core.stub._
+import lms.macros.SourceContext
+import lms.core.virtualize
 
 // tests for the non-staged Scanner library
 // provided by scannerlib.scala

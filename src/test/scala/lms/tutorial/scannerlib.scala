@@ -2,11 +2,7 @@ package scala.lms.tutorial
 
 import java.io.FileReader
 import java.io.BufferedReader
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
 
-
-//@virtualize //FIXME to virtualize we need EmbeddedControls
 class Scanner(filename: String) {
   val br = new BufferedReader(new FileReader(filename))
   private[this] var pending: String = br.readLine()

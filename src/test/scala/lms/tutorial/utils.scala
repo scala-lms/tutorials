@@ -3,8 +3,7 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
-import org.scala_lang.virtualized.EmbeddedControls
-import org.scala_lang.virtualized.virtualize
+import lms.macros.EmbeddedControls
 
 trait LibSuite extends FunSuite {
   def dataFilePath(csv: String) = "src/data/" + csv

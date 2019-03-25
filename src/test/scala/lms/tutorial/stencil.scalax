@@ -13,8 +13,8 @@ Outline:
 package scala.lms.tutorial
 
 import scala.virtualization.lms.stub.common.ForwardTransformer
-import org.scala_lang.virtualized.SourceContext
-import org.scala_lang.virtualized.virtualize
+import lms.macros.SourceContext
+import lms.core.virtualize
 
 // Shonan Challenge 3.3 Stencil
 // https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
