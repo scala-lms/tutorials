@@ -244,11 +244,13 @@ trait QueryProcessor extends QueryAST {
 
 trait PlainQueryProcessor extends QueryProcessor {
   type Table = String
+  def dynamicFilePath(table: String): Table = filePath(table)
 }
 
 @virtualize
 trait StagedQueryProcessor extends QueryProcessor with Dsl {
-  type Table = Rep[String] // dynamic filename
+  type Table = String
+  def dynamicFilePath(table: String): Table = filePath(table)
   override def filePath(table: String) = if (table == "?") throw new Exception("file path for table ? not available") else super.filePath(table)
 }
 
@@ -265,12 +267,9 @@ Examples:
 trait Engine extends QueryProcessor with SQLParser {
   def query: String
   def filename: String
-  def liftTable(n: String): Table
   def eval: Unit
   def prepare: Unit = {}
   def run: Unit = execQuery(PrintCSV(parseSql(query)))
-  override def dynamicFilePath(table: String): Table =
-    liftTable(if (table == "?") filename else filePath(table))
   def evalString = {
     val source = new java.io.ByteArrayOutputStream()
     utils.withOutputFull(new java.io.PrintStream(source)) {
@@ -281,9 +280,7 @@ trait Engine extends QueryProcessor with SQLParser {
 }
 
 @virtualize
-trait StagedEngine extends Engine with StagedQueryProcessor {
-  override def liftTable(n: String) = unit(n)
-}
+trait StagedEngine extends Engine with StagedQueryProcessor
 
 object Run {
   var qu: String = _
@@ -296,7 +293,6 @@ object Run {
 
   def unstaged_engine: Engine =
     new Engine with MainEngine with query_unstaged.QueryInterpreter {
-      override def liftTable(n: Table) = n
       override def eval = run
     }
 
@@ -307,7 +303,7 @@ object Run {
       override val codegen = new DslGen with ScalaGenScanner {
         val IR: q.type = q
       }
-      override def snippet(fn: Table): Rep[Unit] = run
+      override def snippet(fn: Rep[String]): Rep[Unit] = run
       override def prepare: Unit = precompile
       override def eval: Unit = eval(filename)
     }
@@ -318,7 +314,7 @@ object Run {
       override val codegen = new DslGenC with CGenScannerLower {
         val IR: q.type = q
       }
-      override def snippet(fn: Table): Rep[Unit] = run
+      override def snippet(fn: Rep[String]): Rep[Unit] = run
       override def prepare: Unit = {}
       override def eval: Unit = eval(filename)
     }
@@ -329,7 +325,7 @@ object Run {
       println("   test:run (unstaged|scala|c) sql [file]")
       println()
       println("example usage:")
-      println("   test:run c \"select * from ? schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'\" src/data/t1gram.csv")
+      println("   test:run c \"select * from src/data/t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t where Phrase='Auswanderung'\"")
       return
     }
     val version = args(0)
@@ -375,17 +371,13 @@ class QueryTest extends TutorialFunSuite {
   }
 
   trait PlainTestDriver extends TestDriver with PlainQueryProcessor {
-    override def dynamicFilePath(table: String): Table = if (table == "?") defaultEvalTable else filePath(table)
     def eval(fn: Table): Unit = {
       execQuery(PrintCSV(parsedQuery))
     }
   }
 
   trait StagedTestDriver extends TestDriver with StagedQueryProcessor {
-    var dynamicFileName: Table = null.asInstanceOf[Table] //FIXME: "= _" gives: "argument expression's type is not compatible with formal parameter type; found   : <notype> ; required: ?T"
-    override def dynamicFilePath(table: String): Table = if (table == "?") dynamicFileName else unit(filePath(table))
-    def snippet(fn: Table): Rep[Unit] = {
-      dynamicFileName = fn
+    def snippet(fn: Rep[String]): Rep[Unit] = {
       execQuery(PrintCSV(parsedQuery))
     }
   }
@@ -454,7 +446,7 @@ class QueryTest extends TutorialFunSuite {
   // NOTE: we can use "select * from ?" to use dynamic file names (not used here right now)
   trait ExpectedASTs extends QueryAST {
     val scan_t = Scan("t.csv")
-    val scan_t1gram = Scan("?",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
+    val scan_t1gram = Scan("t1gram.csv",Some(Schema("Phrase", "Year", "MatchCount", "VolumeCount")),Some('\t'))
 
     val expectedAstForTest = Map(
       "t1" -> scan_t,
@@ -486,8 +478,8 @@ class QueryTest extends TutorialFunSuite {
   testquery("t5h","select * from t.csv join (select Name from t.csv)")
   testquery("t6", "select * from t.csv group by Name sum Value") // not 100% right syntax, but hey ...
 
-  val defaultEvalTable = dataFilePath("t1gram.csv")
-  val t1gram = "? schema Phrase, Year, MatchCount, VolumeCount delim \\t"
+  val defaultEvalTable = "IGNORE" // passed as argument to eval
+  val t1gram = s"t1gram.csv schema Phrase, Year, MatchCount, VolumeCount delim \\t"
   testquery("t1gram1", s"select * from $t1gram")
   testquery("t1gram2", s"select * from $t1gram where Phrase='Auswanderung'")
   testquery("t1gram2n", s"select * from nestedloops words.csv join (select Phrase as Word, Year, MatchCount, VolumeCount from $t1gram)")

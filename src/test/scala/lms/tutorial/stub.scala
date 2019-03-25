@@ -282,7 +282,7 @@ trait ExtendedCodeGen0 extends CompactTraverser {
   def quote(s: Def): String
   def remap(m: Manifest[_]): String
 
-  def init(g: Graph): Unit = {}
+  def init(g: Graph): Unit = { dce(g) }
 }
 
 
@@ -303,6 +303,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     case Const(x) if x.isInstanceOf[Char] && x == 0    => "'\\0'"
     case Const(x) if x.isInstanceOf[Char] => s"'${x.asInstanceOf[Char]}'"
     case Const(x) if x.isInstanceOf[Long] => x.toString + "L"
+    case Const(null) => "null"
     case Const(x) => x.toString
     // case Eff(x) => x.map(quote).mkString("")
   }
@@ -496,12 +497,6 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
   def emitln(s: String) = stream.println(s)
   def emitln() = stream.println()
 
-  override def init(g: Graph): Unit = dce(g)
-
-  // override def apply(g: Graph): Unit = {
-  //   dce(g)
-  //   super.apply(g)
-  // }
 }
 
 abstract class ExtendedCodeGen extends CompactScalaCodeGen with ExtendedCodeGen0 {
@@ -570,8 +565,7 @@ abstract class ExtendedCodeGen extends CompactScalaCodeGen with ExtendedCodeGen0
       super.traverse(n)
   }
   override def apply(g: Graph): Unit = {
-    dce(g)
-    stream.println(utils.captureOut(super.apply(g)))
+    utils.withOutput(stream)(super.apply(g))
   }
 }
 

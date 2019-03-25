@@ -424,7 +424,6 @@ class QueryLiveStepsTest extends TutorialFunSuite {
 
 
   trait SimpleQueryProcessor extends PlainQueryProcessor with SQLParser {
-    def dynamicFilePath(table: String): Table = table
     def execQuery(q: Operator): Unit = ???
     def version: String = "simple"
   }
