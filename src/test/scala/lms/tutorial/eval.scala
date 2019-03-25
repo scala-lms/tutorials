@@ -317,6 +317,14 @@ The Tests
 class TestEvaluator extends TutorialFunSuite {
   val under = "eval_"
 
+  /* to make it emit output files at all...
+  def assertResult(a: => Any)(b: => Any): Unit = {
+    val a1 = a
+    val b1 = try b catch { case e: Exception => e }
+    println("want: "+a1)
+    println("have: "+b1)
+  }*/
+
   def ex_id(c: Boolean) = A(L(c, "x", V("x")), List(I(1)))
   test ("id evaluated") {
     assertResult(I(1)){top_eval[NoRep](ex_id(false))}
