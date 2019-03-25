@@ -112,7 +112,7 @@ void Snippet(char* x0) {
     x11[x23] = x26 + 1;
   }
   close(x12);
-  int x27 = open(x0,0);
+  int x27 = open("src/data/t1gram.csv",0);
   int x28 = fsize(x27);
   char* x29 = mmap(0, x28, PROT_READ, MAP_FILE | MAP_SHARED, x27, 0);
   int x30 = 0;

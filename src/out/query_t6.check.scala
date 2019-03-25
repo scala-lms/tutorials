@@ -1,7 +1,7 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class Snippet extends (java.lang.String => Unit) {
+class Snippet() extends (java.lang.String => Unit) {
   def apply(x0: java.lang.String): Unit = {
     println("Name,Value")
     val x1 = new Array[java.lang.String](256)
@@ -9,7 +9,9 @@ class Snippet extends (java.lang.String => Unit) {
     var x3 = 0
     val x4 = new Array[Int](256)
     var x5 = 0
-    while (x5 != 256) {
+    while ({
+      x5 != 256
+    }) {
       x4(x5) = -1
       x5 = x5 + 1
     }
@@ -19,36 +21,47 @@ class Snippet extends (java.lang.String => Unit) {
     x8.next(',')
     x8.next(',')
     x8.next('\n')
-    val x9 = 0L * 41L
-    while (x8.hasNext) {
+    while ({
+      x8.hasNext
+    }) {
+      val x9 = x8.next(',')
       val x10 = x8.next(',')
-      val x11 = x8.next(',')
       x8.next('\n')
-      val x12 = ((x9 + x10.hashCode).toInt) & 255
-      val x13 = {
+      val x11 = ((x9.hashCode).toInt) & 255
+      val x12 = {
         //#hash_lookup
         // generated code for hash lookup
-        var x14 = x12
-        while (x4(x14) != -1 && !(x1(x4(x14)) == x10)) x14 = (x14 + 1) & 255
-        if (x4(x14) == -1) {
-          val x15 = x3
-          x1(x15) = x10
+        var x13 = x11
+        while ({
+          ((x4(x13)) != -1) && {
+            !((x1(x4(x13))) == x9)
+          }
+        }) {
+          x13 = (x13 + 1) & 255
+        }
+        if ((x4(x13)) == -1) {
+          val x14 = x3
+          x1(x14) = x9
           x3 = x3 + 1
-          x4(x14) = x15
-          x6(x15) = 0
-          x15
-        } else x4(x14)
+          x4(x13) = x14
+          x6(x14) = 0
+          x14
+        } else {
+          x4(x13)
+        }
         //#hash_lookup
       }
-      x6(x13) = x6(x13) + x11.toInt
+      x6(x12) = (x6(x12)) + (x10.toInt)
     }
     x8.close
-    val x16 = x3
-    var x17 = 0
-    while (x17 != x16) {
-      val x18 = x17
-      printf("%s,%s\n", x1(x18), (x6(x18)).toString)
-      x17 = x17 + 1
+    val x15 = x3
+    var x16 = 0
+    while ({
+      x16 != x15
+    }) {
+      val x17 = x16
+      printf("%s,%s\n", x1(x17), (x6(x17)).toString)
+      x16 = x16 + 1
     }
   }
 }

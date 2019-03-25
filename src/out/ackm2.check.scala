@@ -3,27 +3,31 @@ Emitting Generated Code
 *******************************************/
 class Snippet() extends (Int => Int) {
   def apply(x0: Int): Int = {
-    def x1(x2: Int): Int = {
-      // ack_0
-      x2 + 1
-    }
-    def x3(x4: Int): Int = {
-      // ack_1
-      if (x4 == 0) {
-        x1(1)
-      } else {
-        x1(x3(x4 - 1))
-      }
-    }
+    var x1: scala.Function1[Int, Int] = null
+    var x2: scala.Function1[Int, Int] = null
+    x1 = x3
+    x2 = x4
     def x5(x6: Int): Int = {
-      // ack_2
-      if (x6 == 0) {
-        x3(1)
+      // ack_0
+      x6 + 1
+    }
+    def x4(x7: Int): Int = {
+      // ack_1
+      if (x7 == 0) {
+        x5(1)
       } else {
-        x3(x5(x6 - 1))
+        x5(x2(x7 - 1))
       }
     }
-    x5(x0)
+    def x3(x8: Int): Int = {
+      // ack_2
+      if (x8 == 0) {
+        x4(1)
+      } else {
+        x4(x1(x8 - 1))
+      }
+    }
+    x3(x0)
   }
 }
 /*****************************************

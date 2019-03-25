@@ -60,7 +60,7 @@ void Snippet(char* x0) {
     x4 = x4 + 1;
   }
   x4 = x4 + 1;
-  int x6 = open(x0,0);
+  int x6 = open("src/data/t1gram.csv",0);
   int x7 = fsize(x6);
   char* x8 = mmap(0, x7, PROT_READ, MAP_FILE | MAP_SHARED, x6, 0);
   while (x4 < x2) {

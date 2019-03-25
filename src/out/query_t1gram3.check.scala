@@ -1,17 +1,23 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class Snippet extends (java.lang.String => Unit) {
+class Snippet() extends (java.lang.String => Unit) {
   def apply(x0: java.lang.String): Unit = {
     println("Word,Value,Phrase,Year,MatchCount,VolumeCount")
     val x1 = new scala.lms.tutorial.Scanner("src/data/words.csv")
     x1.next(',')
     x1.next('\n')
-    while (x1.hasNext) {
+    while ({
+      x1.hasNext
+    }) {
       val x2 = x1.next(',')
       val x3 = x1.next('\n')
-      val x4 = new scala.lms.tutorial.Scanner(x0)
-      while (x4.hasNext) printf("%s,%s,%s,%s,%s,%s\n", x2, x3, x4.next('\t'), x4.next('\t'), x4.next('\t'), x4.next('\n'))
+      val x4 = new scala.lms.tutorial.Scanner("src/data/t1gram.csv")
+      while ({
+        x4.hasNext
+      }) {
+        printf("%s,%s,%s,%s,%s,%s\n", x2, x3, x4.next('\t'), x4.next('\t'), x4.next('\t'), x4.next('\n'))
+      }
       x4.close
     }
     x1.close

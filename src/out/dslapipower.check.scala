@@ -1,9 +1,9 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class Snippet extends (Int => Int) {
+class Snippet() extends (Int => Int) {
   def apply(x0: Int): Int = {
-    x0 * x0 * x0 * 1
+    x0 * (x0 * x0)
   }
 }
 /*****************************************
