@@ -316,6 +316,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     "ScannerNext"    -> "Scanner.next",
     "ScannerClose"   -> "Scanner.close",
     "ObjHashCode"    -> "Object.hashCode",
+    "DFAState"       -> "new scala.lms.tutorial.Automaton[Char,Boolean]"
   )
 
 
@@ -325,14 +326,30 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
   }
 
 
+  var recursive = false
+
   // process and print block results
   override def traverseCompact(ns: Seq[Node], y: Block): Unit = {
     // if (numStms > 0) emit("{\n")
+
+    // Are there any forward nodes? if yes, declare all variables before
+    // assigning initial values to avoid "forward reference extends
+    // over definition" errors. Exception: lambdas emitted as defs.
+    val save = recursive
+    recursive = ns.seq.exists(_.op == "λforward")
+
+    if (recursive) {
+      for (d <- ns if d.op != "λ" && shouldInline(d.n).isEmpty) {
+        emit("var "); emit(quote(d.n)); emit(": "); emit(remap(typeMap(d.n))); emitln(" = null")
+      }
+    }
+
     super.traverseCompact(ns, y)
     if (y.res != Const(())) {
       shallow(y.res); emitln()
     }
     // if (numStms > 0) emit("\n}")
+    recursive = save
   }
 
   def quoteBlockp(x: => Unit) {
@@ -354,6 +371,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
   // (either inline or as part of val def)
   // XXX TODO: precedence of nested expressions!!
   def shallow(n: Node): Unit = n match {
+    case n @ Node(f,"λforward",List(y),_) => emit(quote(y))
     case n @ Node(f,"λ",List(y:Block),_) => 
       // XXX what should we do for functions? 
       // proper inlining will likely work better 
@@ -392,8 +410,10 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
         traverse(b)
         emitln("//#" + str)
       }
+
     case n @ Node(s,"Boolean.!",List(a),_) => 
       emit("!"); shallow1(a)
+
     case n @ Node(s,"staticData",List(Const(a)),_) => 
       val q = a match { case x: Array[_] => "Array("+x.mkString(",")+")" case _ => a }
       emit("p"+quote(s)); emit(s" /* staticData $q */")
@@ -441,9 +461,11 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
   override def traverse(n: Node): Unit = n match {
     case n @ Node(f,"λ",List(y:Block),_) => 
       val x = y.in.head
-      emit(s"def ${quote(f)}(${quote(x)}: Int): Int${quoteEff(y.ein)} = ")
-      // ??? // TODO
-      //quoteBlock(traverse(y,f))
+      val a = typeMap(x)
+      val b = typeMap(y.res)
+      val e = quoteEff(y.ein)
+
+      emit(s"def ${quote(f)}(${quote(x)}: $a): $b$e = ")
       quoteBlockp(traverse(y,f))
       emitln()
 
@@ -463,7 +485,11 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     case n @ Node(s,"array_get",_,_) if !dce.live(s) => // no-op
 
     case n @ Node(s,_,_,_) => 
-      if (dce.live(s)) emit(s"val ${quote(s)} = "); shallow(n); emitln()
+      if (!recursive) {
+      /*if (dce.live(s))*/ emit(s"val ${quote(s)} = "); shallow(n); emitln()
+      } else {
+      /*if (dce.live(s))*/ emit(s"${quote(s)} = "); shallow(n); emitln()
+    }
   }
 
   def emit(s: String) = stream.print(s)
@@ -818,12 +844,19 @@ trait Base extends EmbeddedControls with OverloadHack with lms.util.ClosureCompa
       case _ =>
         val fn = Backend.Sym(Adapter.g.fresh)
         Adapter.funTable = (fn,can)::Adapter.funTable
+        
+        val fn1 = Backend.Sym(Adapter.g.fresh)
+        Adapter.g.reflect(fn,"λforward",fn1)()()
         //val xn = Sym(g.fresh)
         //val f1 = (x: INT) => APP(fn,x)
         // NOTE: lambda expression itself does not have
         // an effect, so body block should not count as 
         // latent effect of the lambda
-        Wrap[A=>B](Adapter.g.reflect(fn,"λ",Adapter.g.reify(xn => Unwrap(f(Wrap[A](xn)))))()())
+        val res = Wrap[A=>B](Adapter.g.reflect(fn1,"λ",Adapter.g.reify(xn => Unwrap(f(Wrap[A](xn)))))(fn)())
+        Adapter.funTable = Adapter.funTable.map { case (fn2,can2) => 
+          if (can == can2) (fn1,can) else (fn2,can2)
+        }
+        res
     }
   }
   def doLambda[A:Manifest,B:Manifest](f: Rep[A] => Rep[B]): Rep[A => B] = fun(f)
