@@ -1,53 +1,46 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class Snippet extends ((Unit)=>(scala.lms.tutorial.Automaton[Char, Boolean])) {
-  def apply(x19:Unit): scala.lms.tutorial.Automaton[Char, Boolean] = {
-    var x13 = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
-    var x1 = null.asInstanceOf[scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]]]
-    var x17 = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
-    var x4 = null.asInstanceOf[scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]]]
-    var x10 = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
-    var x7 = null.asInstanceOf[scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]]]
-    var x12 = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
-    x1 = {x2: (Char) =>
-      val x3 = x2 == 'A'
-      val x18 = if (x3) {
-        x17
+class Snippet() extends (Unit => scala.lms.tutorial.Automaton[Char, Boolean]) {
+  def apply(x1: Unit): scala.lms.tutorial.Automaton[Char, Boolean] = {
+    var x2: scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]] = null
+    var x20: scala.lms.tutorial.Automaton[Char, Boolean] = null
+    var x24: scala.lms.tutorial.Automaton[Char, Boolean] = null
+    var x26: scala.lms.tutorial.Automaton[Char, Boolean] = null
+    var x29: scala.lms.tutorial.Automaton[Char, Boolean] = null
+    var x32: scala.lms.tutorial.Automaton[Char, Boolean] = null
+    x2 = x3
+    x20 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x15)
+    x24 = new scala.lms.tutorial.Automaton[Char,Boolean](true, x2)
+    x26 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x2)
+    def x15(x17: Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
+      if (x17 == 'A') {
+        x20
       } else {
-        x13
-      }
-      x18: scala.lms.tutorial.Automaton[Char, Boolean]
-    }
-    x12 = scala.lms.tutorial.Automaton(true, x1)
-    x7 = {x8: (Char) =>
-      val x9 = x8 == 'A'
-      val x15 = if (x9) {
-        x10
-      } else {
-        val x11 = x8 == 'B'
-        val x14 = if (x11) {
-          x12
+        if (x17 == 'B') {
+          x24
         } else {
-          x13
+          x26
         }
-        x14
       }
-      x15: scala.lms.tutorial.Automaton[Char, Boolean]
     }
-    x10 = scala.lms.tutorial.Automaton(false, x7)
-    x4 = {x5: (Char) =>
-      val x6 = x5 == 'A'
-      val x16 = if (x6) {
-        x10
+    x29 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x15)
+    def x9(x11: Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
+      if (x11 == 'A') {
+        x29
       } else {
-        x13
+        x26
       }
-      x16: scala.lms.tutorial.Automaton[Char, Boolean]
     }
-    x17 = scala.lms.tutorial.Automaton(false, x4)
-    x13 = scala.lms.tutorial.Automaton(false, x1)
-    x13
+    x32 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x9)
+    def x3(x5: Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
+      if (x5 == 'A') {
+        x32
+      } else {
+        x26
+      }
+    }
+    new scala.lms.tutorial.Automaton[Char,Boolean](false, x3)
   }
 }
 /*****************************************
