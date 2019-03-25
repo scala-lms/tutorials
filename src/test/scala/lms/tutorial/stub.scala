@@ -340,7 +340,7 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
     recursive = ns.seq.exists(_.op == "λforward")
 
     if (recursive) {
-      for (d <- ns if d.op != "λ" && shouldInline(d.n).isEmpty) {
+      for (d <- ns if d.op != "λ" && shouldInline(d.n).isEmpty && dce.live(d.n)) {
         emit("var "); emit(quote(d.n)); emit(": "); emit(remap(typeMap(d.n))); emitln(" = null")
       }
     }
@@ -487,9 +487,9 @@ class ExtendedScalaCodeGen extends ExtendedCodeGen0 {
 
     case n @ Node(s,_,_,_) => 
       if (!recursive) {
-      /*if (dce.live(s))*/ emit(s"val ${quote(s)} = "); shallow(n); emitln()
+        if (dce.live(s)) emit(s"val ${quote(s)} = "); shallow(n); emitln()
       } else {
-      /*if (dce.live(s))*/ emit(s"${quote(s)} = "); shallow(n); emitln()
+        if (dce.live(s)) emit(s"${quote(s)} = "); shallow(n); emitln()
     }
   }
 
