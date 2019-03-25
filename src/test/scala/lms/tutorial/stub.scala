@@ -785,7 +785,11 @@ trait Base extends EmbeddedControls with OverloadHack with lms.util.ClosureCompa
     Wrap(Adapter.g.reflect("staticData", Backend.Const(x)))
 
 
-  def reflectEffect[T](x: Def[T]): Exp[T] = ???
+  def reflectEffect[T](x: Def[T]): Exp[T] = {
+    val p = x.asInstanceOf[Product]
+    val xs = p.productIterator.map(convertToExp).toSeq
+    Wrap(Adapter.g.reflectEffect(p.productPrefix, xs:_*)(Adapter.CTRL))
+  }
   def reflectMutable[T:Manifest](x: Def[T]): Exp[T] = {
     val p = x.asInstanceOf[Product]
     val xs = p.productIterator.map(convertToExp).toSeq
