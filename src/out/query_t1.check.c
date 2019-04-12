@@ -75,11 +75,11 @@ void Snippet(char* x0) {
     int x8 = x4;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
-    printll(x3 + x6);
+    printll(x3+x6);
     printf(",");
     printf("%d", x7);
     printf(",");
-    printll(x3 + x8);
+    printll(x3+x8);
     printf("%s\n", "");
   }
   close(x1);
