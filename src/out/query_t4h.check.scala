@@ -26,81 +26,80 @@ class Snippet() extends (java.lang.String => Unit) {
     x12.next(',')
     x12.next('\n')
     val x13 = (0L.toInt) & 255
-    val x14 = !true
     while ({
       x12.hasNext
     }) {
-      val x15 = x9
-      x5(x15) = x12.next(',')
-      x6(x15) = x12.next(',')
-      x7(x15) = x12.next('\n')
+      val x14 = x9
+      x5(x14) = x12.next(',')
+      x6(x14) = x12.next(',')
+      x7(x14) = x12.next('\n')
       x9 = x9 + 1
-      val x16 = {
+      val x15 = {
         //#hash_lookup
         // generated code for hash lookup
-        var x17 = x13
+        var x16 = x13
         while ({
-          ((x3(x17)) != -1) && {
-            x14
+          ((x3(x16)) != -1) && {
+            false
           }
         }) {
-          x17 = (x17 + 1) & 255
+          x16 = (x16 + 1) & 255
         }
-        if ((x3(x17)) == -1) {
-          val x18 = x2
+        if ((x3(x16)) == -1) {
+          val x17 = x2
           x2 = x2 + 1
-          x3(x17) = x18
-          x11(x18) = 0
-          x18
+          x3(x16) = x17
+          x11(x17) = 0
+          x17
         } else {
-          x3(x17)
+          x3(x16)
         }
         //#hash_lookup
       }
-      val x19 = x11(x16)
-      x10((x16 * 256) + x19) = x15
-      x11(x16) = x19 + 1
+      val x18 = x11(x15)
+      x10((x15 * 256) + x18) = x14
+      x11(x15) = x18 + 1
     }
     x12.close
-    val x20 = new scala.lms.tutorial.Scanner("src/data/t.csv")
-    x20.next(',')
-    x20.next(',')
-    x20.next('\n')
+    val x19 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    x19.next(',')
+    x19.next(',')
+    x19.next('\n')
     while ({
-      x20.hasNext
+      x19.hasNext
     }) {
-      val x21 = x20.next(',')
-      x20.next(',')
-      x20.next('\n')
-      val x22 = {
+      val x20 = x19.next(',')
+      x19.next(',')
+      x19.next('\n')
+      val x21 = {
         //#hash_lookup
         // generated code for hash lookup
-        var x23 = x13
+        var x22 = x13
         while ({
-          ((x3(x23)) != -1) && {
-            x14
+          ((x3(x22)) != -1) && {
+            false
           }
         }) {
-          x23 = (x23 + 1) & 255
+          x22 = (x22 + 1) & 255
         }
-        x3(x23)
+        x3(x22)
         //#hash_lookup
       }
-      if (x22 != -1) {
-        val x24 = x22 * 256
-        val x25 = x24 + (x11(x22))
-        var x26 = x24
+      if (x21 != -1) {
+        val x23 = x21 * 256
+        val x24 = x23 + (x11(x21))
+        var x25 = x23
         while ({
-          x26 != x25
+          x25 != x24
         }) {
-          val x27 = x10(x26)
-          printf("%s,%s,%s,%s\n", x5(x27), x6(x27), x7(x27), x21)
-          x26 = x26 + 1
+          val x26 = x10(x25)
+          printf("%s,%s,%s,%s\n", x5(x26), x6(x26), x7(x26), x20)
+          x25 = x25 + 1
         }
       } else {
       }
     }
-    x20.close
+    x19.close
   }
 }
 /*****************************************
