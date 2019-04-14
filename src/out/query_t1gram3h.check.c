@@ -50,19 +50,19 @@ void Snippet(char* x0) {
   printf("%s\n", "Word,Value,Phrase,Year,MatchCount,VolumeCount");
   int x1 = 0;
   int x2 = 0;
-  int* x3 = (int*)malloc(256 * sizeof(int));;
+  int* x3 = (int*)malloc(256 * sizeof(int));
   int x4 = 0;
   while (x4 != 256) {
     x3[x4] = -1;
     x4 = x4 + 1;
   }
-  char** x5 = (char**)malloc(65536 * sizeof(char*));;
-  int* x6 = (int*)malloc(65536 * sizeof(int));;
-  int* x7 = (int*)malloc(65536 * sizeof(int));;
+  char** x5 = (char**)malloc(65536 * sizeof(char*));
+  int* x6 = (int*)malloc(65536 * sizeof(int));
+  int* x7 = (int*)malloc(65536 * sizeof(int));
   int x8 = 0;
   int x9 = 0;
-  int* x10 = (int*)malloc(65536 * sizeof(int));;
-  int* x11 = (int*)malloc(256 * sizeof(int));;
+  int* x10 = (int*)malloc(65536 * sizeof(int));
+  int* x11 = (int*)malloc(256 * sizeof(int));
   int x12 = open("src/data/words.csv",0);
   int x13 = fsize(x12);
   char* x14 = mmap(0, x13, PROT_READ, MAP_FILE | MAP_SHARED, x12, 0);

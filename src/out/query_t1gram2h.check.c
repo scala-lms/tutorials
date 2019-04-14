@@ -48,23 +48,23 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Word,Value,Word,Year,MatchCount,VolumeCount");
-  char** x1 = (char**)malloc(256 * sizeof(char*));;
-  int* x2 = (int*)malloc(256 * sizeof(int));;
+  char** x1 = (char**)malloc(256 * sizeof(char*));
+  int* x2 = (int*)malloc(256 * sizeof(int));
   int x3 = 0;
   int x4 = 0;
-  int* x5 = (int*)malloc(256 * sizeof(int));;
+  int* x5 = (int*)malloc(256 * sizeof(int));
   int x6 = 0;
   while (x6 != 256) {
     x5[x6] = -1;
     x6 = x6 + 1;
   }
-  char** x7 = (char**)malloc(65536 * sizeof(char*));;
-  int* x8 = (int*)malloc(65536 * sizeof(int));;
-  int* x9 = (int*)malloc(65536 * sizeof(int));;
+  char** x7 = (char**)malloc(65536 * sizeof(char*));
+  int* x8 = (int*)malloc(65536 * sizeof(int));
+  int* x9 = (int*)malloc(65536 * sizeof(int));
   int x10 = 0;
   int x11 = 0;
-  int* x12 = (int*)malloc(65536 * sizeof(int));;
-  int* x13 = (int*)malloc(256 * sizeof(int));;
+  int* x12 = (int*)malloc(65536 * sizeof(int));
+  int* x13 = (int*)malloc(256 * sizeof(int));
   int x14 = open("src/data/words.csv",0);
   int x15 = fsize(x14);
   char* x16 = mmap(0, x15, PROT_READ, MAP_FILE | MAP_SHARED, x14, 0);

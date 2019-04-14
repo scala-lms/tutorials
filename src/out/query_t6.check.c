@@ -48,17 +48,17 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Name,Value");
-  char** x1 = (char**)malloc(256 * sizeof(char*));;
-  int* x2 = (int*)malloc(256 * sizeof(int));;
+  char** x1 = (char**)malloc(256 * sizeof(char*));
+  int* x2 = (int*)malloc(256 * sizeof(int));
   int x3 = 0;
   int x4 = 0;
-  int* x5 = (int*)malloc(256 * sizeof(int));;
+  int* x5 = (int*)malloc(256 * sizeof(int));
   int x6 = 0;
   while (x6 != 256) {
     x5[x6] = -1;
     x6 = x6 + 1;
   }
-  int* x7 = (int*)malloc(256 * sizeof(int));;
+  int* x7 = (int*)malloc(256 * sizeof(int));
   int x8 = 0;
   int x9 = open("src/data/t.csv",0);
   int x10 = fsize(x9);

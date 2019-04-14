@@ -50,21 +50,21 @@ void Snippet(char* x0) {
   printf("%s\n", "Name,Value,Flag,Name1");
   int x1 = 0;
   int x2 = 0;
-  int* x3 = (int*)malloc(256 * sizeof(int));;
+  int* x3 = (int*)malloc(256 * sizeof(int));
   int x4 = 0;
   while (x4 != 256) {
     x3[x4] = -1;
     x4 = x4 + 1;
   }
-  char** x5 = (char**)malloc(65536 * sizeof(char*));;
-  int* x6 = (int*)malloc(65536 * sizeof(int));;
-  int* x7 = (int*)malloc(65536 * sizeof(int));;
-  char** x8 = (char**)malloc(65536 * sizeof(char*));;
-  int* x9 = (int*)malloc(65536 * sizeof(int));;
+  char** x5 = (char**)malloc(65536 * sizeof(char*));
+  int* x6 = (int*)malloc(65536 * sizeof(int));
+  int* x7 = (int*)malloc(65536 * sizeof(int));
+  char** x8 = (char**)malloc(65536 * sizeof(char*));
+  int* x9 = (int*)malloc(65536 * sizeof(int));
   int x10 = 0;
   int x11 = 0;
-  int* x12 = (int*)malloc(65536 * sizeof(int));;
-  int* x13 = (int*)malloc(256 * sizeof(int));;
+  int* x12 = (int*)malloc(65536 * sizeof(int));
+  int* x13 = (int*)malloc(256 * sizeof(int));
   int x14 = open("src/data/t.csv",0);
   int x15 = fsize(x14);
   char* x16 = mmap(0, x15, PROT_READ, MAP_FILE | MAP_SHARED, x14, 0);

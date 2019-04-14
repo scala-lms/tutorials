@@ -48,25 +48,25 @@ Emitting C Generated Code
 #include <stdbool.h>
 void Snippet(char* x0) {
   printf("%s\n", "Name,Value,Flag,Name");
-  char** x1 = (char**)malloc(256 * sizeof(char*));;
-  int* x2 = (int*)malloc(256 * sizeof(int));;
+  char** x1 = (char**)malloc(256 * sizeof(char*));
+  int* x2 = (int*)malloc(256 * sizeof(int));
   int x3 = 0;
   int x4 = 0;
-  int* x5 = (int*)malloc(256 * sizeof(int));;
+  int* x5 = (int*)malloc(256 * sizeof(int));
   int x6 = 0;
   while (x6 != 256) {
     x5[x6] = -1;
     x6 = x6 + 1;
   }
-  char** x7 = (char**)malloc(65536 * sizeof(char*));;
-  int* x8 = (int*)malloc(65536 * sizeof(int));;
-  int* x9 = (int*)malloc(65536 * sizeof(int));;
-  char** x10 = (char**)malloc(65536 * sizeof(char*));;
-  int* x11 = (int*)malloc(65536 * sizeof(int));;
+  char** x7 = (char**)malloc(65536 * sizeof(char*));
+  int* x8 = (int*)malloc(65536 * sizeof(int));
+  int* x9 = (int*)malloc(65536 * sizeof(int));
+  char** x10 = (char**)malloc(65536 * sizeof(char*));
+  int* x11 = (int*)malloc(65536 * sizeof(int));
   int x12 = 0;
   int x13 = 0;
-  int* x14 = (int*)malloc(65536 * sizeof(int));;
-  int* x15 = (int*)malloc(256 * sizeof(int));;
+  int* x14 = (int*)malloc(65536 * sizeof(int));
+  int* x15 = (int*)malloc(256 * sizeof(int));
   int x16 = open("src/data/t.csv",0);
   int x17 = fsize(x16);
   char* x18 = mmap(0, x17, PROT_READ, MAP_FILE | MAP_SHARED, x16, 0);
