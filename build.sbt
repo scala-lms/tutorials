@@ -26,5 +26,5 @@ parallelExecution in Test := false
 lazy val tutorials = (project in file(".")).dependsOn(lms % "test->test")
   // .settings(fork := true)
 
-lazy val lms = (project in file("../lms-clean"))
+lazy val lms = ProjectRef(file("../lms-clean"), "lms-clean")
   // .settings(fork := true)
