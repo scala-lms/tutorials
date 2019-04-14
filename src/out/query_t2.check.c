@@ -74,7 +74,7 @@ void Snippet(char* x0) {
     x4 = x4 + 1;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
-    printll(x3+x6);
+    printll(x3 + x6);
     printf("%s\n", "");
   }
   close(x1);

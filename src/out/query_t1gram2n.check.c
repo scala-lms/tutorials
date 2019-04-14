@@ -68,7 +68,7 @@ void Snippet(char* x0) {
     while (x3[x4] != ',') x4 = x4 + 1;
     int x10 = x4 - x9;
     x4 = x4 + 1;
-    char* x11 = x3+x9;
+    char* x11 = x3 + x9;
     int x12 = 0;
     while (x3[x4] != '\n') {
       x12 = x12 * 10 + (int)(x3[x4] - '0');
@@ -92,23 +92,23 @@ void Snippet(char* x0) {
       while (x8[x14] != '\n') x14 = x14 + 1;
       x14 = x14 + 1;
       if (x10 == x16 - x15 && ({
-        char* x20 = x8+x15;
+        char* x20 = x8 + x15;
         int x21 = 0;
         while (x21 < x10 && x11[x21] == x20[x21]) x21 = x21 + 1;
         x21 == x10;
       })) {
-        char* x20 = x8+x15;
+        char* x20 = x8 + x15;
         printll(x11);
         printf(",");
         printf("%d", x13);
         printf(",");
         printll(x20);
         printf(",");
-        printll(x8+x17);
+        printll(x8 + x17);
         printf(",");
-        printll(x8+x18);
+        printll(x8 + x18);
         printf(",");
-        printll(x8+x19);
+        printll(x8 + x19);
         printf("%s\n", "");
       } else {
       }

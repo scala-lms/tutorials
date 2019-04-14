@@ -96,10 +96,10 @@ void Snippet(char* x0) {
     int x24 = x17;
     x17 = x17 + 1;
     int x25 = x11;
-    x5[x25] = x16+x20;
+    x5[x25] = x16 + x20;
     x6[x25] = x21 - x20;
     x7[x25] = x22;
-    x8[x25] = x16+x23;
+    x8[x25] = x16 + x23;
     x9[x25] = x24 - x23;
     x11 = x11 + 1;
     int x26 = ({
@@ -153,7 +153,7 @@ void Snippet(char* x0) {
       ;//#hash_lookup;
     });
     if (x34 != -1) {
-      char* x36 = x16+x32;
+      char* x36 = x16 + x32;
       int x37 = x34 * 256;
       int x38 = x37 + x13[x34];
       int x39 = x37;

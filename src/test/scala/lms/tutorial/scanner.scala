@@ -117,7 +117,7 @@ trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp { this: DslE
   def close(fd: Rep[Int]) = unchecked[Unit]("close(",fd,")")
   def filelen(fd: Rep[Int]) = uncheckedPure[Int]("fsize(",fd,")") // FIXME: fresh name
   def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
-  def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data,"+",pos)
+  def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data," + ",pos)
   def prints(s: Rep[String]): Rep[Int] = unchecked[Int]("printll(",s,")")
 }
 

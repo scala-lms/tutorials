@@ -77,12 +77,12 @@ void Snippet(char* x0) {
     int x9 = x4 - x8;
     x4 = x4 + 1;
     if (x9 == 3 && ({
-      char* x10 = x3+x8;
+      char* x10 = x3 + x8;
       int x11 = 0;
       while (x11 < x9 && x10[x11] == "yes"[x11]) x11 = x11 + 1;
       x11 == x9;
     })) {
-      printll(x3+x6);
+      printll(x3 + x6);
       printf("%s\n", "");
     } else {
     }

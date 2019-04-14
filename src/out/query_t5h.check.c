@@ -86,7 +86,7 @@ void Snippet(char* x0) {
     while (x18[x19] != ',') x19 = x19 + 1;
     int x22 = x19 - x21;
     x19 = x19 + 1;
-    char* x23 = x18+x21;
+    char* x23 = x18 + x21;
     int x24 = 0;
     while (x18[x19] != ',') {
       x24 = x24 * 10 + (int)(x18[x19] - '0');
@@ -101,7 +101,7 @@ void Snippet(char* x0) {
     x7[x27] = x23;
     x8[x27] = x22;
     x9[x27] = x24;
-    x10[x27] = x18+x25;
+    x10[x27] = x18 + x25;
     x11[x27] = x26 - x25;
     x13 = x13 + 1;
     int x28 = ((int)(hash(x23, x22))) & 255;
@@ -151,7 +151,7 @@ void Snippet(char* x0) {
     while (x18[x37] != ',') x37 = x37 + 1;
     int x40 = x37 - x39;
     x37 = x37 + 1;
-    char* x41 = x18+x39;
+    char* x41 = x18 + x39;
     int x42 = 0;
     while (x18[x37] != ',') {
       x42 = x42 * 10 + (int)(x18[x37] - '0');

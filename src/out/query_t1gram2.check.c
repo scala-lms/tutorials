@@ -67,19 +67,19 @@ void Snippet(char* x0) {
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
     if (x6 == 12 && ({
-      char* x10 = x3+x5;
+      char* x10 = x3 + x5;
       int x11 = 0;
       while (x11 < x6 && x10[x11] == "Auswanderung"[x11]) x11 = x11 + 1;
       x11 == x6;
     })) {
-      char* x10 = x3+x5;
+      char* x10 = x3 + x5;
       printll(x10);
       printf(",");
-      printll(x3+x7);
+      printll(x3 + x7);
       printf(",");
-      printll(x3+x8);
+      printll(x3 + x8);
       printf(",");
-      printll(x3+x9);
+      printll(x3 + x9);
       printf("%s\n", "");
     } else {
     }
