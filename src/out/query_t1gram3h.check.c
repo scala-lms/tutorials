@@ -75,7 +75,7 @@ void Snippet(char* x0) {
     x15 = x15 + 1;
   }
   x15 = x15 + 1;
-  int x17 = ((int)0L) & 255;
+  int x17 = (int)0L & 255;
   while (x15 < x13) {
     int x18 = x15;
     while (x14[x15] != ',') x15 = x15 + 1;
@@ -96,7 +96,7 @@ void Snippet(char* x0) {
       //#hash_lookup
       // generated code for hash lookup
       int x23 = x17;
-      while (x3[x23] != -1 && false) x23 = (x23 + 1) & 255;
+      while (x3[x23] != -1 && false) x23 = x23 + 1 & 255;
       (x3[x23] == -1) ? ({
         int x24 = x2;
         x2 = x2 + 1;
@@ -132,7 +132,7 @@ void Snippet(char* x0) {
       //#hash_lookup
       // generated code for hash lookup
       int x35 = x17;
-      while (x3[x35] != -1 && false) x35 = (x35 + 1) & 255;
+      while (x3[x35] != -1 && false) x35 = x35 + 1 & 255;
       x3[x35]
       ;//#hash_lookup;
     });

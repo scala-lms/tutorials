@@ -88,7 +88,7 @@ void Snippet(char* x0) {
     x12 = x12 + 1;
     while (x11[x12] != '\n') x12 = x12 + 1;
     x12 = x12 + 1;
-    int x18 = ((int)(hash(x16, x15))) & 255;
+    int x18 = (int)hash(x16, x15) & 255;
     int x19 = ({
       //#hash_lookup
       // generated code for hash lookup
@@ -102,7 +102,7 @@ void Snippet(char* x0) {
           while (x24 < x23 && x22[x24] == x16[x24]) x24 = x24 + 1;
           x24 == x23;
         }));
-      })) x20 = (x20 + 1) & 255;
+      })) x20 = x20 + 1 & 255;
       (x5[x20] == -1) ? ({
         int x25 = x4;
         x1[x25] = x16;
