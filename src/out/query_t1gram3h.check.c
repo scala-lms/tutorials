@@ -1,11 +1,17 @@
-#include <fcntl.h>
+/*****************************************
+Emitting C Generated Code
+*******************************************/
+#include <unistd.h>
 #include <errno.h>
 #include <err.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
-#include <unistd.h>
+#include <sys/mman.h>
+#include <stdbool.h>
+/************* Functions **************/
 #ifndef MAP_FILE
 #define MAP_FILE MAP_SHARED
 #endif
@@ -20,8 +26,7 @@ int printll(char* s) {
   }
   return 0;
 }
-long hash(char *str0, int len)
-{
+long hash(char *str0, int len) {
   unsigned char* str = (unsigned char*)str0;
   unsigned long hash = 5381;
   int c;
@@ -29,23 +34,7 @@ long hash(char *str0, int len)
   hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   return hash;
 }
-void Snippet(char*);
-int main(int argc, char *argv[])
-{
-  if (argc != 2) {
-    printf("usage: query <filename>\n");
-    return 0;
-  }
-  Snippet(argv[1]);
-  return 0;
-}
-/*****************************************
-Emitting C Generated Code
-*******************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+/**************** Snippet ****************/
 void Snippet(char* x0) {
   printf("%s\n", "Word,Value,Phrase,Year,MatchCount,VolumeCount");
   int x1 = 0;
@@ -168,3 +157,11 @@ void Snippet(char* x0) {
 /*****************************************
 End of C Generated Code
 *******************************************/
+int main(int argc, char *argv[]) {
+  if (argc != 2) {
+    printf("usage: %s <arg>\n", argv[0]);
+    return 0;
+  }
+  Snippet(argv[1]);
+  return 0;
+}

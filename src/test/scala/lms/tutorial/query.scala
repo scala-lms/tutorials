@@ -308,10 +308,39 @@ object Run {
       override def eval: Unit = eval(filename)
     }
 
+  trait CGenPreamble { this: DslGenC =>
+    registerHeader("<fcntl.h>", "<errno.h>", "<err.h>", "<sys/mman.h>", "<sys/stat.h>", "<unistd.h>")
+    registerTopLevelFunction {
+      emit("""#ifndef MAP_FILE
+      #define MAP_FILE MAP_SHARED
+      #endif
+      int fsize(int fd) {
+        struct stat stat;
+        int res = fstat(fd,&stat);
+        return stat.st_size;
+      }
+      int printll(char* s) {
+        while (*s != '\n' && *s != ',' && *s != '\t') {
+          putchar(*s++);
+        }
+        return 0;
+      }
+      long hash(char *str0, int len) {
+        unsigned char* str = (unsigned char*)str0;
+        unsigned long hash = 5381;
+        int c;
+        while ((c = *str++) && len--)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+        return hash;
+      }"""
+      )
+    }
+  }
+
   def c_engine =
     new DslDriverC[String,Unit] with ScannerLowerExp
     with StagedEngine with MainEngine with query_optc.QueryCompiler { q =>
-      override val codegen = new DslGenC with CGenScannerLower {
+      override val codegen = new DslGenC with CGenScannerLower with CGenPreamble {
         val IR: q.type = q
       }
       override def snippet(fn: Rep[String]): Rep[Unit] = run
@@ -414,7 +443,7 @@ class QueryTest extends TutorialFunSuite {
   }
 
   abstract class CStagedQueryDriver(val name: String, val query: String) extends DslDriverC[String,Unit] with StagedTestDriver with StagedQueryProcessor with ScannerLowerExp { q =>
-    override val codegen = new DslGenC with CGenScannerLower {
+    override val codegen = new DslGenC with CGenScannerLower with Run.CGenPreamble {
       val IR: q.type = q
     }
     override def runtest: Unit = {
