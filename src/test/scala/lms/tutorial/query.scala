@@ -310,7 +310,7 @@ object Run {
 
   trait CGenPreamble { this: DslGenC =>
     registerHeader("<fcntl.h>", "<errno.h>", "<err.h>", "<sys/mman.h>", "<sys/stat.h>", "<unistd.h>")
-    registerTopLevelFunction {
+    registerTopLevelFunction("preamble_tutorial") {
       emit("""#ifndef MAP_FILE
       #define MAP_FILE MAP_SHARED
       #endif
