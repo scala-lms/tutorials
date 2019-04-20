@@ -91,9 +91,9 @@ void Snippet(char* x0) {
     x8[x25] = x16 + x23;
     x9[x25] = x24 - x23;
     x11 = x11 + 1;
+    //# hash_lookup
+    // generated code for hash lookup
     int x26 = ({
-      //#hash_lookup
-      // generated code for hash lookup
       int x27 = x19;
       while (x3[x27] != -1 && false) x27 = x27 + 1 & 255;
       (x3[x27] == -1) ? ({
@@ -102,9 +102,9 @@ void Snippet(char* x0) {
         x3[x27] = x28;
         x13[x28] = 0;
         x28;
-      }) : x3[x27]
-      ;//#hash_lookup;
+      }) : x3[x27];
     });
+    //# hash_lookup
     int x29 = x13[x26];
     x12[x26 * 256 + x29] = x25;
     x13[x26] = x29 + 1;
@@ -133,14 +133,14 @@ void Snippet(char* x0) {
     x30 = x30 + 1;
     while (x16[x30] != '\n') x30 = x30 + 1;
     x30 = x30 + 1;
+    //# hash_lookup
+    // generated code for hash lookup
     int x34 = ({
-      //#hash_lookup
-      // generated code for hash lookup
       int x35 = x19;
       while (x3[x35] != -1 && false) x35 = x35 + 1 & 255;
-      x3[x35]
-      ;//#hash_lookup;
+      x3[x35];
     });
+    //# hash_lookup
     if (x34 != -1) {
       char* x36 = x16 + x32;
       int x37 = x34 * 256;
