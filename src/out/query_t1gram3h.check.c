@@ -85,7 +85,9 @@ void Snippet(char* x0) {
     // generated code for hash lookup
     int x22 = ({
       int x23 = x17;
-      while (x3[x23] != -1 && false) x23 = x23 + 1 & 255;
+      while (x3[x23] != -1 && ({
+        false;
+      })) x23 = x23 + 1 & 255;
       (x3[x23] == -1) ? ({
         int x24 = x2;
         x2 = x2 + 1;
@@ -121,7 +123,9 @@ void Snippet(char* x0) {
     // generated code for hash lookup
     int x34 = ({
       int x35 = x17;
-      while (x3[x35] != -1 && false) x35 = x35 + 1 & 255;
+      while (x3[x35] != -1 && ({
+        false;
+      })) x35 = x35 + 1 & 255;
       x3[x35];
     });
     //# hash_lookup
