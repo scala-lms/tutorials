@@ -3,6 +3,8 @@ package scala.lms.tutorial
 import java.io._
 import org.scalatest.FunSuite
 
+import lms.core.utils
+
 import lms.macros.EmbeddedControls
 
 trait LibSuite extends FunSuite {
@@ -14,6 +16,9 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
 
   val prefix = "src/out/"
   val under: String
+  override protected def test(testName: String,testTags: org.scalatest.Tag*)(testFun: => Any)(implicit pos: org.scalactic.source.Position): Unit = {
+    super.test(testName,testTags:_*)(utils.time(testName)(testFun))(pos)
+  }
   def readFile(name: String): String = {
     try {
       val buf = new Array[Byte](new File(name).length().toInt)
@@ -103,42 +108,3 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
   }
 }
 
-object utils {
-  def time[A](key: String)(a: => A) = {
-    val now = System.nanoTime
-    val result = a
-    val micros = (System.nanoTime - now) / 1000
-    println(s"$key: $micros µs")
-    result
-  }
-  def captureOut(func: => Any): String = {
-    val source = new java.io.ByteArrayOutputStream()
-    withOutput(new java.io.PrintStream(source))(func)
-    source.toString
-  }
-  def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
-    scala.Console.withOut(out)(scala.Console.withErr(out)(f))
-  }
-  def devnull(f: => Unit): Unit = {
-    withOutput(nullout)(f)
-  }
-  def nullout = new PrintStream(new OutputStream() {
-    override def write(b: Int) = {}
-    override def write(b: Array[Byte]) = {}
-    override def write(b: Array[Byte], off: Int, len: Int) = {}
-  })
-  def withOutputFull(out: PrintStream)(func: => Unit): Unit = {
-    val oldStdOut = System.out
-    val oldStdErr = System.err
-    try {
-      System.setOut(out)
-      System.setErr(out)
-      scala.Console.withOut(out)(scala.Console.withErr(out)(func))
-    } finally {
-      out.flush()
-      out.close()
-      System.setOut(oldStdOut)
-      System.setErr(oldStdErr)
-    }
-  }
-}

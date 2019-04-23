@@ -1,6 +1,7 @@
 package scala.lms.tutorial
 
 import lms.core.stub._
+import lms.core.utils
 
 import lms.macros.SourceContext
 import lms.core.virtualize

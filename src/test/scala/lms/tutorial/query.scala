@@ -65,6 +65,8 @@ import lms.core.stub._
 import lms.core.virtualize
 import org.scalatest.FunSuite
 
+import lms.core.utils
+
 /**
 Relational Algebra AST
 ----------------------
