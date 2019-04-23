@@ -23,7 +23,7 @@ class Snippet() extends (java.lang.String => Unit) {
     val x11 = new scala.lms.tutorial.Scanner("src/data/words.csv")
     x11.next(',')
     x11.next('\n')
-    val x12 = (0L.toInt) & 255
+    val x12 = 0 & 255
     while ({
       x11.hasNext
     }) {
@@ -31,9 +31,9 @@ class Snippet() extends (java.lang.String => Unit) {
       x5(x13) = x11.next(',')
       x6(x13) = x11.next('\n')
       x8 = x8 + 1
+      //# hash_lookup
+      // generated code for hash lookup
       val x14 = {
-        //#hash_lookup
-        // generated code for hash lookup
         var x15 = x12
         while ({
           ((x3(x15)) != -1) && {
@@ -51,8 +51,8 @@ class Snippet() extends (java.lang.String => Unit) {
         } else {
           x3(x15)
         }
-        //#hash_lookup
       }
+      //# hash_lookup
       val x17 = x10(x14)
       x9((x14 * 256) + x17) = x13
       x10(x14) = x17 + 1
@@ -66,9 +66,9 @@ class Snippet() extends (java.lang.String => Unit) {
       val x20 = x18.next('\t')
       val x21 = x18.next('\t')
       val x22 = x18.next('\n')
+      //# hash_lookup
+      // generated code for hash lookup
       val x23 = {
-        //#hash_lookup
-        // generated code for hash lookup
         var x24 = x12
         while ({
           ((x3(x24)) != -1) && {
@@ -78,8 +78,8 @@ class Snippet() extends (java.lang.String => Unit) {
           x24 = (x24 + 1) & 255
         }
         x3(x24)
-        //#hash_lookup
       }
+      //# hash_lookup
       if (x23 != -1) {
         val x25 = x23 * 256
         val x26 = x25 + (x10(x23))

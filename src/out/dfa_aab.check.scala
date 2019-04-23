@@ -25,16 +25,15 @@ class Snippet() extends (Unit => scala.lms.tutorial.Automaton[Char, Boolean]) {
       }
     }
     x5 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x8)
-    def x11(x10:Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
+    x6 = new scala.lms.tutorial.Automaton[Char,Boolean](false, { (x10: Char) =>
       if (x10 == 'A') {
         x5
       } else {
         x4
       }
-    }
-    x6 = new scala.lms.tutorial.Automaton[Char,Boolean](false, x11)
-    def x7(x12:Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
-      if (x12 == 'A') {
+    })
+    def x7(x11:Char): scala.lms.tutorial.Automaton[Char, Boolean] = {
+      if (x11 == 'A') {
         x6
       } else {
         x4

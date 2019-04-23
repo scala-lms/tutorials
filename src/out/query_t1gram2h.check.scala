@@ -33,9 +33,9 @@ class Snippet() extends (java.lang.String => Unit) {
       x7(x14) = x12.next('\n')
       x9 = x9 + 1
       val x15 = ((x13.hashCode).toInt) & 255
+      //# hash_lookup
+      // generated code for hash lookup
       val x16 = {
-        //#hash_lookup
-        // generated code for hash lookup
         var x17 = x15
         while ({
           ((x4(x17)) != -1) && {
@@ -54,8 +54,8 @@ class Snippet() extends (java.lang.String => Unit) {
         } else {
           x4(x17)
         }
-        //#hash_lookup
       }
+      //# hash_lookup
       val x19 = x11(x16)
       x10((x16 * 256) + x19) = x14
       x11(x16) = x19 + 1
@@ -70,9 +70,9 @@ class Snippet() extends (java.lang.String => Unit) {
       val x23 = x20.next('\t')
       val x24 = x20.next('\n')
       val x25 = ((x21.hashCode).toInt) & 255
+      //# hash_lookup
+      // generated code for hash lookup
       val x26 = {
-        //#hash_lookup
-        // generated code for hash lookup
         var x27 = x25
         while ({
           ((x4(x27)) != -1) && {
@@ -82,8 +82,8 @@ class Snippet() extends (java.lang.String => Unit) {
           x27 = (x27 + 1) & 255
         }
         x4(x27)
-        //#hash_lookup
       }
+      //# hash_lookup
       if (x26 != -1) {
         val x28 = x26 * 256
         val x29 = x28 + (x11(x26))

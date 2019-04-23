@@ -61,8 +61,7 @@ void Snippet(char* x0) {
       while (x11 < x6 && x10[x11] == "Auswanderung"[x11]) x11 = x11 + 1;
       x11 == x6;
     })) {
-      char* x10 = x3 + x5;
-      printll(x10);
+      printll(x3 + x5);
       printf(",");
       printll(x3 + x7);
       printf(",");
