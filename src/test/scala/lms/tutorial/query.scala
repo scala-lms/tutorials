@@ -416,7 +416,6 @@ class QueryTest extends TutorialFunSuite {
   abstract class ScalaPlainQueryDriver(val name: String, val query: String) extends PlainTestDriver with QueryProcessor { q =>
     override def runtest: Unit = {
       test(version+" "+name) {
-        Console.println("---- plain "+version+" "+name)
         for (expectedParsedQuery <- expectedAstForTest.get(name)) {
           assert(expectedParsedQuery==parsedQuery)
         }
@@ -433,7 +432,6 @@ class QueryTest extends TutorialFunSuite {
     override def runtest: Unit = {
       if (version == "query_staged0" && List("Group","HashJoin").exists(parsedQuery.toString contains _)) return ()
       test(version+" "+name) {
-        Console.println("---- scala "+version+" "+name)
         for (expectedParsedQuery <- expectedAstForTest.get(name)) {
           assert(expectedParsedQuery==parsedQuery)
         }
@@ -450,7 +448,6 @@ class QueryTest extends TutorialFunSuite {
     }
     override def runtest: Unit = {
       test(version+" "+name) {
-        Console.println("---- c "+version+" "+name)
         for (expectedParsedQuery <- expectedAstForTest.get(name)) {
           assert(expectedParsedQuery==parsedQuery)
         }
