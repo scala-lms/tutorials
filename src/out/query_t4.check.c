@@ -45,7 +45,7 @@ void Snippet(char* x0) {
   x4 = x4 + 1;
   int x5 = 0;
   while (x3[x4] != ',') {
-    x5 = x5 * 10 + x3[x4] - '0';
+    x5 = x5 * 10 + (x3[x4] - '0');
     x4 = x4 + 1;
   }
   x4 = x4 + 1;
@@ -58,7 +58,7 @@ void Snippet(char* x0) {
     char* x7 = x3 + x6;
     int x8 = 0;
     while (x3[x4] != ',') {
-      x8 = x8 * 10 + x3[x4] - '0';
+      x8 = x8 * 10 + (x3[x4] - '0');
       x4 = x4 + 1;
     }
     x4 = x4 + 1;
@@ -72,7 +72,7 @@ void Snippet(char* x0) {
     x12 = x12 + 1;
     int x13 = 0;
     while (x3[x12] != ',') {
-      x13 = x13 * 10 + x3[x12] - '0';
+      x13 = x13 * 10 + (x3[x12] - '0');
       x12 = x12 + 1;
     }
     x12 = x12 + 1;
@@ -84,7 +84,7 @@ void Snippet(char* x0) {
       x12 = x12 + 1;
       int x15 = 0;
       while (x3[x12] != ',') {
-        x15 = x15 * 10 + x3[x12] - '0';
+        x15 = x15 * 10 + (x3[x12] - '0');
         x12 = x12 + 1;
       }
       x12 = x12 + 1;
