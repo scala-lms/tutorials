@@ -17,7 +17,7 @@ trait TutorialFunSuite extends LibSuite with EmbeddedControls {
   val prefix = "src/out/"
   val under: String
   override protected def test(testName: String,testTags: org.scalatest.Tag*)(testFun: => Any)(implicit pos: org.scalactic.source.Position): Unit = {
-    super.test(testName,testTags:_*)(utils.time(testName)(testFun))(pos)
+    super.test(testName,testTags:_*)(utils.time(under)(utils.time(testName)(testFun)))(pos)
   }
   def readFile(name: String): String = {
     try {
