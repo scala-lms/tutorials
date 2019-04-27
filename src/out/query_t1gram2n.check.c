@@ -98,7 +98,6 @@ void Snippet(char* x0) {
         printf(",");
         printll(x8 + x19);
         printf("%s\n", "");
-      } else {
       }
     }
     close(x6);

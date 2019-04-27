@@ -92,10 +92,10 @@ trait ScalaGenScanner extends ScalaGenEffect {
   import IR._
 
   override def emitNode(sym: Sym[Any], rhs: Def[Any]) = rhs match {
-    case ScannerNew(fn) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn)")
-    case ScannerNext(s, d) => emitValDef(sym, src"$s.next($d)")
-    case ScannerHasNext(s) => emitValDef(sym, src"$s.hasNext")
-    case ScannerClose(s) => emitValDef(sym, src"$s.close")
+    // case ScannerNew(fn) => emitValDef(sym, src"new scala.lms.tutorial.Scanner($fn)")
+    // case ScannerNext(s, d) => emitValDef(sym, src"$s.next($d)")
+    // case ScannerHasNext(s) => emitValDef(sym, src"$s.hasNext")
+    // case ScannerClose(s) => emitValDef(sym, src"$s.close")
     case _ => super.emitNode(sym, rhs)
   }
 }

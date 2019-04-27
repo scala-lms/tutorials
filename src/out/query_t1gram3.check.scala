@@ -7,15 +7,11 @@ class Snippet() extends (java.lang.String => Unit) {
     val x1 = new scala.lms.tutorial.Scanner("src/data/words.csv")
     x1.next(',')
     x1.next('\n')
-    while ({
-      x1.hasNext
-    }) {
+    while (x1.hasNext) {
       val x2 = x1.next(',')
       val x3 = x1.next('\n')
       val x4 = new scala.lms.tutorial.Scanner("src/data/t1gram.csv")
-      while ({
-        x4.hasNext
-      }) {
+      while (x4.hasNext) {
         printf("%s,%s,%s,%s,%s,%s\n", x2, x3, x4.next('\t'), x4.next('\t'), x4.next('\t'), x4.next('\n'))
       }
       x4.close

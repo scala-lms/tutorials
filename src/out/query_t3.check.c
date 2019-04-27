@@ -73,7 +73,6 @@ void Snippet(char* x0) {
     })) {
       printll(x3 + x6);
       printf("%s\n", "");
-    } else {
     }
   }
   close(x1);

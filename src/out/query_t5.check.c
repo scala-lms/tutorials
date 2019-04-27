@@ -106,7 +106,6 @@ void Snippet(char* x0) {
         printf(",");
         printll(x3 + x15);
         printf("%s\n", "");
-      } else {
       }
     }
     close(x1);

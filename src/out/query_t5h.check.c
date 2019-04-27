@@ -183,7 +183,6 @@ void Snippet(char* x0) {
         printf("%s\n", "");
         x52 = x52 + 1;
       }
-    } else {
     }
   }
   close(x16);

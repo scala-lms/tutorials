@@ -8,9 +8,7 @@ class Snippet() extends (java.lang.String => Unit) {
     x1.next(',')
     x1.next(',')
     x1.next('\n')
-    while ({
-      x1.hasNext
-    }) {
+    while (x1.hasNext) {
       printf("%s,%s,%s\n", x1.next(','), x1.next(','), x1.next('\n'))
     }
     x1.close

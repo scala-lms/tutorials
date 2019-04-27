@@ -8,14 +8,11 @@ class Snippet() extends (java.lang.String => Unit) {
     x1.next(',')
     x1.next(',')
     x1.next('\n')
-    while ({
-      x1.hasNext
-    }) {
+    while (x1.hasNext) {
       val x2 = x1.next(',')
       x1.next(',')
-      if ((x1.next('\n')) == "yes") {
+      if (x1.next('\n') == "yes") {
         printf("%s\n", x2)
-      } else {
       }
     }
     x1.close

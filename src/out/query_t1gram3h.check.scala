@@ -8,9 +8,7 @@ class Snippet() extends (java.lang.String => Unit) {
     var x2 = 0
     val x3 = new Array[Int](256)
     var x4 = 0
-    while ({
-      x4 != 256
-    }) {
+    while (x4 != 256) {
       x3(x4) = -1
       x4 = x4 + 1
     }
@@ -24,9 +22,7 @@ class Snippet() extends (java.lang.String => Unit) {
     x11.next(',')
     x11.next('\n')
     val x12 = 0 & 255
-    while ({
-      x11.hasNext
-    }) {
+    while (x11.hasNext) {
       val x13 = x8
       x5(x13) = x11.next(',')
       x6(x13) = x11.next('\n')
@@ -35,33 +31,27 @@ class Snippet() extends (java.lang.String => Unit) {
       // generated code for hash lookup
       val x14 = {
         var x15 = x12
-        while ({
-          ((x3(x15)) != -1) && {
-            false
-          }
+        while (x3(x15) != -1 && {
+          false
         }) {
-          x15 = (x15 + 1) & 255
+          x15 = x15 + 1 & 255
         }
-        if ((x3(x15)) == -1) {
+        if (x3(x15) == -1) {
           val x16 = x2
           x2 = x2 + 1
           x3(x15) = x16
           x10(x16) = 0
           x16
-        } else {
-          x3(x15)
-        }
+        } else x3(x15)
       }
       //# hash_lookup
       val x17 = x10(x14)
-      x9((x14 * 256) + x17) = x13
+      x9(x14 * 256 + x17) = x13
       x10(x14) = x17 + 1
     }
     x11.close
     val x18 = new scala.lms.tutorial.Scanner("src/data/t1gram.csv")
-    while ({
-      x18.hasNext
-    }) {
+    while (x18.hasNext) {
       val x19 = x18.next('\t')
       val x20 = x18.next('\t')
       val x21 = x18.next('\t')
@@ -70,28 +60,23 @@ class Snippet() extends (java.lang.String => Unit) {
       // generated code for hash lookup
       val x23 = {
         var x24 = x12
-        while ({
-          ((x3(x24)) != -1) && {
-            false
-          }
+        while (x3(x24) != -1 && {
+          false
         }) {
-          x24 = (x24 + 1) & 255
+          x24 = x24 + 1 & 255
         }
         x3(x24)
       }
       //# hash_lookup
       if (x23 != -1) {
         val x25 = x23 * 256
-        val x26 = x25 + (x10(x23))
+        val x26 = x25 + x10(x23)
         var x27 = x25
-        while ({
-          x27 != x26
-        }) {
+        while (x27 != x26) {
           val x28 = x9(x27)
           printf("%s,%s,%s,%s,%s,%s\n", x5(x28), x6(x28), x19, x20, x21, x22)
           x27 = x27 + 1
         }
-      } else {
       }
     }
     x18.close

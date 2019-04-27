@@ -8,9 +8,7 @@ class Snippet() extends (java.lang.String => Unit) {
     x1.next(',')
     x1.next(',')
     x1.next('\n')
-    while ({
-      x1.hasNext
-    }) {
+    while (x1.hasNext) {
       val x2 = x1.next(',')
       val x3 = x1.next(',')
       val x4 = x1.next('\n')
@@ -18,15 +16,12 @@ class Snippet() extends (java.lang.String => Unit) {
       x5.next(',')
       x5.next(',')
       x5.next('\n')
-      while ({
-        x5.hasNext
-      }) {
+      while (x5.hasNext) {
         val x6 = x5.next(',')
         x5.next(',')
         x5.next('\n')
         if (x2 == x6) {
           printf("%s,%s,%s,%s\n", x2, x3, x4, x6)
-        } else {
         }
       }
       x5.close

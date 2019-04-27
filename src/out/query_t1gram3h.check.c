@@ -153,7 +153,6 @@ void Snippet(char* x0) {
         printf("%s\n", "");
         x42 = x42 + 1;
       }
-    } else {
     }
   }
   close(x26);

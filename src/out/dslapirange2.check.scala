@@ -6,9 +6,7 @@ class Snippet() extends (Int => Unit) {
     //# for
     // generated code
     var x1 = 0
-    while ({
-      x1 != x0
-    }) {
+    while (x1 != x0) {
       println(x1)
       x1 = x1 + 1
     }
