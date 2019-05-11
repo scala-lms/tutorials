@@ -43,55 +43,51 @@ void Snippet(char* x0) {
   int x4 = 0;
   while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x5 = 0;
-  while (x3[x4] != '\n') {
-    x5 = x5 * 10 + (x3[x4] - '0');
-    x4 = x4 + 1;
-  }
+  while (x3[x4] != '\n') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x6 = open("src/data/t1gram.csv",0);
-  int x7 = fsize(x6);
-  char* x8 = mmap(0, x7, PROT_READ, MAP_FILE | MAP_SHARED, x6, 0);
+  int x5 = open("src/data/t1gram.csv",0);
+  int x6 = fsize(x5);
+  char* x7 = mmap(0, x6, PROT_READ, MAP_FILE | MAP_SHARED, x5, 0);
   while (x4 < x2) {
-    int x9 = x4;
+    int x8 = x4;
     while (x3[x4] != ',') x4 = x4 + 1;
     x4 = x4 + 1;
-    char* x10 = x3 + x9;
-    int x11 = 0;
+    char* x9 = x3 + x8;
+    int x10 = 0;
     while (x3[x4] != '\n') {
-      x11 = x11 * 10 + (x3[x4] - '0');
+      x10 = x10 * 10 + (x3[x4] - '0');
       x4 = x4 + 1;
     }
     x4 = x4 + 1;
-    int x12 = x11;
-    int x13 = 0;
-    while (x13 < x7) {
-      int x14 = x13;
-      while (x8[x13] != '\t') x13 = x13 + 1;
-      x13 = x13 + 1;
-      int x15 = x13;
-      while (x8[x13] != '\t') x13 = x13 + 1;
-      x13 = x13 + 1;
-      int x16 = x13;
-      while (x8[x13] != '\t') x13 = x13 + 1;
-      x13 = x13 + 1;
-      int x17 = x13;
-      while (x8[x13] != '\n') x13 = x13 + 1;
-      x13 = x13 + 1;
-      printll(x10);
+    int x11 = x10;
+    int x12 = 0;
+    while (x12 < x6) {
+      int x13 = x12;
+      while (x7[x12] != '\t') x12 = x12 + 1;
+      x12 = x12 + 1;
+      int x14 = x12;
+      while (x7[x12] != '\t') x12 = x12 + 1;
+      x12 = x12 + 1;
+      int x15 = x12;
+      while (x7[x12] != '\t') x12 = x12 + 1;
+      x12 = x12 + 1;
+      int x16 = x12;
+      while (x7[x12] != '\n') x12 = x12 + 1;
+      x12 = x12 + 1;
+      printll(x9);
       printf(",");
-      printf("%d", x12);
+      printf("%d", x11);
       printf(",");
-      printll(x8 + x14);
+      printll(x7 + x13);
       printf(",");
-      printll(x8 + x15);
+      printll(x7 + x14);
       printf(",");
-      printll(x8 + x16);
+      printll(x7 + x15);
       printf(",");
-      printll(x8 + x17);
+      printll(x7 + x16);
       printf("%s\n", "");
     }
-    close(x6);
+    close(x5);
   }
   close(x1);
 }

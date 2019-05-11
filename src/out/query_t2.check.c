@@ -43,27 +43,19 @@ void Snippet(char* x0) {
   int x4 = 0;
   while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x5 = 0;
-  while (x3[x4] != ',') {
-    x5 = x5 * 10 + (x3[x4] - '0');
-    x4 = x4 + 1;
-  }
+  while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
   while (x3[x4] != '\n') x4 = x4 + 1;
   x4 = x4 + 1;
   while (x4 < x2) {
-    int x6 = x4;
+    int x5 = x4;
     while (x3[x4] != ',') x4 = x4 + 1;
     x4 = x4 + 1;
-    int x7 = 0;
-    while (x3[x4] != ',') {
-      x7 = x7 * 10 + (x3[x4] - '0');
-      x4 = x4 + 1;
-    }
+    while (x3[x4] != ',') x4 = x4 + 1;
     x4 = x4 + 1;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
-    printll(x3 + x6);
+    printll(x3 + x5);
     printf("%s\n", "");
   }
   close(x1);

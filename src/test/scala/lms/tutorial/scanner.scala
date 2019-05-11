@@ -74,7 +74,7 @@ trait ScannerExp extends ScannerBase with EffectExp { this: DslExp =>
   override def scannerHasNext(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Boolean] =
     reflectWrite(s)(ScannerHasNext(s))
   override def scannerClose(s: Rep[Scanner])(implicit pos: SourceContext): Rep[Unit] =
-    reflectWrite(s)(ScannerClose(s))
+    reflectFree(s)(ScannerClose(s))
 
   //STUB
   // override def mirror[A:Typ](e: Def[A], f: Transformer)(implicit pos: SourceContext): Exp[A] = (e match {

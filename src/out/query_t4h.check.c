@@ -38,133 +38,109 @@ long hash(char *str0, int len) {
 void Snippet(char* x0) {
   printf("%s\n", "Name,Value,Flag,Name1");
   int x1 = 0;
-  int x2 = 0;
-  int* x3 = (int*)malloc(256 * sizeof(int));
-  int x4 = 0;
-  while (x4 != 256) {
-    x3[x4] = -1;
-    x4 = x4 + 1;
+  int* x2 = (int*)malloc(256 * sizeof(int));
+  int x3 = 0;
+  while (x3 != 256) {
+    x2[x3] = -1;
+    x3 = x3 + 1;
   }
-  char** x5 = (char**)malloc(65536 * sizeof(char*));
-  int* x6 = (int*)malloc(65536 * sizeof(int));
-  int* x7 = (int*)malloc(65536 * sizeof(int));
-  char** x8 = (char**)malloc(65536 * sizeof(char*));
-  int* x9 = (int*)malloc(65536 * sizeof(int));
-  int x10 = 0;
-  int x11 = 0;
-  int* x12 = (int*)malloc(65536 * sizeof(int));
-  int* x13 = (int*)malloc(256 * sizeof(int));
-  int x14 = open("src/data/t.csv",0);
-  int x15 = fsize(x14);
-  char* x16 = mmap(0, x15, PROT_READ, MAP_FILE | MAP_SHARED, x14, 0);
-  int x17 = 0;
-  while (x16[x17] != ',') x17 = x17 + 1;
-  x17 = x17 + 1;
-  int x18 = 0;
-  while (x16[x17] != ',') {
-    x18 = x18 * 10 + (x16[x17] - '0');
-    x17 = x17 + 1;
-  }
-  x17 = x17 + 1;
-  while (x16[x17] != '\n') x17 = x17 + 1;
-  x17 = x17 + 1;
-  int x19 = 0 & 255;
-  while (x17 < x15) {
-    int x20 = x17;
-    while (x16[x17] != ',') x17 = x17 + 1;
-    int x21 = x17;
-    x17 = x17 + 1;
-    int x22 = 0;
-    while (x16[x17] != ',') {
-      x22 = x22 * 10 + (x16[x17] - '0');
-      x17 = x17 + 1;
+  char** x4 = (char**)malloc(65536 * sizeof(char*));
+  int* x5 = (int*)malloc(65536 * sizeof(int));
+  char** x6 = (char**)malloc(65536 * sizeof(char*));
+  int x7 = 0;
+  int* x8 = (int*)malloc(65536 * sizeof(int));
+  int* x9 = (int*)malloc(256 * sizeof(int));
+  int x10 = open("src/data/t.csv",0);
+  int x11 = fsize(x10);
+  char* x12 = mmap(0, x11, PROT_READ, MAP_FILE | MAP_SHARED, x10, 0);
+  int x13 = 0;
+  while (x12[x13] != ',') x13 = x13 + 1;
+  x13 = x13 + 1;
+  while (x12[x13] != ',') x13 = x13 + 1;
+  x13 = x13 + 1;
+  while (x12[x13] != '\n') x13 = x13 + 1;
+  x13 = x13 + 1;
+  int x14 = 0 & 255;
+  while (x13 < x11) {
+    int x15 = x13;
+    while (x12[x13] != ',') x13 = x13 + 1;
+    x13 = x13 + 1;
+    int x16 = 0;
+    while (x12[x13] != ',') {
+      x16 = x16 * 10 + (x12[x13] - '0');
+      x13 = x13 + 1;
     }
-    x17 = x17 + 1;
-    int x23 = x17;
-    while (x16[x17] != '\n') x17 = x17 + 1;
-    int x24 = x17;
-    x17 = x17 + 1;
-    int x25 = x11;
-    x5[x25] = x16 + x20;
-    x6[x25] = x21 - x20;
-    x7[x25] = x22;
-    x8[x25] = x16 + x23;
-    x9[x25] = x24 - x23;
-    x11 = x11 + 1;
+    x13 = x13 + 1;
+    int x17 = x13;
+    while (x12[x13] != '\n') x13 = x13 + 1;
+    x13 = x13 + 1;
+    int x18 = x7;
+    x4[x18] = x12 + x15;
+    x5[x18] = x16;
+    x6[x18] = x12 + x17;
+    x7 = x7 + 1;
     //# hash_lookup
     // generated code for hash lookup
-    int x26 = ({
-      int x27 = x19;
-      while (x3[x27] != -1 && ({
-        false;
-      })) x27 = x27 + 1 & 255;
-      x3[x27] == -1 ? ({
-        int x28 = x2;
-        x2 = x2 + 1;
-        x3[x27] = x28;
-        x13[x28] = 0;
-        x28;
-      }) : x3[x27];
+    int x19 = ({
+      int x20 = x14;
+      while (x2[x20] != -1 && false) x20 = x20 + 1 & 255;
+      x2[x20] == -1 ? ({
+        int x21 = x1;
+        x1 = x1 + 1;
+        x2[x20] = x21;
+        x9[x21] = 0;
+        x21;
+      }) : x2[x20];
     });
     //# hash_lookup
-    int x29 = x13[x26];
-    x12[x26 * 256 + x29] = x25;
-    x13[x26] = x29 + 1;
+    int x22 = x9[x19];
+    x8[x19 * 256 + x22] = x18;
+    x9[x19] = x22 + 1;
   }
-  close(x14);
-  int x30 = 0;
-  while (x16[x30] != ',') x30 = x30 + 1;
-  x30 = x30 + 1;
-  int x31 = 0;
-  while (x16[x30] != ',') {
-    x31 = x31 * 10 + (x16[x30] - '0');
-    x30 = x30 + 1;
-  }
-  x30 = x30 + 1;
-  while (x16[x30] != '\n') x30 = x30 + 1;
-  x30 = x30 + 1;
-  while (x30 < x15) {
-    int x32 = x30;
-    while (x16[x30] != ',') x30 = x30 + 1;
-    x30 = x30 + 1;
-    int x33 = 0;
-    while (x16[x30] != ',') {
-      x33 = x33 * 10 + (x16[x30] - '0');
-      x30 = x30 + 1;
-    }
-    x30 = x30 + 1;
-    while (x16[x30] != '\n') x30 = x30 + 1;
-    x30 = x30 + 1;
+  close(x10);
+  int x23 = 0;
+  while (x12[x23] != ',') x23 = x23 + 1;
+  x23 = x23 + 1;
+  while (x12[x23] != ',') x23 = x23 + 1;
+  x23 = x23 + 1;
+  while (x12[x23] != '\n') x23 = x23 + 1;
+  x23 = x23 + 1;
+  while (x23 < x11) {
+    int x24 = x23;
+    while (x12[x23] != ',') x23 = x23 + 1;
+    x23 = x23 + 1;
+    while (x12[x23] != ',') x23 = x23 + 1;
+    x23 = x23 + 1;
+    while (x12[x23] != '\n') x23 = x23 + 1;
+    x23 = x23 + 1;
     //# hash_lookup
     // generated code for hash lookup
-    int x34 = ({
-      int x35 = x19;
-      while (x3[x35] != -1 && ({
-        false;
-      })) x35 = x35 + 1 & 255;
-      x3[x35];
+    int x25 = ({
+      int x26 = x14;
+      while (x2[x26] != -1 && false) x26 = x26 + 1 & 255;
+      x2[x26];
     });
     //# hash_lookup
-    if (x34 != -1) {
-      char* x36 = x16 + x32;
-      int x37 = x34 * 256;
-      int x38 = x37 + x13[x34];
-      int x39 = x37;
-      while (x39 != x38) {
-        int x40 = x12[x39];
-        printll(x5[x40]);
+    if (x25 != -1) {
+      char* x27 = x12 + x24;
+      int x28 = x25 * 256;
+      int x29 = x28 + x9[x25];
+      int x30 = x28;
+      while (x30 != x29) {
+        int x31 = x8[x30];
+        printll(x4[x31]);
         printf(",");
-        printf("%d", x7[x40]);
+        printf("%d", x5[x31]);
         printf(",");
-        printll(x8[x40]);
+        printll(x6[x31]);
         printf(",");
-        printll(x36);
+        printll(x27);
         printf("%s\n", "");
-        x39 = x39 + 1;
+        x30 = x30 + 1;
       }
     }
   }
-  close(x14);
+  close(x10);
 }
 /*****************************************
 End of C Generated Code

@@ -43,68 +43,56 @@ void Snippet(char* x0) {
   int x4 = 0;
   while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x5 = 0;
-  while (x3[x4] != ',') {
-    x5 = x5 * 10 + (x3[x4] - '0');
-    x4 = x4 + 1;
-  }
+  while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
   while (x3[x4] != '\n') x4 = x4 + 1;
   x4 = x4 + 1;
   while (x4 < x2) {
-    int x6 = x4;
+    int x5 = x4;
     while (x3[x4] != ',') x4 = x4 + 1;
-    int x7 = x4 - x6;
+    int x6 = x4 - x5;
     x4 = x4 + 1;
-    char* x8 = x3 + x6;
-    int x9 = 0;
+    char* x7 = x3 + x5;
+    int x8 = 0;
     while (x3[x4] != ',') {
-      x9 = x9 * 10 + (x3[x4] - '0');
+      x8 = x8 * 10 + (x3[x4] - '0');
       x4 = x4 + 1;
     }
     x4 = x4 + 1;
-    int x10 = x9;
-    int x11 = x4;
+    int x9 = x8;
+    int x10 = x4;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
-    char* x12 = x3 + x11;
-    int x13 = 0;
-    while (x3[x13] != ',') x13 = x13 + 1;
-    x13 = x13 + 1;
-    int x14 = 0;
-    while (x3[x13] != ',') {
-      x14 = x14 * 10 + (x3[x13] - '0');
-      x13 = x13 + 1;
-    }
-    x13 = x13 + 1;
-    while (x3[x13] != '\n') x13 = x13 + 1;
-    x13 = x13 + 1;
-    while (x13 < x2) {
-      int x15 = x13;
-      while (x3[x13] != ',') x13 = x13 + 1;
-      int x16 = x13;
-      x13 = x13 + 1;
-      int x17 = 0;
-      while (x3[x13] != ',') {
-        x17 = x17 * 10 + (x3[x13] - '0');
-        x13 = x13 + 1;
-      }
-      x13 = x13 + 1;
-      while (x3[x13] != '\n') x13 = x13 + 1;
-      x13 = x13 + 1;
-      if (x7 == x16 - x15 && ({
-        char* x18 = x3 + x15;
-        int x19 = 0;
-        while (x19 < x7 && x8[x19] == x18[x19]) x19 = x19 + 1;
-        x19 == x7;
+    char* x11 = x3 + x10;
+    int x12 = 0;
+    while (x3[x12] != ',') x12 = x12 + 1;
+    x12 = x12 + 1;
+    while (x3[x12] != ',') x12 = x12 + 1;
+    x12 = x12 + 1;
+    while (x3[x12] != '\n') x12 = x12 + 1;
+    x12 = x12 + 1;
+    while (x12 < x2) {
+      int x13 = x12;
+      while (x3[x12] != ',') x12 = x12 + 1;
+      int x14 = x12;
+      x12 = x12 + 1;
+      while (x3[x12] != ',') x12 = x12 + 1;
+      x12 = x12 + 1;
+      while (x3[x12] != '\n') x12 = x12 + 1;
+      x12 = x12 + 1;
+      if (x6 == x14 - x13 && ({
+        char* x15 = x3 + x13;
+        int x16 = 0;
+        while (x16 < x6 && x7[x16] == x15[x16]) x16 = x16 + 1;
+        x16 == x6;
       })) {
-        printll(x8);
+        printll(x7);
         printf(",");
-        printf("%d", x10);
+        printf("%d", x9);
         printf(",");
-        printll(x12);
+        printll(x11);
         printf(",");
-        printll(x3 + x15);
+        printll(x3 + x13);
         printf("%s\n", "");
       }
     }

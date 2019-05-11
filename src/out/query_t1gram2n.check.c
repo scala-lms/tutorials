@@ -43,64 +43,60 @@ void Snippet(char* x0) {
   int x4 = 0;
   while (x3[x4] != ',') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x5 = 0;
-  while (x3[x4] != '\n') {
-    x5 = x5 * 10 + (x3[x4] - '0');
-    x4 = x4 + 1;
-  }
+  while (x3[x4] != '\n') x4 = x4 + 1;
   x4 = x4 + 1;
-  int x6 = open("src/data/t1gram.csv",0);
-  int x7 = fsize(x6);
-  char* x8 = mmap(0, x7, PROT_READ, MAP_FILE | MAP_SHARED, x6, 0);
+  int x5 = open("src/data/t1gram.csv",0);
+  int x6 = fsize(x5);
+  char* x7 = mmap(0, x6, PROT_READ, MAP_FILE | MAP_SHARED, x5, 0);
   while (x4 < x2) {
-    int x9 = x4;
+    int x8 = x4;
     while (x3[x4] != ',') x4 = x4 + 1;
-    int x10 = x4 - x9;
+    int x9 = x4 - x8;
     x4 = x4 + 1;
-    char* x11 = x3 + x9;
-    int x12 = 0;
+    char* x10 = x3 + x8;
+    int x11 = 0;
     while (x3[x4] != '\n') {
-      x12 = x12 * 10 + (x3[x4] - '0');
+      x11 = x11 * 10 + (x3[x4] - '0');
       x4 = x4 + 1;
     }
     x4 = x4 + 1;
-    int x13 = x12;
-    int x14 = 0;
-    while (x14 < x7) {
-      int x15 = x14;
-      while (x8[x14] != '\t') x14 = x14 + 1;
-      int x16 = x14;
-      x14 = x14 + 1;
-      int x17 = x14;
-      while (x8[x14] != '\t') x14 = x14 + 1;
-      x14 = x14 + 1;
-      int x18 = x14;
-      while (x8[x14] != '\t') x14 = x14 + 1;
-      x14 = x14 + 1;
-      int x19 = x14;
-      while (x8[x14] != '\n') x14 = x14 + 1;
-      x14 = x14 + 1;
-      if (x10 == x16 - x15 && ({
-        char* x20 = x8 + x15;
-        int x21 = 0;
-        while (x21 < x10 && x11[x21] == x20[x21]) x21 = x21 + 1;
-        x21 == x10;
+    int x12 = x11;
+    int x13 = 0;
+    while (x13 < x6) {
+      int x14 = x13;
+      while (x7[x13] != '\t') x13 = x13 + 1;
+      int x15 = x13;
+      x13 = x13 + 1;
+      int x16 = x13;
+      while (x7[x13] != '\t') x13 = x13 + 1;
+      x13 = x13 + 1;
+      int x17 = x13;
+      while (x7[x13] != '\t') x13 = x13 + 1;
+      x13 = x13 + 1;
+      int x18 = x13;
+      while (x7[x13] != '\n') x13 = x13 + 1;
+      x13 = x13 + 1;
+      if (x9 == x15 - x14 && ({
+        char* x19 = x7 + x14;
+        int x20 = 0;
+        while (x20 < x9 && x10[x20] == x19[x20]) x20 = x20 + 1;
+        x20 == x9;
       })) {
-        printll(x11);
+        printll(x10);
         printf(",");
-        printf("%d", x13);
+        printf("%d", x12);
         printf(",");
-        printll(x8 + x15);
+        printll(x7 + x14);
         printf(",");
-        printll(x8 + x17);
+        printll(x7 + x16);
         printf(",");
-        printll(x8 + x18);
+        printll(x7 + x17);
         printf(",");
-        printll(x8 + x19);
+        printll(x7 + x18);
         printf("%s\n", "");
       }
     }
-    close(x6);
+    close(x5);
   }
   close(x1);
 }
