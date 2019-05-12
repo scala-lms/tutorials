@@ -11,6 +11,7 @@ Outline:
 package scala.lms.tutorial
 
 import lms.core.stub._
+import lms.core.utils
 import lms.macros.SourceContext
 import lms.core.virtualize
 import scala.collection.{mutable,immutable}
@@ -91,12 +92,14 @@ even if multiple processes are launched (this is how MPI works).
 */
 
   test("charcount_seq") {
+    val str = 
+      "My name is Ozymandias, King of Kings; " +
+      "Look on my Works, ye Mighty, and despair!"
+
     val snippet = new MPIDriver[String,Unit] {
       def snippet(arg: Rep[String]): Rep[Unit] = {
         if (pid == 0) {
-          val input: Rep[String] = 
-            "My name is Ozymandias, King of Kings; " +
-            "Look on my Works, ye Mighty, and despair!"
+          val input: Rep[String] = str
 
           val histogram = NewArray[Int](256);
           for (i <- 0 until histogram.length)
@@ -110,7 +113,9 @@ even if multiple processes are launched (this is how MPI works).
         }
       }
     }
-    assert { snippet.eval("ARG") == () }
+    val expected = str.groupBy(c => c).map { case (c,cs) => s"'$c' ${cs.length}" }.toSet
+    val actual = lms.core.utils.captureOut(snippet.eval("ARG")).lines.toSet
+    assert { actual == expected }
     check("charcount_seq", snippet.code, "c")
   }
 
@@ -205,9 +210,9 @@ that the result is partioned by keys.
 
       }
 
-      def snippet(arg: Rep[String]): Rep[Unit] = {
-        val str = "My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"
+      val str = "My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"
 
+      def snippet(arg: Rep[String]): Rep[Unit] = {
         val input = Input(str)
         val histogram = Histogram()
 
@@ -222,7 +227,9 @@ that the result is partioned by keys.
         }
       }
     }
-    assert { snippet.eval("ARG") == () }
+    val expected = snippet.str.groupBy(c => c).map { case (c,cs) => s": '$c' ${cs.length}" }.toSet
+    val actual = lms.core.utils.captureOut(snippet.eval("ARG")).lines.map(s => s.substring(s.indexOf(':'))).toSet // drop pid, since we don't know many here
+    assert { actual == expected }
     check("charcount_par", snippet.code, "c")
   }
 
@@ -401,7 +408,7 @@ implementation.
 
 
   test("wordcount_unstaged_seq") {
-    new API {
+    val actual = lms.core.utils.captureOut(new API {
       val input = "foo bar baz foo bar foo foo foo boom bang boom boom yum"
 
       val wg = WordGen(input)
@@ -414,11 +421,19 @@ implementation.
       hm.foreach { case (w,c) =>
         println(s"$w ${w.hashCode % 4} $c")
       }
-    }
+    })
+    assert(actual == 
+"""baz 3 1
+boom 3 3
+bang 0 1
+yum 1 1
+foo 2 5
+bar 3 2
+""")
   }
 
   test("wordcount_unstaged_par") {
-    new API {
+    val actual = lms.core.utils.captureOut(new API {
       val input = "foo bar baz foo bar foo foo foo boom bang boom boom yum"
       val inputs = input.grouped((input.length - 1) / nThreads + 1).toArray
 
@@ -435,7 +450,17 @@ implementation.
       hm.foreach { case (w,c) =>
         println(s"$w ${w.hashCode % 4} $c")
       }
-    }
+    })
+    assert(actual == 
+"""Array(foo bar baz fo, o bar foo foo , foo boom bang , boom boom yum)
+Array(14, 14, 14, 13)
+bang 0 1
+yum 1 1
+foo 2 5
+baz 3 1
+boom 3 3
+bar 3 2
+""")
   }
 
 /** 
