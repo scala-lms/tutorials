@@ -67,8 +67,8 @@ subclass of `DslDriver` that contains the necessary infrastructure.
       res
     }
 
-    def MPI_Issend(msg: Rep[Array[Int]], len: Rep[Int], dst: Rep[Int]) = unchecked[Unit]("MPI_Issend(",msg,", ",len,", MPI_INT, ",dst,", 0, MPI_COMM_WORLD, &req)")
-    def MPI_Irecv(msg: Rep[Array[Int]], len: Rep[Int], src: Rep[Int]) = unchecked[Unit]("MPI_Irecv(",msg,", ",len,", MPI_INT, ",src,", 0, MPI_COMM_WORLD, &req)")
+    def MPI_Issend(msg: Rep[Array[Int]], off: Rep[Int], len: Rep[Int], dst: Rep[Int]) = unchecked[Unit]("MPI_Issend(",msg," + (",off,"), ",len,", MPI_INT, ",dst,", 0, MPI_COMM_WORLD, &req)")
+    def MPI_Irecv(msg: Rep[Array[Int]], off: Rep[Int], len: Rep[Int], src: Rep[Int]) = unchecked[Unit]("MPI_Irecv(",msg," + (",off,"), ",len,", MPI_INT, ",src,", 0, MPI_COMM_WORLD, &req)")
     def MPI_Barrier() = unchecked[Unit]("MPI_Barrier(MPI_COMM_WORLD)")
   }
 
@@ -138,6 +138,15 @@ that the result is partioned by keys.
         }
       }
 
+      // A logical slice of an array
+      case class View(data: Rep[Array[Int]], off: Rep[Int], len: Rep[Int]) {
+        def apply(i: Rep[Int]) = data(off + i)
+        def update(i: Rep[Int], x: Rep[Int]) = data(off + i) = x
+        def +=(that: View) = for (j <- 0 until len) this(j) += that(j)
+        def send(dst: Rep[Int]) = MPI_Issend(data,off,len,dst)
+        def receive(src: Rep[Int]) = MPI_Irecv(data,off,len,src)
+      }
+
       // A distributed character histogram, accumulating counts
       // for each node, exchanging, and merging so that the result
       // histogram is partitioned across nodes by key
@@ -150,49 +159,32 @@ that the result is partioned by keys.
         val histogramR = NewArray[Int](size) // receive and traverse buffer
 
         val bucketLen = size / nprocs
-        def bucket(i: Rep[Int]) = uncheckedPure[Array[Int]](histogram," + ", i * bucketLen)
-        def bucketR(i: Rep[Int]) = uncheckedPure[Array[Int]](histogramR," + ", i * bucketLen)
+        def bucket(i: Rep[Int]) = View(histogram, i * bucketLen, bucketLen)
+        def bucketR(i: Rep[Int]) = View(histogramR, i * bucketLen, bucketLen)
 
         // accumulator api
         def apply(i: Rep[Char]) = new { 
+          val b = bucket(i.toInt % nprocs)
           def += (n: Rep[Int]) = {
-            bucket(i.toInt % nprocs)(i.toInt / nprocs) += n
+            b(i.toInt / nprocs) = b(i.toInt / nprocs) + n
           }
         }
 
-        // per-bucket transfers (internal)
-        def sendBucket(i: Rep[Int]) =
-          MPI_Issend(bucket(i),bucketLen,i)
-
-        def receiveBucketR(i: Rep[Int]) =
-          MPI_Irecv(bucketR(i),bucketLen,i)
-
-        def mergeBucketR(i: Rep[Int]) = {
-          val b = bucket(pid)
-          for (j <- 0 until bucketLen)
-            b(j) += bucketR(i)(j)
-        }
-
-        def foreachBucket(i: Rep[Int])(f: (Rep[Char], Rep[Int]) => Unit): Unit = {
-          val b = bucket(i)
-          for (j <- 0 until bucketLen)
-            f((i + j * nprocs).toChar, b(j))
-        }
-
-        // transfer whole data structure
+        // transfers
         def send() = {
           for (i <- 0 until nprocs) if (i != pid)
-            sendBucket(i)
+            bucket(i).send(i)
         }
 
         def receive() = {
           for (i <- 0 until nprocs) if (i != pid)
-            receiveBucketR(i)
+            bucketR(i).receive(i)
         }
 
         def merge() = {
+          val b = bucket(pid)
           for (i <- (0 until nprocs)) if (i != pid)
-            mergeBucketR(i)
+            b += bucketR(i)
         }
 
         def sync() = MPI_Barrier()
@@ -206,7 +198,9 @@ that the result is partioned by keys.
 
         // generator api
         def foreach(f: (Rep[Char], Rep[Int]) => Unit): Unit = {
-          foreachBucket(pid)(f)
+          val b = bucket(pid)
+          for (j <- 0 until bucketLen)
+            f((pid + j * nprocs).toChar, b(j))
         }
 
       }

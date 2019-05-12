@@ -36,10 +36,6 @@ long hash(char *str0, int len) {
   hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   return hash;
 }
-/*********** Init ***********/
-inline int init() {
-  return 0;
-}
 /**************** Snippet ****************/
 void Snippet(char* x0) {
   int argc = 0; char** argv = (char**)malloc(0); int provided;

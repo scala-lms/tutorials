@@ -36,10 +36,6 @@ long hash(char *str0, int len) {
   hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
   return hash;
 }
-/*********** Init ***********/
-inline int init() {
-  return 0;
-}
 /**************** Snippet ****************/
 void Snippet(char* x0) {
   int argc = 0; char** argv = (char**)malloc(0); int provided;
@@ -66,34 +62,34 @@ void Snippet(char* x0) {
   int x12 = x10;
   while (x12 != x11) {
     int x13 = "My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"[x12];
-    int* x14 = x6 + x13 % x4 * x9;
-    int x15 = x13 / x4;
-    x14[x15] = x14[x15] + 1;
+    int x14 = x13 % x4 * x9 + x13 / x4;
+    x6[x14] = x6[x14] + 1;
     x12 = x12 + 1;
   }
-  int x16 = 0;
-  while (x16 != x4) {
-    int x17 = x16;
-    if (x17 != x3) MPI_Issend(x6 + x17 * x9, x9, MPI_INT, x17, 0, MPI_COMM_WORLD, &req);
-    x16 = x16 + 1;
+  int x15 = 0;
+  while (x15 != x4) {
+    int x16 = x15;
+    if (x16 != x3) MPI_Issend(x6 + (x16 * x9), x9, MPI_INT, x16, 0, MPI_COMM_WORLD, &req);
+    x15 = x15 + 1;
   }
-  int x18 = 0;
-  while (x18 != x4) {
-    int x19 = x18;
-    if (x19 != x3) MPI_Irecv(x8 + x19 * x9, x9, MPI_INT, x19, 0, MPI_COMM_WORLD, &req);
-    x18 = x18 + 1;
+  int x17 = 0;
+  while (x17 != x4) {
+    int x18 = x17;
+    if (x18 != x3) MPI_Irecv(x8 + (x18 * x9), x9, MPI_INT, x18, 0, MPI_COMM_WORLD, &req);
+    x17 = x17 + 1;
   }
   MPI_Barrier(MPI_COMM_WORLD);
+  int x19 = x3 * x9;
   int x20 = 0;
-  int* x21 = x6 + x3 * x9;
   while (x20 != x4) {
-    int x22 = x20;
-    if (x22 != x3) {
+    int x21 = x20;
+    if (x21 != x3) {
+      int x22 = x21 * x9;
       int x23 = 0;
-      int* x24 = x8 + x22 * x9;
       while (x23 != x9) {
-        int x25 = x23;
-        x21[x25] = x21[x25] + x24[x25];
+        int x24 = x23;
+        int x25 = x19 + x24;
+        x6[x25] = x6[x25] + x8[x22 + x24];
         x23 = x23 + 1;
       }
     }
@@ -102,7 +98,7 @@ void Snippet(char* x0) {
   int x26 = 0;
   while (x26 != x9) {
     int x27 = x26;
-    int x28 = x21[x27];
+    int x28 = x6[x19 + x27];
     if (x28 != 0) printf("%d: '%c' %d\n", x3, (char)(x3 + x27 * x4), x28);
     x26 = x26 + 1;
   }
