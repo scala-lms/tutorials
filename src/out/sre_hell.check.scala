@@ -15,7 +15,7 @@ class Snippet() extends (java.lang.String => Boolean) {
           val x6 = x5 + 1
           x6 < x3 && 'l' == x0.charAt(x6) && {
             val x7 = x6 + 1
-            x7 < x3 && 'l' == x0.charAt(x7) && true
+            x7 < x3 && 'l' == x0.charAt(x7)
           }
         }
       }

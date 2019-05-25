@@ -46,28 +46,31 @@ void Snippet(char* x0) {
     while (x3[x4] != '\t') x4 = x4 + 1;
     int x6 = x4 - x5;
     x4 = x4 + 1;
-    int x7 = x4;
-    while (x3[x4] != '\t') x4 = x4 + 1;
-    x4 = x4 + 1;
+    char* x7 = x3 + x5;
     int x8 = x4;
     while (x3[x4] != '\t') x4 = x4 + 1;
     x4 = x4 + 1;
-    int x9 = x4;
+    char* x9 = x3 + x8;
+    int x10 = x4;
+    while (x3[x4] != '\t') x4 = x4 + 1;
+    x4 = x4 + 1;
+    char* x11 = x3 + x10;
+    int x12 = x4;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
+    char* x13 = x3 + x12;
     if (x6 == 12 && ({
-      char* x10 = x3 + x5;
-      int x11 = 0;
-      while (x11 < x6 && x10[x11] == "Auswanderung"[x11]) x11 = x11 + 1;
-      x11 == x6;
+      int x14 = 0;
+      while (x14 < x6 && x7[x14] == "Auswanderung"[x14]) x14 = x14 + 1;
+      x14 == x6;
     })) {
-      printll(x3 + x5);
+      printll(x7);
       printf(",");
-      printll(x3 + x7);
+      printll(x9);
       printf(",");
-      printll(x3 + x8);
+      printll(x11);
       printf(",");
-      printll(x3 + x9);
+      printll(x13);
       printf("%s\n", "");
     }
   }

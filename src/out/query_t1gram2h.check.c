@@ -119,36 +119,36 @@ void Snippet(char* x0) {
     int x36 = x32;
     while (x31[x32] != '\t') x32 = x32 + 1;
     x32 = x32 + 1;
-    int x37 = x32;
+    char* x37 = x31 + x36;
+    int x38 = x32;
     while (x31[x32] != '\t') x32 = x32 + 1;
     x32 = x32 + 1;
-    int x38 = x32;
+    char* x39 = x31 + x38;
+    int x40 = x32;
     while (x31[x32] != '\n') x32 = x32 + 1;
     x32 = x32 + 1;
-    int x39 = (int)hash(x35, x34) & 255;
+    char* x41 = x31 + x40;
+    int x42 = (int)hash(x35, x34) & 255;
     //# hash_lookup
     // generated code for hash lookup
-    int x40 = ({
-      int x41 = x39;
-      while (x4[x41] != -1 && ({
-        int x42 = x4[x41];
-        int x43 = x2[x42];
-        !(x43 == x34 && ({
-          char* x44 = x1[x42];
-          int x45 = 0;
-          while (x45 < x43 && x44[x45] == x35[x45]) x45 = x45 + 1;
-          x45 == x43;
+    int x43 = ({
+      int x44 = x42;
+      while (x4[x44] != -1 && ({
+        int x45 = x4[x44];
+        int x46 = x2[x45];
+        !(x46 == x34 && ({
+          char* x47 = x1[x45];
+          int x48 = 0;
+          while (x48 < x46 && x47[x48] == x35[x48]) x48 = x48 + 1;
+          x48 == x46;
         }));
-      })) x41 = x41 + 1 & 255;
-      x4[x41];
+      })) x44 = x44 + 1 & 255;
+      x4[x44];
     });
     //# hash_lookup
-    if (x40 != -1) {
-      char* x46 = x31 + x36;
-      char* x47 = x31 + x37;
-      char* x48 = x31 + x38;
-      int x49 = x40 * 256;
-      int x50 = x49 + x10[x40];
+    if (x43 != -1) {
+      int x49 = x43 * 256;
+      int x50 = x49 + x10[x43];
       int x51 = x49;
       while (x51 != x50) {
         int x52 = x9[x51];
@@ -158,11 +158,11 @@ void Snippet(char* x0) {
         printf(",");
         printll(x35);
         printf(",");
-        printll(x46);
+        printll(x37);
         printf(",");
-        printll(x47);
+        printll(x39);
         printf(",");
-        printll(x48);
+        printll(x41);
         printf("%s\n", "");
         x51 = x51 + 1;
       }

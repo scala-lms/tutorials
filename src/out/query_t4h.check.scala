@@ -32,7 +32,7 @@ class Snippet() extends (java.lang.String => Unit) {
       // generated code for hash lookup
       val x13 = {
         var x14 = x11
-        while (x2(x14) != -1 && false) {
+        while (false) {
           x14 = x14 + 1 & 255
         }
         if (x2(x14) == -1) {
@@ -61,7 +61,7 @@ class Snippet() extends (java.lang.String => Unit) {
       // generated code for hash lookup
       val x19 = {
         var x20 = x11
-        while (x2(x20) != -1 && false) {
+        while (false) {
           x20 = x20 + 1 & 255
         }
         x2(x20)

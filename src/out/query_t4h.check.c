@@ -83,7 +83,7 @@ void Snippet(char* x0) {
     // generated code for hash lookup
     int x19 = ({
       int x20 = x14;
-      while (x2[x20] != -1 && false) x20 = x20 + 1 & 255;
+      while (false) x20 = x20 + 1 & 255;
       x2[x20] == -1 ? ({
         int x21 = x1;
         x1 = x1 + 1;
@@ -109,22 +109,22 @@ void Snippet(char* x0) {
     int x24 = x23;
     while (x12[x23] != ',') x23 = x23 + 1;
     x23 = x23 + 1;
+    char* x25 = x12 + x24;
     while (x12[x23] != ',') x23 = x23 + 1;
     x23 = x23 + 1;
     while (x12[x23] != '\n') x23 = x23 + 1;
     x23 = x23 + 1;
     //# hash_lookup
     // generated code for hash lookup
-    int x25 = ({
-      int x26 = x14;
-      while (x2[x26] != -1 && false) x26 = x26 + 1 & 255;
-      x2[x26];
+    int x26 = ({
+      int x27 = x14;
+      while (false) x27 = x27 + 1 & 255;
+      x2[x27];
     });
     //# hash_lookup
-    if (x25 != -1) {
-      char* x27 = x12 + x24;
-      int x28 = x25 * 256;
-      int x29 = x28 + x9[x25];
+    if (x26 != -1) {
+      int x28 = x26 * 256;
+      int x29 = x28 + x9[x26];
       int x30 = x28;
       while (x30 != x29) {
         int x31 = x8[x30];
@@ -134,7 +134,7 @@ void Snippet(char* x0) {
         printf(",");
         printll(x6[x31]);
         printf(",");
-        printll(x27);
+        printll(x25);
         printf("%s\n", "");
         x30 = x30 + 1;
       }
