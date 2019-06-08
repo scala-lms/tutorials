@@ -21,64 +21,63 @@ class Snippet() extends (java.lang.String => Unit) {
     x10.next(',')
     x10.next(',')
     x10.next('\n')
-    val x11 = 0 & 255
     while (x10.hasNext) {
-      val x12 = x7
-      x4(x12) = x10.next(',')
-      x5(x12) = x10.next(',')
-      x6(x12) = x10.next('\n')
+      val x11 = x7
+      x4(x11) = x10.next(',')
+      x5(x11) = x10.next(',')
+      x6(x11) = x10.next('\n')
       x7 = x7 + 1
       //# hash_lookup
       // generated code for hash lookup
-      val x13 = {
-        var x14 = x11
+      val x12 = {
+        var x13 = 0
         while (false) {
-          x14 = x14 + 1 & 255
+          x13 = x13 + 1 & 255
         }
-        if (x2(x14) == -1) {
-          val x15 = x1
+        if (x2(x13) == -1) {
+          val x14 = x1
           x1 = x1 + 1
-          x2(x14) = x15
-          x9(x15) = 0
-          x15
-        } else x2(x14)
+          x2(x13) = x14
+          x9(x14) = 0
+          x14
+        } else x2(x13)
       }
       //# hash_lookup
-      val x16 = x9(x13)
-      x8(x13 * 256 + x16) = x12
-      x9(x13) = x16 + 1
+      val x15 = x9(x12)
+      x8(x12 * 256 + x15) = x11
+      x9(x12) = x15 + 1
     }
     x10.close
-    val x17 = new scala.lms.tutorial.Scanner("src/data/t.csv")
-    x17.next(',')
-    x17.next(',')
-    x17.next('\n')
-    while (x17.hasNext) {
-      val x18 = x17.next(',')
-      x17.next(',')
-      x17.next('\n')
+    val x16 = new scala.lms.tutorial.Scanner("src/data/t.csv")
+    x16.next(',')
+    x16.next(',')
+    x16.next('\n')
+    while (x16.hasNext) {
+      val x17 = x16.next(',')
+      x16.next(',')
+      x16.next('\n')
       //# hash_lookup
       // generated code for hash lookup
-      val x19 = {
-        var x20 = x11
+      val x18 = {
+        var x19 = 0
         while (false) {
-          x20 = x20 + 1 & 255
+          x19 = x19 + 1 & 255
         }
-        x2(x20)
+        x2(x19)
       }
       //# hash_lookup
-      if (x19 != -1) {
-        val x21 = x19 * 256
-        val x22 = x21 + x9(x19)
-        var x23 = x21
-        while (x23 != x22) {
-          val x24 = x8(x23)
-          printf("%s,%s,%s,%s\n", x4(x24), x5(x24), x6(x24), x18)
-          x23 = x23 + 1
+      if (x18 != -1) {
+        val x20 = x18 * 256
+        val x21 = x20 + x9(x18)
+        var x22 = x20
+        while (x22 != x21) {
+          val x23 = x8(x22)
+          printf("%s,%s,%s,%s\n", x4(x23), x5(x23), x6(x23), x17)
+          x22 = x22 + 1
         }
       }
     }
-    x17.close
+    x16.close
   }
 }
 /*****************************************
