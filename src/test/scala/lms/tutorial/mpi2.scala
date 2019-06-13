@@ -161,6 +161,7 @@ lines used in the character histogram above.
       //case ex: Exception =>
         //println("ERROR: " + ex)
     //}
+    println(actual)
     val expected = actual
 /*"""foo 5
 bar 2
