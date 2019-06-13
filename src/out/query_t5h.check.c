@@ -70,7 +70,7 @@ void Snippet(char* x0) {
     char* x18 = x14 + x16;
     int x19 = 0;
     while (x14[x15] != ',') {
-      x19 = x19 * 10 + (x14[x15] - '0');
+      x19 = x19 * 10 + (int)(x14[x15] - '0');
       x15 = x15 + 1;
     }
     int x20 = x15 + 1;

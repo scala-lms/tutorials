@@ -55,7 +55,7 @@ void Snippet(char* x0) {
     }
     int x5 = 0;
     while (x5 != 79) {
-      int x6 = "My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"[x5];
+      int x6 = (int)"My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"[x5];
       x3[x6] = x3[x6] + 1;
       x5 = x5 + 1;
     }

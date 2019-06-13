@@ -54,7 +54,7 @@ void Snippet(char* x0) {
     char* x6 = x3 + x5;
     int x7 = 0;
     while (x3[x4] != ',') {
-      x7 = x7 * 10 + (x3[x4] - '0');
+      x7 = x7 * 10 + (int)(x3[x4] - '0');
       x4 = x4 + 1;
     }
     int x8 = x4 + 1;
