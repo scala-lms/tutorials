@@ -108,7 +108,6 @@ trait ScannerLowerBase extends Base with UncheckedOps { this: Dsl =>
   def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]): Rep[Array[T]]
   def stringFromCharArray(buf: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String]
   def prints(s: Rep[String]): Rep[Int]
-  def printl(s: Rep[String], len: Rep[Int]): Rep[Int]
   def infix_toInt(c: Rep[Char]): Rep[Int] = c.asInstanceOf[Rep[Int]]
 }
 
@@ -120,7 +119,6 @@ trait ScannerLowerExp extends ScannerLowerBase with UncheckedOpsExp { this: DslE
   def mmap[T:Typ](fd: Rep[Int], len: Rep[Int]) = uncheckedPure[Array[T]]("mmap(0, ",len,", PROT_READ, MAP_FILE | MAP_SHARED, ",fd,", 0)")
   def stringFromCharArray(data: Rep[Array[Char]], pos: Rep[Int], len: Rep[Int]): Rep[String] = uncheckedPure[String](data," + ",pos)
   def prints(s: Rep[String]): Rep[Int] = unchecked[Int]("printll(",s,")")
-  def printl(s: Rep[String], len: Rep[Int]): Rep[Int] = unchecked[Int]("fwrite(",s, ", ", len, ", 1, stdout)")
 }
 
 @virtualize
