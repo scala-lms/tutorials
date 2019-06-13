@@ -97,20 +97,20 @@ void Snippet(char* x0) {
   while (x23 < x21) {
     int x24 = x23;
     while (x22[x23] != '\t') x23 = x23 + 1;
-    x23 = x23 + 1;
-    char* x25 = x22 + x24;
-    int x26 = x23;
+    int x25 = x23 + 1;
+    x23 = x25;
+    char* x26 = x22 + x24;
     while (x22[x23] != '\t') x23 = x23 + 1;
-    x23 = x23 + 1;
-    char* x27 = x22 + x26;
-    int x28 = x23;
+    int x27 = x23 + 1;
+    x23 = x27;
+    char* x28 = x22 + x25;
     while (x22[x23] != '\t') x23 = x23 + 1;
-    x23 = x23 + 1;
-    char* x29 = x22 + x28;
-    int x30 = x23;
+    int x29 = x23 + 1;
+    x23 = x29;
+    char* x30 = x22 + x27;
     while (x22[x23] != '\n') x23 = x23 + 1;
     x23 = x23 + 1;
-    char* x31 = x22 + x30;
+    char* x31 = x22 + x29;
     //# hash_lookup
     // generated code for hash lookup
     int x32 = ({
@@ -129,11 +129,11 @@ void Snippet(char* x0) {
         printf(",");
         printf("%d", x5[x37]);
         printf(",");
-        printll(x25);
+        printll(x26);
         printf(",");
-        printll(x27);
+        printll(x28);
         printf(",");
-        printll(x29);
+        printll(x30);
         printf(",");
         printll(x31);
         printf("%s\n", "");

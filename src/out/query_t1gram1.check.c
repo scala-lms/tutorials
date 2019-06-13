@@ -44,14 +44,14 @@ void Snippet(char* x0) {
   while (x4 < x2) {
     int x5 = x4;
     while (x3[x4] != '\t') x4 = x4 + 1;
-    x4 = x4 + 1;
-    int x6 = x4;
+    int x6 = x4 + 1;
+    x4 = x6;
     while (x3[x4] != '\t') x4 = x4 + 1;
-    x4 = x4 + 1;
-    int x7 = x4;
+    int x7 = x4 + 1;
+    x4 = x7;
     while (x3[x4] != '\t') x4 = x4 + 1;
-    x4 = x4 + 1;
-    int x8 = x4;
+    int x8 = x4 + 1;
+    x4 = x8;
     while (x3[x4] != '\n') x4 = x4 + 1;
     x4 = x4 + 1;
     printll(x3 + x5);

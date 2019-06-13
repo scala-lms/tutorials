@@ -69,8 +69,8 @@ void Snippet(char* x0) {
       x15 = x15 * 10 + (x12[x13] - '0');
       x13 = x13 + 1;
     }
-    x13 = x13 + 1;
-    int x16 = x13;
+    int x16 = x13 + 1;
+    x13 = x16;
     while (x12[x13] != '\n') x13 = x13 + 1;
     x13 = x13 + 1;
     int x17 = x7;
