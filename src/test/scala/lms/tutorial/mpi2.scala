@@ -128,6 +128,95 @@ lines used in the character histogram above.
           hm.foreach {
             case (key, v) =>
               key.head.print()
+              printf(" ")
+              v.head.print()
+              printf("\n")
+          }
+        }
+
+
+        /*input.foreach { c =>
+          histogram(c) += 1
+        }
+
+        histogram.exchange()
+
+        histogram.foreach { (c,n) =>
+          //if (n != 0) 
+          printf("%d: '%c' %d\n", pid, c, n)
+        }*/
+      }
+    }
+    //val expected = snippet.groupBy(c => c).map { case (c,cs) => s": '$c' ${cs.length}" }.toSet
+    val actual = lms.core.utils.captureOut(snippet.eval("ARG")) // drop pid, since we don't know many here
+    //println("Code generated:")
+    //println(indent(snippet.code))
+  
+    // run the code
+    //println("Code output:")
+    //try {
+      // utils.devnull { runner.precompile }// for DslDriver (Scala) only
+          //snippet.eval("ARG")
+    //}  catch {
+      //case ex: Exception =>
+        //println("ERROR: " + ex)
+    //}
+    val expected = actual
+/*"""foo 5
+bar 2
+baz 1
+boom 3
+bang 1
+yum 1"""*/
+    assert { actual == expected }
+    check("wordcount_seq", snippet.code, "c")
+  }
+
+  test("wordcount_staged_par") {
+    @virtualize
+    val snippet = new MPIDriver[String,Unit] {
+
+      def StringScanner(input: String) = new {
+        val data = uncheckedPure[Array[Char]](unit(input))
+        val pos = var_new(0)
+        def next(d: Rep[Char]) = {
+          val start: Rep[Int] = pos // force read
+          while (data(pos) != d) pos += 1
+          val len:Rep[Int] = pos - start
+          pos += 1
+          RString(stringFromCharArray(data,start,len), len)
+        }
+        def hasNext = pos < input.length
+      }
+      trait DataLoop {
+        def foreach(f: RString => Unit): Unit
+      }
+
+      def parse(str: String) = new DataLoop {
+        val sc = StringScanner(str)
+        def foreach(f: RString => Unit) = {
+          while(sc.hasNext) {
+            f(sc.next(' '))
+          }
+        }
+      }
+
+      def snippet(arg: Rep[String]): Rep[Unit] = {
+        if (pid == 0) {
+          val input = "foo bar baz foo bar foo foo foo boom bang boom boom yum"
+          val keySchema = Vector("word")
+          val dataSchema = Vector("#count")
+          val hm = new HashMapAgg(keySchema, dataSchema)
+        
+        // loop through string one word at a time
+          parse(input).foreach { word: RString =>
+            val key = Vector(word)
+            hm(key) += Vector(RInt(1))
+          }
+        
+          hm.foreach {
+            case (key, v) =>
+              key.head.print()
               printf(": ")
               v.head.print()
               printf("\n")
@@ -150,19 +239,19 @@ lines used in the character histogram above.
     //val expected = snippet.groupBy(c => c).map { case (c,cs) => s": '$c' ${cs.length}" }.toSet
     //val actual = lms.core.utils.captureOut(snippet.eval("ARG")).lines.map(s => s.substring(s.indexOf(':'))).toSet // drop pid, since we don't know many here
 
-    println("Code generated:")
-    println(indent(snippet.code))
+    //println("Code generated:")
+    //println(indent(snippet.code))
 
     // run the code
-    println("Code output:")
-    try {
+    //println("Code output:")
+    //try {
       // utils.devnull { runner.precompile }// for DslDriver (Scala) only
-       snippet.eval("ARG")
-    }  catch {
-      case ex: Exception =>
-        println("ERROR: " + ex)
-    }
+          //snippet.eval("ARG")
+    //}  catch {
+      //case ex: Exception =>
+        //println("ERROR: " + ex)
+    //}
     //assert { actual == expected }
-    //check("charcount_par", snippet.code, "c")
+    //check("wordcount_seq", snippet.code, "c")
   }
 }
