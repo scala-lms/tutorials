@@ -127,7 +127,7 @@ lines used in the character histogram above.
         
           hm.foreach {
             case (key, v) =>
-              key.head.print()
+              key.head.asInstanceOf[RString].printLen() // force cast to RString for printLen
               printf(" ")
               v.head.print()
               printf("\n")
@@ -223,35 +223,11 @@ yum 1"""*/
               printf("\n")
           }
         }
-
-
-        /*input.foreach { c =>
-          histogram(c) += 1
-        }
-
-        histogram.exchange()
-
-        histogram.foreach { (c,n) =>
-          //if (n != 0) 
-          printf("%d: '%c' %d\n", pid, c, n)
-        }*/
       }
     }
     //val expected = snippet.groupBy(c => c).map { case (c,cs) => s": '$c' ${cs.length}" }.toSet
     //val actual = lms.core.utils.captureOut(snippet.eval("ARG")).lines.map(s => s.substring(s.indexOf(':'))).toSet // drop pid, since we don't know many here
 
-    //println("Code generated:")
-    //println(indent(snippet.code))
-
-    // run the code
-    //println("Code output:")
-    //try {
-      // utils.devnull { runner.precompile }// for DslDriver (Scala) only
-          //snippet.eval("ARG")
-    //}  catch {
-      //case ex: Exception =>
-        //println("ERROR: " + ex)
-    //}
     //assert { actual == expected }
     //check("wordcount_seq", snippet.code, "c")
   }

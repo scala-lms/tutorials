@@ -61,7 +61,7 @@ void Snippet(char* x0) {
   int x11 = x3 == x4 - 1 ? 79 : x10 + x5;
   int x12 = x10;
   while (x12 != x11) {
-    int x13 = "My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"[x12];
+    int x13 = (int)"My name is Ozymandias, King of Kings; Look on my Works, ye Mighty, and despair!"[x12];
     int x14 = x13 % x4 * x9 + x13 / x4;
     x6[x14] = x6[x14] + 1;
     x12 = x12 + 1;

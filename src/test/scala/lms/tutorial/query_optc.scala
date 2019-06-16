@@ -60,7 +60,8 @@ Low-Level Processing Logic
     def hash: Rep[Long]
   }
   case class RString(data: Rep[String], len: Rep[Int]) extends RField {
-    def print() = printf("%.*s", len, data)//printl(data, len)
+    def print() = prints(data)
+    def printLen() = printf("%.*s", len, data)//printl(data, len)
     def compare(o: RField) = o match { case RString(data2, len2) => if (len == len2) {
       // TODO: we may or may not want to inline this (code bloat and icache considerations).
       var i = 0
