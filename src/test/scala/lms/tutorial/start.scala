@@ -107,26 +107,62 @@ bare ``T`` as opposed of a ``Rep[T]``. In the second snippet,
 ``compute`` has the type ``Rep[Boolean] => Rep[Int]``, not
 ``Rep[Boolean => Int]`` -- its type already tells us that the function
 is known at staging time.
+
+Similarly, below, the recursive power function and the helper square
+function only exists during staging time.
 */
 
   test("power") {
     val snippet = new DslDriver[Int,Int] {
+      def square(x: Rep[Int]): Rep[Int] = x*x
 
-      def power(b: Rep[Int], x: Int): Rep[Int] =
-        if (x == 0) 1
-        else b * power(b, x-1)
+      def power(b: Rep[Int], n: Int): Rep[Int] =
+        if (n == 0) 1
+        else if (n % 2 == 0) square(power(b, n/2))
+        else b * power(b, n-1)
 
       def snippet(b: Rep[Int]) =
-        power(b, 3)
+        power(b, 7)
 
     }
-    assert(snippet.eval(2) === 8)
+    assert(snippet.eval(2) === 128)
     check("power", snippet.code)
   }
 
 /**
+
+Because of common subexpression elimination, we get reuse of the square
+argument for free.
+
       .. includecode:: ../../../../out/dslapipower.check.scala
 
+We could also create a generated square function, of type
+`Rep[Int=>Int]` instead of `Rep[Int]=>Rep[Int]`.
+*/
+
+  test("power with fun square") {
+    val snippet = new DslDriver[Int,Int] {
+      def square: Rep[Int=>Int] = fun {x => x*x}
+
+      def power(b: Rep[Int], n: Int): Rep[Int] =
+        if (n == 0) 1
+        else if (n % 2 == 0) square(power(b, n/2))
+        else b * power(b, n-1)
+
+      def snippet(b: Rep[Int]) =
+        power(b, 7)
+
+    }
+    assert(snippet.eval(2) === 128)
+    check("powerfunsquare", snippet.code)
+  }
+
+/**
+
+The code we get is in fact slightly less efficient, because of these
+extra calls to the generated square function.
+
+      .. includecode:: ../../../../out/dslapipowerfunsquare.check.scala
 
 ### Rep[Range] vs Range
 
