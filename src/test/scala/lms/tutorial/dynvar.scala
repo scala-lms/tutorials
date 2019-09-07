@@ -51,3 +51,12 @@ class DynVarWarmupTest extends TutorialFunSuite {
   }
 }
 
+/**
+Compare the code of `warmup0`:
+
+      .. includecode:: ../../../../out/dynvar0.check.scala
+
+and with that of `warmup1`:
+
+      .. includecode:: ../../../../out/dynvar1.check.scala
+*/
