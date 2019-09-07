@@ -170,6 +170,6 @@ the second stage, driven by the type of their condition.
 What's next?
 ------------
 
-Go back to the [tutorial index](index.html) or continue with the [Shonan Challenge](shonan.html).
+Go back to the [tutorial index](index.html) or continue with the [power function](power.html).
 
 */

@@ -52,6 +52,9 @@ The following tutorials are available:
 - [Getting Started](start.html)
     Rep[T] vs T
 
+- [The Power Function](power.html)
+    A first example
+
 - [Shonan HMM Challenge](shonan.html)
     Sparse matrix vector multiplication
     Selective unrolling and precomputation
