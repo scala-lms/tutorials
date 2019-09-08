@@ -37,6 +37,9 @@ trait Sliding extends Dsl {
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit]
 }
 
+/**
+### No Sliding (Baseline)
+*/
 trait NoSlidingExp extends DslExp with Sliding {
   // not actually sliding -- just to have a baseline reference
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
@@ -44,12 +47,15 @@ trait NoSlidingExp extends DslExp with Sliding {
   }
 }
 
+/**
+### Sliding
+*/
 trait SlidingExp extends DslExp with Sliding {
   object trans extends ForwardTransformer {
     val IR: SlidingExp.this.type = SlidingExp.this
   }
   def log(x: Any): Unit = {
-    System.out.println("sliding log: "+x)
+    System.err.println("sliding log: "+x)
   }
 
   // some arithmetic rewrites to maximize sliding sharing
@@ -140,6 +146,82 @@ trait SlidingExp extends DslExp with Sliding {
 }
 
 /**
+### Multi sliding
+*/
+trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
+  type Subst = scala.collection.immutable.Map[Exp[Any],Exp[Any]]
+  type Triplet = (Rep[Unit], List[Stm], Subst)
+
+  override def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
+    val i = fresh[Int]
+
+    val save = context
+    // evaluate loop contents f(i)
+    val (r0,stms0) = reifySubGraph(f(i))
+    val defs = stms0.flatMap(_.lhs)
+    def step(n: Int, last: List[Stm], acc: List[Triplet], overlap: List[Sym[Any]]): (Int, List[Triplet], List[Sym[Any]]) = {
+      val (res: (Int, List[Triplet], List[Sym[Any]]), _) = reifySubGraph {
+        reflectSubGraph(last)
+        context = save
+        val ((ri, substi), stmsi) = reifySubGraph(trans.withSubstScope(i -> (i+n)) {
+          stms0.foreach(s => trans.traverseStm(s))
+          (trans(r0), trans.subst)
+        })
+
+        val overlapi = stmsi.flatMap { case TP(s,d) => syms(d) filter (defs contains _) }.distinct
+        if (overlapi.nonEmpty)
+          step(n+1, stmsi, ((ri, stmsi, substi):Triplet)::acc, (overlap++overlapi).distinct)
+        else {
+          log("stopping at "+n)
+          (n-1, acc, overlap)
+        }
+      }
+      res
+    }
+
+    val (n, acc, overlap) = step(1, stms0, Nil, Nil)
+    context = save
+
+    val ls = acc.reverse
+    val overlap0 = overlap
+    val overlaps = ls.map({case (_, _, substi) => overlap0 map substi})
+    val overlaps_pred = overlap0::overlaps
+    // build a variable for each overlap sym.
+    // init variables by peeling first loop iteration.
+    if (end > start) {
+      val (rX,substX) = trans.withSubstScope(i -> start) {
+        stms0.foreach(s=>trans.traverseStm(s))
+        (trans(r0), trans.subst)
+      }
+      val vars = overlap0.map{x => var_new(substX(x))(x.tp,x.pos.head)}
+      // now generate the loop
+      for (j <- 0 until (end-start)/n) {
+        val base = n*j+start
+        for (k <- 0 until n: Range) {
+          generate_comment("unrolled for k="+k)
+          val index = base+k+1
+          if (index < end) {
+            // read the overlap variables
+            generate_comment("variable reads")
+            val reads = (overlaps_pred(k) zip vars).map(p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
+            // emit the transformed loop body
+            generate_comment("computation")
+            val (ri, substYi: Subst) = trans.withSubstScope((reads:+(i->base)): _*) {
+              ls(k)._2.foreach(s=>trans.traverseStm(s))
+              (trans(ls(k)._1), trans.subst)
+            }
+            // write the new values to the overlap vars
+            generate_comment("variable writes")
+            val writes = (overlaps(k) zip vars).map{p =>
+              (p._1, var_assign(p._2, substYi(p._1))(p._1.tp,p._1.pos.head))}
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
 ## Warmup
 */
 trait SlidingWarmup extends Sliding {
@@ -162,11 +244,18 @@ class SlidingWarmupTest extends TutorialFunSuite {
     check("1", sliding1.code)
   }
 
+  test("warmup with multi sliding") {
+    val sliding2 = new SlidingWarmupDriver with SlidingMultiExp
+    check("2", sliding2.code) // same as single sliding
+  }
+
   test("warmup equal") {
     val sliding0 = new SlidingWarmupDriver with NoSlidingExp
     val sliding1 = new SlidingWarmupDriver with SlidingExp
+    val sliding2 = new SlidingWarmupDriver with SlidingMultiExp
     val input = 5
     assert(sliding0.eval(input).mkString(",") == sliding1.eval(input).mkString(","))
+    assert(sliding0.eval(input).mkString(",") == sliding2.eval(input).mkString(","))
   }
 }
 
@@ -176,6 +265,10 @@ class SlidingWarmupTest extends TutorialFunSuite {
 
 ### Generated code with sliding
       .. includecode:: ../../../../out/sliding1.check.scala
+
+### Generated code with multi sliding
+      .. includecode:: ../../../../out/sliding2.check.scala
+
 */
 
 /**
@@ -211,11 +304,18 @@ class StencilTest extends TutorialFunSuite {
     check("1", stencil1.code)
   }
 
+  test("stencil with multi sliding") {
+    val stencil2 = new StencilDriver with SlidingMultiExp
+    check("2", stencil2.code)
+  }
+
   test("stencil equal") {
     val stencil0 = new StencilDriver with NoSlidingExp
     val stencil1 = new StencilDriver with SlidingExp
+    val stencil2 = new StencilDriver with SlidingMultiExp
     val input = Array(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
     assert(stencil0.eval(input).mkString(",") == stencil1.eval(input).mkString(","))
+    assert(stencil0.eval(input).mkString(",") == stencil2.eval(input).mkString(","))
   }
 }
 
@@ -225,4 +325,7 @@ class StencilTest extends TutorialFunSuite {
 
 ### Generated code with sliding
       .. includecode:: ../../../../out/stencil1.check.scala
+
+### Generated code with multi sliding
+      .. includecode:: ../../../../out/stencil2.check.scala
 */

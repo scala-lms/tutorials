@@ -44,6 +44,8 @@ trait Dsl extends PrimitiveOps with NumericOps with BooleanOps with LiftString w
   implicit def repStrToSeqOps(a: Rep[String]) = new SeqOpsCls(a.asInstanceOf[Rep[Seq[Char]]])
   override def infix_&&(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: scala.reflect.SourceContext): Rep[Boolean] =
     __ifThenElse(lhs, rhs, unit(false))
+  override def infix_||(lhs: Rep[Boolean], rhs: => Rep[Boolean])(implicit pos: scala.reflect.SourceContext): Rep[Boolean] =
+    __ifThenElse(lhs, unit(true), rhs)
   def generate_comment(l: String): Rep[Unit]
   def comment[A:Typ](l: String, verbose: Boolean = true)(b: => Rep[A]): Rep[A]
 }
