@@ -161,6 +161,13 @@ class SlidingWarmupTest extends TutorialFunSuite {
     val sliding1 = new SlidingWarmupDriver with SlidingExp
     check("1", sliding1.code)
   }
+
+  test("warmup equal") {
+    val sliding0 = new SlidingWarmupDriver with NoSlidingExp
+    val sliding1 = new SlidingWarmupDriver with SlidingExp
+    val input = 5
+    assert(sliding0.eval(input).mkString(",") == sliding1.eval(input).mkString(","))
+  }
 }
 
 /**
@@ -202,6 +209,13 @@ class StencilTest extends TutorialFunSuite {
   test("stencil with sliding") {
     val stencil1 = new StencilDriver with SlidingExp
     check("1", stencil1.code)
+  }
+
+  test("stencil equal") {
+    val stencil0 = new StencilDriver with NoSlidingExp
+    val stencil1 = new StencilDriver with SlidingExp
+    val input = Array(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)
+    assert(stencil0.eval(input).mkString(",") == stencil1.eval(input).mkString(","))
   }
 }
 
