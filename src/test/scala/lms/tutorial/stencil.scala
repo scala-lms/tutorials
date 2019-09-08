@@ -47,19 +47,25 @@ trait SlidingExp extends DslExp with Sliding {
   }
 
   // some arithmetic rewrites to maximize sliding sharing
-  override def int_plus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] = ((lhs,rhs) match {
-    case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y+z)) // (x+y)+z --> x+(y+z)
-    case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y-z)) // (x-y)+z --> x-(y-z)
-    case (x: Exp[Int], Const(z:Int)) if z < 0 => int_minus(x, unit(-z))
-    case _ => super.int_plus(lhs,rhs)
-  }).asInstanceOf[Exp[Int]]
+  override def int_plus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] =
+    ((lhs,rhs) match {
+      // (x+y)+z --> x+(y+z)
+      case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y+z))
+      // (x-y)+z --> x-(y-z)
+      case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y-z))
+      case (x: Exp[Int], Const(z:Int)) if z < 0 => int_minus(x, unit(-z))
+      case _ => super.int_plus(lhs,rhs)
+    }).asInstanceOf[Exp[Int]]
 
-  override def int_minus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] = ((lhs,rhs) match {
-    case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y+z)) // (x-y)-z --> x-(y+z)
-    case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y-z)) // (x+y)-z --> x+(y-z)
-    case (x: Exp[Int], Const(z:Int)) if z < 0 => int_plus(x, unit(-z))
-    case _ => super.int_minus(lhs,rhs)
-  }).asInstanceOf[Exp[Int]]
+  override def int_minus(lhs: Exp[Int], rhs: Exp[Int])(implicit pos: SourceContext): Exp[Int] =
+    ((lhs,rhs) match {
+      // (x-y)-z --> x-(y+z)
+      case (Def(IntMinus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_minus(x, unit(y+z))
+      // (x+y)-z --> x+(y-z)
+      case (Def(IntPlus(x:Exp[Int],Const(y:Int))), Const(z:Int)) => int_plus(x, unit(y-z))
+      case (x: Exp[Int], Const(z:Int)) if z < 0 => int_plus(x, unit(-z))
+      case _ => super.int_minus(lhs,rhs)
+    }).asInstanceOf[Exp[Int]]
 
   def sliding(start: Rep[Int], end: Rep[Int])(f: Rep[Int] => Rep[Unit]): Rep[Unit] = {
     val i = fresh[Int]
@@ -117,7 +123,8 @@ trait SlidingExp extends DslExp with Sliding {
           (trans(r1), trans.subst)
         }
         // write the new values to the overlap vars
-        val writes = (overlap1 zip vars) map (p => (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head)))
+        val writes = (overlap1 zip vars) map (p =>
+          (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head)))
       }
     }
   }
