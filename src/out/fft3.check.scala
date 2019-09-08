@@ -1,7 +1,7 @@
 /*****************************************
 Emitting Generated Code
 *******************************************/
-class FFT4 extends ((Array[Double])=>(Array[Double])) {
+class staged$0 extends ((Array[Double])=>(Array[Double])) {
   def apply(x0:Array[Double]): Array[Double] = {
     val x1 = x0(0)
     val x5 = x0(4)
@@ -41,7 +41,5 @@ class FFT4 extends ((Array[Double])=>(Array[Double])) {
 /*****************************************
 End of Generated Code
 *******************************************/
-/*
-compilation: ok
-6.0,0.0,-1.0,1.0,0.0,0.0,-1.0,-1.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0
-*/
+// compilation: ok
+// 6.0,0.0,-1.0,1.0,0.0,0.0,-1.0,-1.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0

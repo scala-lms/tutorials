@@ -152,12 +152,14 @@ members defined by `TestFFC`.
 
 */
 package scala.lms.tutorial.fft
+import scala.lms.tutorial._
 
 import scala.reflect.SourceContext
 import java.io.PrintWriter
 
 import scala.lms.common._
-
+import scala.lms.internal._
+import scala.reflect._
 
 /**
 ### Arith
@@ -297,6 +299,10 @@ trait TrigExpOpt extends TrigExp {
   }
 }
 
+trait ScalaGenTrig {
+  // ...
+}
+
 /**
 ### Arrays
 
@@ -304,12 +310,12 @@ We create a package for arrays.
 
 */
 trait Arrays extends Base {
+  implicit def arrayTyp[T:Typ]: Typ[Array[T]]
 
-  class ArrayOps[T:Typ](x: Rep[Array[T]]) {
+  implicit class ArrayOps[T:Typ](x: Rep[Array[T]]) {
     def apply(i: Int) = arrayApply(x, i)
     def update(i: Int, v: Rep[T]) = arrayUpdate(x,i, v)
   }
-  implicit def array2arrayOps[T:Typ](x: Rep[Array[T]]) = new ArrayOps(x)
 
   def arrayApply[T:Typ](x: Rep[Array[T]], i:Int): Rep[T]
   def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v:Rep[T]): Rep[Unit]
@@ -331,6 +337,10 @@ trait ArraysExp extends Arrays with EffectExp {
   def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v: Rep[T]) = reflectEffect(ArrayUpdate(x,i,v))
 }
 
+trait ArraysExpOpt extends ArraysExp {
+  // ...
+}
+
 trait ScalaGenArrays extends ScalaGenBase {
   val IR: ArraysExp
   import IR._
@@ -341,8 +351,6 @@ trait ScalaGenArrays extends ScalaGenBase {
     case _ => super.emitNode(sym, rhs)
   }
 }
-
-import scala.lms.internal._
 
 /**
 ### Disable Optimizations
@@ -359,8 +367,6 @@ trait DisableDCE extends GraphTraversal {
 /**
 ### FFT
 */
-
-import scala.reflect._
 
 trait FFT { this: Arith with Trig =>
   def omega(k: Int, N: Int): Complex = {
@@ -460,10 +466,35 @@ trait ScalaGenFlat extends ScalaGenEffect {
   }
 }
 
+trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
+  def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
+  def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
+    val arg = Array.tabulate(size){i =>
+      Complex(input(2*i), input(2*i+1))
+    }
+    val res = fft(arg)
+    updateArray[Double](input, (res.flatMap {
+      case Complex(re,im) => Array(re,im)(repClassTag[Double])
+    }).toArray(repClassTag[Double]))
+  }
+}
+
+trait TestFFTC { this: FFTC =>
+  lazy val fft4: Array[Double] => Array[Double] = fftc(4)
+  // ...
+}
+
+trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala {
+  def repClassTag[T:ClassTag]: ClassTag[Rep[T]] = classTag
+}
+
+trait ScalaGenFFT extends ScalaGenFlat with ScalaGenArith with ScalaGenTrig with ScalaGenArrays {
+  val IR: FFTCExp
+}
+
 /**
 ### Tests
 */
-import scala.lms.tutorial.TutorialFunSuite;
 
 class TestFFT extends TutorialFunSuite {
 
@@ -519,36 +550,18 @@ Computation graph for size-4 FFT, optimized.
 
   test("3") {
     checkOut("3", "scala", {
-      class FFTC extends FFT
-        with ArithExpOptFFT with TrigExpOptFFT with ArraysExp
-        with CompileScala {
-
-        def ffts(size: Int) = { input: Rep[Array[Double]] =>
-          val arg = Array.tabulate(size){i =>
-            Complex(input(2*i), input(2*i+1))
-          }
-          val res = fft(arg)
-          updateArray(input, res.flatMap {
-            case Complex(re,im) => Array(re,im)
-          })
-        }
-
-        val codegen = new ScalaGenFlat with ScalaGenArith with ScalaGenArrays {
-          val IR: FFTC.this.type = FFTC.this
+      val OP: TestFFTC = new TestFFTC with FFTCExp { self =>
+        dumpGeneratedCode = true
+        val IR: self.type = self
+        val codegen = new ScalaGenFFT {
+          val IR: self.type = self
         }
       }
-      val o = new FFTC
-      import o._
-
-      val fft4 = ffts(4)
-      val fft8 = ffts(8)
-      codegen.emitSource(fft4, "FFT4", new PrintWriter(scala.Console.out))
-      println("/*")
-      val fft4c = compile(fft4)
-      println(fft4c(Array(
+      val code = utils.captureOut(OP.fft4)
+      println(code.replace("compilation: ok", "// compilation: ok"))
+      println(OP.fft4(Array(
         1.0,0.0, 1.0,0.0, 2.0,0.0, 2.0,0.0, 1.0,0.0, 1.0,0.0, 0.0,0.0, 0.0,0.0
-      )).mkString(","))
-      println("*/")
+      )).mkString("// ", ",", ""))
     })
 
 /**
