@@ -439,16 +439,18 @@ trait ScalaGenFlat extends ScalaGenEffect {
 <a name="FFTC"></a>
 */
 trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
-  def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
   def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
     val arg = Array.tabulate(size){i =>
       Complex(input(2*i), input(2*i+1))
     }
     val res = fft(arg)
-    updateArray[Double](input, (res.flatMap {
-      case Complex(re,im) => Array(re,im)(repClassTag[Double])
-    }).toArray(repClassTag[Double]))
+    updateArray(input, res.flatMap {
+      case Complex(re,im) => Array(re,im)
+    })
   }
+
+  // This is because we're using an Array of Rep.
+  implicit def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
 }
 
 /**
