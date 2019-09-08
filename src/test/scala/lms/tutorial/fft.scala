@@ -461,8 +461,12 @@ trait TestFFTC { this: FFTC =>
   // embedded code using fft4, fft8, ...
 }
 
-trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala {
+trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala { self =>
   def repClassTag[T:ClassTag]: ClassTag[Rep[T]] = classTag
+  val IR: self.type = self
+  val codegen = new ScalaGenFFT {
+    val IR: self.type = self
+  }
 }
 
 trait ScalaGenFFT extends ScalaGenFlat with ScalaGenArith with ScalaGenTrig with ScalaGenArrays {
@@ -527,12 +531,8 @@ Computation graph for size-4 FFT, optimized.
 
   test("3") {
     checkOut("3", "scala", {
-      val OP: TestFFTC = new TestFFTC with FFTCExp { self =>
+      val OP: TestFFTC = new TestFFTC with FFTCExp {
         dumpGeneratedCode = true
-        val IR: self.type = self
-        val codegen = new ScalaGenFFT {
-          val IR: self.type = self
-        }
       }
       val code = utils.captureOut(OP.fft4)
       println(code.replace("compilation: ok", "// compilation: ok"))
