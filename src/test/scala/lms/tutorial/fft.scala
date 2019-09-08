@@ -438,7 +438,7 @@ trait ScalaGenFlat extends ScalaGenEffect {
 /**
 <a name="FFTC"></a>
 */
-trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
+trait FFTC { this: FFT with Arith with Arrays with Compile =>
   def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
     val arg = Array.tabulate(size){i =>
       Complex(input(2*i), input(2*i+1))
