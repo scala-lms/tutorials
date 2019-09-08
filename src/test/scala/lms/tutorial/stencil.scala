@@ -144,6 +144,14 @@ class SlidingWarmupTest extends TutorialFunSuite {
   }
 }
 
+/**
+Without sliding:
+      .. includecode:: ../../../../out/sliding0.check.scala
+
+With sliding:
+      .. includecode:: ../../../../out/sliding1.check.scala
+*/
+
 trait Stencil extends Sliding {
   def snippet(v: Rep[Array[Double]]): Rep[Array[Double]] = {
     val n = v.length
@@ -174,3 +182,11 @@ class StencilTest extends TutorialFunSuite {
     check("1", stencil1.code)
   }
 }
+
+/**
+Without sliding:
+      .. includecode:: ../../../../out/stencil0.check.scala
+
+With sliding:
+      .. includecode:: ../../../../out/stencil1.check.scala
+*/
