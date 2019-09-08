@@ -256,6 +256,7 @@ trait ScalaGenTrig {
 
 We create a minimal package for arrays.
 
+We use the effect system of LMS to ensure updates are recorded.
 */
 trait Arrays extends Base {
   implicit def arrayTyp[T:Typ]: Typ[Array[T]]
@@ -277,6 +278,8 @@ given a static array by an unrolled loop.
       arrayUpdate(x, i, v(i))
     x
   }
+
+  def mutable[T:Typ](x: Rep[T]): Unit
 }
 
 trait ArraysExp extends Arrays with EffectExp {
@@ -286,7 +289,9 @@ trait ArraysExp extends Arrays with EffectExp {
   case class ArrayUpdate[T:Typ](x:Rep[Array[T]], i:Int, v: Rep[T]) extends Def[Unit]
 
   def arrayApply[T:Typ](x: Rep[Array[T]], i:Int) = ArrayApply(x, i)
-  def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v: Rep[T]) = reflectEffect(ArrayUpdate(x,i,v))
+  def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v: Rep[T]) = reflectWrite(x)(ArrayUpdate(x,i,v))
+
+  def mutable[T:Typ](x: Rep[T]): Unit = reflectMutableSym(x.asInstanceOf[Sym[T]])
 }
 
 trait ArraysExpOpt extends ArraysExp {
@@ -433,6 +438,7 @@ trait ScalaGenFlat extends ScalaGenEffect {
 */
 trait FFTC { this: FFT with Arith with Arrays with Compile =>
   def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
+    mutable(input)
     val arg = Array.tabulate(size){i =>
       Complex(input(2*i), input(2*i+1))
     }
