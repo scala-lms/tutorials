@@ -4,7 +4,7 @@ Sliding Stencil
 
 In this tutorial, we show a solution to Shonan Challenge 3.3 Stencil.
 
-For explanation of this solution, <a href="https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ">see the group discussion</a>.
+For explanation of this solution, [see the group discussion](https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ).
 
 For further reference, see:
 
