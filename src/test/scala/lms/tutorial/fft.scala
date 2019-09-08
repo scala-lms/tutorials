@@ -464,11 +464,12 @@ trait TestFFTC { this: FFTC =>
 }
 
 trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala { self =>
-  def repClassTag[T:ClassTag]: ClassTag[Rep[T]] = classTag
   val IR: self.type = self
   val codegen = new ScalaGenFFT {
     val IR: self.type = self
   }
+
+  def repClassTag[T:ClassTag]: ClassTag[Rep[T]] = classTag
 }
 
 trait ScalaGenFFT extends ScalaGenFlat with ScalaGenArith with ScalaGenTrig with ScalaGenArrays {
