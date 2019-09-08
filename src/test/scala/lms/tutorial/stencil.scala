@@ -8,7 +8,7 @@ For explanation of this solution, [see the group discussion](https://groups.goog
 
 For further reference, see:
 
-- Shonan Challenge for Generative Programming ([PDF](https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf)) ([official code repository](https://github.com/StagedHPC/shonan-challenge))
+- Shonan Challenge for Generative Programming ([PDF](http://homes.sice.indiana.edu/ccshan/metafx/pepm2013.pdf)) ([official code repository](https://github.com/StagedHPC/shonan-challenge))
   Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
 
 Outline:
