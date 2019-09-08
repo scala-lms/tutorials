@@ -72,19 +72,12 @@ realize the necessary data interface for a fixed input size.
 
 
 We can then define code that creates and uses compiled  FFT "codelets" by
-extending <a href="#FFTC">`FFTC`</a>:
-
-    trait TestFFTC extends FFTC {
-      val fft4: Array[Double] => Array[Double] = fftc(4)
-      val fft8: Array[Double] => Array[Double] = fftc(8)
-
-      // embedded code using fft4, fft8, ...
-    }
+extending <a href="#FFTC">`FFTC`</a>. See the trait <a href="#TestFFTC">`TestFFTC`</a>.
 
 Constructing an instance of this subtrait (mixed in with the appropriate LMS
 traits) will execute the embedded code:
 
-    val OP: TestFFC = new TestFFTC with FFTCExp ...
+    val OP: TestFFC = new TestFFTC with FFTCExp
 
 We can also use the compiled methods from outside the object:
 
