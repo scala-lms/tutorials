@@ -536,7 +536,7 @@ Computation graph for size-4 FFT, optimized.
       val OP: TestFFTC = new TestFFTC with FFTCExp {
         dumpGeneratedCode = true
       }
-      val code = utils.captureOutThreaded(OP.fft4)
+      val code = utils.captureLocalOut(OP.fft4)
       println(code.replace("compilation: ok", "// compilation: ok"))
       println(OP.fft4(Array(
         1.0,0.0, 1.0,0.0, 2.0,0.0, 2.0,0.0, 1.0,0.0, 1.0,0.0, 0.0,0.0, 0.0,0.0
