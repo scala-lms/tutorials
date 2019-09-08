@@ -270,7 +270,7 @@ trait Arrays extends Base {
   def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v:Rep[T]): Rep[Unit]
 
 /**
-The function `updateArray is staging-time. It updates a dynamic array
+The function `updateArray` is staging-time. It updates a dynamic array
 given a static array by an unrolled loop.
 */
   def updateArray[T:Typ](x: Rep[Array[T]], v: Array[Rep[T]]): Rep[Array[T]] = {
@@ -545,6 +545,8 @@ Computation graph for size-4 FFT, optimized.
 
 /**
 Generated code for FFT4, optimized, as well as sample output.
+That all the reads are done at the beginning is an artifact of the
+LMS effect system.
 
       .. includecode:: ../../../../out/fft3.check.scala
 */
