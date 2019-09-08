@@ -2,8 +2,14 @@
 Sliding Stencil
 ===============
 
-Shonan Challenge 3.3 Stencil
-https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
+In this tutorial, we show a solution to Shonan Challenge 3.3 Stencil.
+
+For explanation of this solution, <a href="https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ">see the group discussion</a>.
+
+For further reference, see:
+
+- Shonan Challenge for Generative Programming ([PDF](https://www.cs.rutgers.edu/~ccshan/metafx/pepm2013.pdf)) ([official code repository](https://github.com/StagedHPC/shonan-challenge))
+  Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
 
 Outline:
 <div id="tableofcontents"></div>
@@ -15,9 +21,9 @@ package scala.lms.tutorial
 import scala.lms.common.ForwardTransformer
 import scala.reflect.SourceContext
 
-// Shonan Challenge 3.3 Stencil
-// https://groups.google.com/d/msg/stagedhpc/r5L4xGJETwE/1kOdwJo0kgAJ
-
+/**
+## Infrastructure
+*/
 trait Sliding extends Dsl {
   def infix_sliding[T:Typ](n: Rep[Int], f: Rep[Int] => Rep[T]): Rep[Array[T]] = {
     val a = NewArray[T](n)
@@ -130,6 +136,9 @@ trait SlidingExp extends DslExp with Sliding {
   }
 }
 
+/**
+## Warmup
+*/
 trait SlidingWarmup extends Sliding {
   def snippet(n: Rep[Int]): Rep[Array[Int]] = {
     def compute(i: Rep[Int]) = 2*i+3
@@ -152,13 +161,16 @@ class SlidingWarmupTest extends TutorialFunSuite {
 }
 
 /**
-Without sliding:
+### Generated code without sliding
       .. includecode:: ../../../../out/sliding0.check.scala
 
-With sliding:
+### Generated code with sliding:
       .. includecode:: ../../../../out/sliding1.check.scala
 */
 
+/**
+## Stencil Challenge
+*/
 trait Stencil extends Sliding {
   def snippet(v: Rep[Array[Double]]): Rep[Array[Double]] = {
     val n = v.length
@@ -191,9 +203,9 @@ class StencilTest extends TutorialFunSuite {
 }
 
 /**
-Without sliding:
+### Generated code without sliding:
       .. includecode:: ../../../../out/stencil0.check.scala
 
-With sliding:
+### Generated code with sliding:
       .. includecode:: ../../../../out/stencil1.check.scala
 */
