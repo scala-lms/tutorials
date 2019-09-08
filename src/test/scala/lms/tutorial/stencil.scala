@@ -159,8 +159,8 @@ trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
     // evaluate loop contents f(i)
     val (r0,stms0) = reifySubGraph(f(i))
     val defs = stms0.flatMap(_.lhs)
-    def step(n: Int, last: List[Stm], acc: List[Triplet], overlap: List[Sym[Any]]): (Int, List[Triplet], List[Sym[Any]]) = {
-      val (res: (Int, List[Triplet], List[Sym[Any]]), _) = reifySubGraph {
+    def step(n: Int, last: List[Stm], acc: List[Triplet], overlap: List[Sym[Any]]): (Triplet, List[Sym[Any]]) = {
+      val (res: (Triplet, List[Sym[Any]]), _) = reifySubGraph {
         reflectSubGraph(last)
         context = save
         val ((ri, substi), stmsi) = reifySubGraph(trans.withSubstScope(i -> (i+n)) {
@@ -173,19 +173,16 @@ trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
           step(n+1, stmsi, ((ri, stmsi, substi):Triplet)::acc, (overlap++overlapi).distinct)
         else {
           log("stopping at "+n)
-          (n-1, acc, overlap)
+          (acc.last, overlap)
         }
       }
       res
     }
 
-    val (n, acc, overlap) = step(1, stms0, Nil, Nil)
+    val ((r1, stms1, subst1), overlap0) = step(1, stms0, Nil, Nil)
     context = save
 
-    val ls = acc.reverse
-    val overlap0 = overlap
-    val overlaps = ls.map({case (_, _, substi) => overlap0 map substi})
-    val overlaps_pred = overlap0::overlaps
+    val overlap1 = overlap0 map subst1
     // build a variable for each overlap sym.
     // init variables by peeling first loop iteration.
     if (end > start) {
@@ -202,12 +199,12 @@ trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
         // emit the transformed loop body
         generate_comment("computation")
         val (ri, substY1: Subst) = trans.withSubstScope((reads:+(i->(j-unit(1)))): _*) {
-          ls(0)._2.foreach(s=>trans.traverseStm(s))
-          (trans(ls(0)._1), trans.subst)
+          stms1.foreach(s=>trans.traverseStm(s))
+          (trans(r1), trans.subst)
         }
         // write the new values to the overlap vars
         generate_comment("variable writes")
-        val writes = (overlaps(0) zip vars).map{p =>
+        val writes = (overlap1 zip vars).map{p =>
           (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head))}
       }
     }
