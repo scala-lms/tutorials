@@ -195,27 +195,20 @@ trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
       }
       val vars = overlap0.map{x => var_new(substX(x))(x.tp,x.pos.head)}
       // now generate the loop
-      for (j <- 0 until (end-start)/n) {
-        val base = n*j+start
-        for (k <- 0 until n: Range) {
-          generate_comment("unrolled for k="+k)
-          val index = base+k+1
-          if (index < end) {
-            // read the overlap variables
-            generate_comment("variable reads")
-            val reads = (overlaps_pred(k) zip vars).map(p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
-            // emit the transformed loop body
-            generate_comment("computation")
-            val (ri, substYi: Subst) = trans.withSubstScope((reads:+(i->base)): _*) {
-              ls(k)._2.foreach(s=>trans.traverseStm(s))
-              (trans(ls(k)._1), trans.subst)
-            }
-            // write the new values to the overlap vars
-            generate_comment("variable writes")
-            val writes = (overlaps(k) zip vars).map{p =>
-              (p._1, var_assign(p._2, substYi(p._1))(p._1.tp,p._1.pos.head))}
-          }
+      for (j <- (start + unit(1)) until end) {
+        // read the overlap variables
+        generate_comment("variable reads")
+        val reads = (overlap0 zip vars).map(p => (p._1, readVar(p._2)(p._1.tp,p._1.pos.head)))
+        // emit the transformed loop body
+        generate_comment("computation")
+        val (ri, substY1: Subst) = trans.withSubstScope((reads:+(i->(j-unit(1)))): _*) {
+          ls(0)._2.foreach(s=>trans.traverseStm(s))
+          (trans(ls(0)._1), trans.subst)
         }
+        // write the new values to the overlap vars
+        generate_comment("variable writes")
+        val writes = (overlaps(0) zip vars).map{p =>
+          (p._1, var_assign(p._2, substY1(p._1))(p._1.tp,p._1.pos.head))}
       }
     }
   }
@@ -246,7 +239,7 @@ class SlidingWarmupTest extends TutorialFunSuite {
 
   test("warmup with multi sliding") {
     val sliding2 = new SlidingWarmupDriver with SlidingMultiExp
-    check("2", sliding2.code) // same as single sliding
+    check("1", sliding2.code) // same as single sliding
   }
 
   test("warmup equal") {
