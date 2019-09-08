@@ -164,7 +164,7 @@ class SlidingWarmupTest extends TutorialFunSuite {
 ### Generated code without sliding
       .. includecode:: ../../../../out/sliding0.check.scala
 
-### Generated code with sliding:
+### Generated code with sliding
       .. includecode:: ../../../../out/sliding1.check.scala
 */
 
@@ -203,9 +203,9 @@ class StencilTest extends TutorialFunSuite {
 }
 
 /**
-### Generated code without sliding:
+### Generated code without sliding
       .. includecode:: ../../../../out/stencil0.check.scala
 
-### Generated code with sliding:
+### Generated code with sliding
       .. includecode:: ../../../../out/stencil1.check.scala
 */
