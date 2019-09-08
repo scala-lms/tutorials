@@ -168,7 +168,7 @@ trait SlidingMultiExp extends SlidingExp with DslExp with Sliding {
           (trans(r0), trans.subst)
         })
 
-        val overlapi = stmsi.flatMap { case TP(s,d) => syms(d) filter (defs contains _) }.distinct
+        val overlapi = stmsi.flatMap{ case TP(s,d) => syms(d) filter (defs contains _)}.distinct
         if (overlapi.nonEmpty)
           step(n+1, stmsi, ((ri, stmsi, substi):Triplet)::acc, (overlap++overlapi).distinct)
         else {
