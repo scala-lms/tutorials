@@ -63,8 +63,8 @@ will see later.
 
       }
     }
-    assert(snippet.eval(0) === 2)
     check("1", snippet.code)
+    assert(snippet.eval(0) === 2)
   }
 /**
       .. includecode:: ../../../../out/dslapi1.check.scala
@@ -89,8 +89,8 @@ time, but only when the generated code is executed.
 
       }
     }
-    assert(snippet.eval(2) === 2)
     check("2", snippet.code)
+    assert(snippet.eval(2) === 2)
   }
 /**
       .. includecode:: ../../../../out/dslapi2.check.scala
@@ -125,8 +125,8 @@ function only exists during staging time.
         power(b, 7)
 
     }
-    assert(snippet.eval(2) === 128)
     check("power", snippet.code)
+    assert(snippet.eval(2) === 128)
   }
 
 /**
@@ -153,8 +153,8 @@ We could also create a generated square function, of type
         power(b, 7)
 
     }
-    assert(snippet.eval(2) === 128)
     check("powerfunsquare", snippet.code)
+    assert(snippet.eval(2) === 128)
   }
 
 /**

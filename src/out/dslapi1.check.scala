@@ -2,7 +2,7 @@
 Emitting Generated Code
 *******************************************/
 class Snippet extends ((Int)=>(Int)) {
-  def apply(x1:Int): Int = {
+  def apply(x0:Int): Int = {
     2
   }
 }
