@@ -383,7 +383,9 @@ trait FFT { this: Arith with Trig =>
     mergeEvenOdd(even.toList, odd.toList).toArray
 }
 
-/** <a name="ArithExpOptFFT"></a> */
+/**
+<a name="ArithExpOptFFT"></a>
+*/
 trait ArithExpOptFFT extends ArithExpOpt {
   override def infix_+(x: Exp[Double], y: Exp[Double])(implicit pos: SourceContext) =
     (x, y) match {
@@ -433,7 +435,9 @@ trait ScalaGenFlat extends ScalaGenEffect {
   }
 }
 
-/** <a name="FFTC"></a> */
+/**
+<a name="FFTC"></a>
+*/
 trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
   def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
   def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
@@ -447,7 +451,9 @@ trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
   }
 }
 
-/** <a name="TestFFTC"></a> */
+/**
+<a name="TestFFTC"></a>
+*/
 trait TestFFTC { this: FFTC =>
   lazy val fft4: Array[Double] => Array[Double] = fftc(4)
   lazy val fft8: Array[Double] => Array[Double] = fftc(8)
