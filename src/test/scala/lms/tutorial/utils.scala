@@ -109,7 +109,7 @@ object utils {
     println("%d microseconds".format(micros))
     result
   }
-  def captureOutThreaded(func: => Any): String = {
+  def captureLocalOut(func: => Any): String = {
     val source = new java.io.ByteArrayOutputStream()
     withOutput(new java.io.PrintStream(source))(func)
     source.toString
