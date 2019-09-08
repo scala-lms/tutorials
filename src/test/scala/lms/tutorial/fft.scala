@@ -51,12 +51,6 @@ components of complex numbers from `Double` to `Rep[Double]`.
 FFT code. Only the real and imaginary components of complex numbers need to be
 staged.
 
-<center>
-<img src="fft4.png"></img>
-<br/>
-Computation graph for size-4 FFT. Auto-generated from staged code.
-</center>
-
 Merely changing the types  will not provide us with  the desired optimizations
 yet.  We will see how we can add the transformations described by
 Kiselyov et al. to generate the same fixed-size FFT code, corresponding to
@@ -490,8 +484,15 @@ class TestFFT extends TutorialFunSuite {
   }
 
 /**
-      .. includecode:: ../../../../out/fft1.check.txt
+
+<center>
+<img src="fft4-unopt.png" width="600"></img>
+<br/>
+Computation graph for size-4 FFT, unoptimized.
+</center>
+
 */
+
   test("2") {
     checkOut("2", "txt", {
       val o = new FFT with ArithExpOptFFT with TrigExpOptFFT with FlatResult
@@ -505,6 +506,16 @@ class TestFFT extends TutorialFunSuite {
       p.emitDepGraph(r, prefix+under+"2.dot", true)
     })
   }
+
+/**
+
+<center>
+<img src="fft4.png"></img>
+<br/>
+Computation graph for size-4 FFT, optimized.
+</center>
+
+*/
 
   test("3") {
     checkOut("3", "scala", {
@@ -539,5 +550,12 @@ class TestFFT extends TutorialFunSuite {
       )).mkString(","))
       println("*/")
     })
+
+/**
+Generated code for FFT4, optimized, as well as sample output.
+
+      .. includecode:: ../../../../out/fft3.check.scala
+*/
+
   }
 }
