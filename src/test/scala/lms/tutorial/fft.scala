@@ -5,6 +5,7 @@
 Outline:
 <div id="tableofcontents"></div>
 
+## Staging FFT
 
 We consider staging a fast fourier transform (FFT) algorithm.  A staged FFT,
 implemented in MetaOCaml, has been presented by Kiselyov et al. [<a href="https://dl.acm.org/citation.cfm?doid=1017753.1017794">EMSOFT'04</a>].
@@ -24,32 +25,8 @@ All that is needed is adding the self-type annotation to import arithmetic and
 trigonometric operations and changing the type of the real and imaginary
 components of complex numbers from `Double` to `Rep[Double]`.
 
-    trait FFT { this: Arith with Trig =>
-      case class Complex(re: Rep[Double], im: Rep[Double]) {
-        def +(that: Complex) = Complex(this.re + that.re, this.im + that.im)
-        def *(that: Complex) = ...
-      }
-      def omega(k: Int, N: Int): Complex = {
-        val kth = -2.0 * k * Math.Pi / N
-        Complex(cos(kth), sin(kth))
-      }
-      def fft(xs: Array[Complex]): Array[Complex] = xs match {
-        case (x :: Nil) => xs
-        case _ =>
-          val N = xs.length // assume it's a power of two
-          val (even0, odd0) = splitEvenOdd(xs)
-          val (even1, odd1) = (fft(even0), fft(odd0))
-          val (even2, odd2) = (even1 zip odd1 zipWithIndex) map {
-            case ((x, y), k) =>
-              val z = omega(k, N) * y
-              (x + z, x - z)
-          }.unzip;
-          even2 ::: odd2
-      }
-    }
-
-FFT code. Only the real and imaginary components of complex numbers need to be
-staged.
+See the trait <a href="#FFT">`FFT`</a>.
+Only the real and imaginary components of complex numbers need to be staged.
 
 Merely changing the types  will not provide us with  the desired optimizations
 yet.  We will see how we can add the transformations described by
@@ -58,21 +35,8 @@ the famous FFT butterfly networks. Despite the
 seemingly naive algorithm, this staged code is free of branches, intermediate
 data structures and redundant computations. The important point here is that
 we can add these transformations without any further changes to the code,
-just by mixing in the trait `FFT` with a few others.
-
-
-    trait ArithExpOptFFT extends ArithExp {
-      override def infix_*(x:Exp[Double],y:Exp[Double]) = (x,y) match {
-        case (Const(k), Def(Times(Const(l), y))) => Const(k * l) * y
-        case (x, Def(Times(Const(k), y))) => Const(k) * (x * y))
-        case (Def(Times(Const(k), x)), y) => Const(k) * (x * y))
-        ...
-        case (x, Const(y)) => Times(Const(y), x)
-        case _ => super.infix_*(x, y)
-      }
-    }
-
-Extending the generic implementation with FFT-specific optimizations.
+just by mixing in the trait <a href="#FFT">`FFT`</a> with a few others,
+extending the generic implementation with FFT-specific optimizations.
 
 ## Implementing Optimizations
 
@@ -84,30 +48,16 @@ but not as much for other programs.
 
 What we want to achieve again is modularity, such that optimizations can be
 combined in a way that is most useful for a given task.  This can be achieved
-by overriding smart constructors,  as shown by trait `ArithExpOptFFT`.
+by overriding smart constructors,  as shown by trait <a href="#ArithExpOptFFT">`ArithExpOptFFT`</a>.
 Note that the use of `x*y` within the body of `infix_*` will apply the optimization  recursively.
 
 ## Running the Generated Code
 
-Extending the FFT component with explicit compilation.
-
-    trait FFTC extends FFT { this: Arrays with Compile =>
-      def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
-        assert(<size is power of 2>) // happens at staging time
-        val arg = Array.tabulate(size) { i =>
-          Complex(input(2*i), input(2*i+1))
-        }
-        val res = fft(arg)
-        updateArray(input, res.flatMap {
-          case Complex(re,im) => Array(re,im)
-        })
-      }
-    }
-
+Extending the FFT component with explicit compilation. See trait <a href="#FFTC">`FFTC`</a>.
 
 Using the staged FFT implementation as part of some larger Scala program is
 straightforward but requires us to interface the generic algorithm with a
-concrete data representation. The algorithm in `FFT`
+concrete data representation. The algorithm in <a href="#FFT">`FFT`</a>
 expects an array of `Complex` objects as input, each of which contains fields
 of type `Rep[Double]`. The algorithm itself has no notion of staged arrays but
 uses arrays only in the generator stage, which means that it is agnostic to
@@ -116,13 +66,13 @@ complex numbers in some native format which we will need to feed into the
 algorithm. A simple choice of representation is to use `Array[Double]` with
 the complex numbers flattened into adjacent slots. When applying `compile`, we
 will thus receive  input of type `Rep[Array[Double]]`.
-We can  extend trait `FFT` to `FFTC` to obtain compiled FFT
-implementations that realize the necessary data interface for a  fixed input
-size.
+We can extend trait <a href="#FFT">`FFT`</a> to <a href="#FFTC">`FFTC`</a>
+to obtain compiled FFT implementations that
+realize the necessary data interface for a fixed input size.
 
 
 We can then define code that creates and uses compiled  FFT "codelets" by
-extending `FFTC`:
+extending <a href="#FFTC">`FFTC`</a>:
 
     trait TestFFTC extends FFTC {
       val fft4: Array[Double] => Array[Double] = fftc(4)
@@ -134,10 +84,7 @@ extending `FFTC`:
 Constructing an instance of this subtrait (mixed in with the appropriate LMS
 traits) will execute the embedded code:
 
-    val OP: TestFFC = new TestFFTC with CompileScala
-      with ArithExpOpt  with ArithExpOptFFT with ScalaGenArith
-      with TrigExpOpt   with ScalaGenTrig
-      with ArraysExpOpt with ScalaGenArrays
+    val OP: TestFFC = new TestFFTC with FFTCExp ...
 
 We can also use the compiled methods from outside the object:
 
@@ -150,7 +97,11 @@ members defined by `TestFFC`.
 
 ## Full Code
 
+Note that the full code does not make use of the tutorial API.
+It puts together from scratch all the parts of the LMS framework it needs.
+
 */
+
 package scala.lms.tutorial.fft
 import scala.lms.tutorial._
 
@@ -162,6 +113,7 @@ import scala.lms.internal._
 import scala.reflect._
 
 /**
+
 ### Arith
 
 Instead of using the LMS common arithmetic package, we create one from
@@ -299,6 +251,9 @@ trait TrigExpOpt extends TrigExp {
   }
 }
 
+/**
+We don't need `sin` and `cos` in the generated code for our purposes...
+*/
 trait ScalaGenTrig {
   // ...
 }
@@ -306,7 +261,7 @@ trait ScalaGenTrig {
 /**
 ### Arrays
 
-We create a package for arrays.
+We create a minimal package for arrays.
 
 */
 trait Arrays extends Base {
@@ -320,6 +275,10 @@ trait Arrays extends Base {
   def arrayApply[T:Typ](x: Rep[Array[T]], i:Int): Rep[T]
   def arrayUpdate[T:Typ](x: Rep[Array[T]], i:Int, v:Rep[T]): Rep[Unit]
 
+/**
+The function `updateArray is staging-time. It updates a dynamic array
+given a static array by an unrolled loop.
+*/
   def updateArray[T:Typ](x: Rep[Array[T]], v: Array[Rep[T]]): Rep[Array[T]] = {
     for (i <- 0 until v.length)
       arrayUpdate(x, i, v(i))
@@ -354,6 +313,10 @@ trait ScalaGenArrays extends ScalaGenBase {
 
 /**
 ### Disable Optimizations
+
+We can disable default LMS optimizations just by mixing in these
+traits. This will allow us to compare the unoptimized and optimized
+FFT code.
  */
 trait DisableCSE extends Expressions {
   override def findDefinition[T: Typ](d: Def[T]) = None
@@ -366,21 +329,39 @@ trait DisableDCE extends GraphTraversal {
 
 /**
 ### FFT
+
+Finally, here is the FFT class. Notice that the code looks standard,
+except for the `Rep`s in the `re`al and `im`aginary fields of the
+`Complex` class.
+
+<a name="FFT"></a>
 */
-
 trait FFT { this: Arith with Trig =>
-  def omega(k: Int, N: Int): Complex = {
-    val kth = -2.0 * k * math.Pi / N
-    Complex(cos(kth), sin(kth))
-  }
-
   case class Complex(re: Rep[Double], im: Rep[Double]) {
     def +(that: Complex) = Complex(this.re + that.re, this.im + that.im)
     def -(that: Complex) = Complex(this.re - that.re, this.im - that.im)
     def *(that: Complex) = Complex(this.re * that.re - this.im * that.im,
                                    this.re * that.im + this.im * that.re)
   }
+  def omega(k: Int, N: Int): Complex = {
+    val kth = -2.0 * k * math.Pi / N
+    Complex(cos(kth), sin(kth))
+  }
+  def fft(xs: Array[Complex]): Array[Complex] =
+    if (xs.length == 1) xs
+    else {
+      val N = xs.length // assume it's a power of two
+      val (even0, odd0) = splitEvenOdd(xs)
+      val (even1, odd1) = (fft(even0), fft(odd0))
+      val (even2, odd2) = (even1 zip odd1 zipWithIndex) map {
+        case ((x, y), k) =>
+          val z = omega(k, N) * y
+          (x + z, x - z)
+      } unzip;
+      even2 ++ odd2
+    }
 
+  // helpers
   def splitEvenOdd[T](xs: List[T]): (List[T], List[T]) = (xs: @unchecked) match {
     case e :: o :: xt =>
       val (es, os) = splitEvenOdd(xt)
@@ -400,22 +381,9 @@ trait FFT { this: Arith with Trig =>
   }
   def mergeEvenOdd[T:ClassTag](even: Array[T], odd: Array[T]): Array[T] =
     mergeEvenOdd(even.toList, odd.toList).toArray
-
-  def fft(xs: Array[Complex]): Array[Complex] =
-    if (xs.length == 1) xs
-    else {
-      val N = xs.length // assume it's a power of two
-      val (even0, odd0) = splitEvenOdd(xs)
-      val (even1, odd1) = (fft(even0), fft(odd0))
-      val (even2, odd2) = (even1 zip odd1 zipWithIndex) map {
-        case ((x, y), k) =>
-          val z = omega(k, N) * y
-          (x + z, x - z)
-      } unzip;
-      even2 ++ odd2
-    }
 }
 
+/** <a name="ArithExpOptFFT"></a> */
 trait ArithExpOptFFT extends ArithExpOpt {
   override def infix_+(x: Exp[Double], y: Exp[Double])(implicit pos: SourceContext) =
     (x, y) match {
@@ -444,7 +412,6 @@ trait TrigExpOptFFT extends TrigExpOpt {
   }
 }
 
-
 trait FlatResult extends BaseExp { // just to make dot output nicer
   case class Result[T](x: Any) extends Def[T]
   def result[T:Typ](x: Any): Exp[T] = {
@@ -466,6 +433,7 @@ trait ScalaGenFlat extends ScalaGenEffect {
   }
 }
 
+/** <a name="FFTC"></a> */
 trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
   def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
   def fftc(size: Int) = compile { input: Rep[Array[Double]] =>
@@ -479,9 +447,12 @@ trait FFTC { this: FFT with Arith with Trig with Arrays with Compile =>
   }
 }
 
+/** <a name="TestFFTC"></a> */
 trait TestFFTC { this: FFTC =>
   lazy val fft4: Array[Double] => Array[Double] = fftc(4)
-  // ...
+  lazy val fft8: Array[Double] => Array[Double] = fftc(8)
+
+  // embedded code using fft4, fft8, ...
 }
 
 trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala {
