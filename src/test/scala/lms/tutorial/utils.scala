@@ -109,10 +109,15 @@ object utils {
     println("%d microseconds".format(micros))
     result
   }
+  def captureOutThreaded(func: => Any): String = {
+    val source = new java.io.ByteArrayOutputStream()
+    withOutput(new java.io.PrintStream(source))(func)
+    source.toString
+  }
   def captureOut(func: => Any): String = {
     val source = new java.io.ByteArrayOutputStream()
     withOutputFull(new java.io.PrintStream(source))(func)
-    source.toString    
+    source.toString
   }
   def withOutput[T](out: PrintStream)(f: => Unit): Unit = {
     scala.Console.withOut(out)(scala.Console.withErr(out)(f))

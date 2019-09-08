@@ -55,7 +55,7 @@ trait SlidingExp extends DslExp with Sliding {
     val IR: SlidingExp.this.type = SlidingExp.this
   }
   def log(x: Any): Unit = {
-    System.err.println("sliding log: "+x)
+    System.out.println("sliding log: "+x)
   }
 
   // some arithmetic rewrites to maximize sliding sharing
