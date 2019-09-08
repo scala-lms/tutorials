@@ -446,16 +446,6 @@ trait FFTC { this: FFT with Arith with Arrays with Compile =>
   implicit def repClassTag[T:ClassTag]: ClassTag[Rep[T]]
 }
 
-/**
-<a name="TestFFTC"></a>
-*/
-trait TestFFTC { this: FFTC =>
-  lazy val fft4: Array[Double] => Array[Double] = fftc(4)
-  lazy val fft8: Array[Double] => Array[Double] = fftc(8)
-
-  // embedded code using fft4, fft8, ...
-}
-
 trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with ArraysExpOpt with CompileScala { self =>
   val IR: self.type = self
   val codegen = new ScalaGenFFT {
@@ -467,6 +457,16 @@ trait FFTCExp extends FFTC with FFT with ArithExpOptFFT with TrigExpOptFFT with 
 
 trait ScalaGenFFT extends ScalaGenFlat with ScalaGenArith with ScalaGenTrig with ScalaGenArrays {
   val IR: FFTCExp
+}
+
+/**
+<a name="TestFFTC"></a>
+*/
+trait TestFFTC { this: FFTC =>
+  lazy val fft4: Array[Double] => Array[Double] = fftc(4)
+  lazy val fft8: Array[Double] => Array[Double] = fftc(8)
+
+  // embedded code using fft4, fft8, ...
 }
 
 /**
