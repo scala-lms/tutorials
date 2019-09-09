@@ -20,9 +20,9 @@ a best paper award at VLDB'14.
 See also:
 
 - Building Efficient Query Engines in a High-Level Language ([PDF](http://infoscience.epfl.ch/record/198693/files/801-klonatos.pdf))
-  Yannis Klonatos, Christoph Koch, Tiark Rompf, Hassan Chafi. VLDB'14
+  <br>Yannis Klonatos, Christoph Koch, Tiark Rompf, Hassan Chafi. VLDB'14
 - Functional pearl: A SQL to C Compiler in 500 Lines of Code ([PDF](https://www.cs.purdue.edu/homes/rompf/papers/rompf-icfp15.pdf))
-  Tiark Rompf, Nada Amin. ICFP'15
+  <br>Tiark Rompf, Nada Amin. ICFP'15
 
 Outline:
 <div id="tableofcontents"></div>

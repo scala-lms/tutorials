@@ -50,30 +50,30 @@ Self-Contained Tutorials
 The following tutorials are available:
 
 - [Getting Started](start.html)
-    Rep[T] vs T
+  <br>Rep[T] vs T
 
 - [Shonan HMM Challenge](shonan.html)
-    Sparse matrix vector multiplication
-    Selective unrolling and precomputation
+  <br>Sparse matrix vector multiplication
+  <br>Selective unrolling and precomputation
 
 - [Regular Expressions](regex.html)
-    From interpreters to compilers using staging
+  <br>From interpreters to compilers using staging
 
 - [Ackermann's Function](ack.html)
-    From recursive functions to automata
-    Automatic specialization using staging
+  <br>From recursive functions to automata
+  <br>Automatic specialization using staging
 
 - [Automata-Based Regex Matcher](automata.html)
-    NFA to DFA conversion using staging
+  <br>NFA to DFA conversion using staging
 
 - [SQL Engine](query.html)
-    Efficient data processing
+  <br>Efficient data processing
 
 - [Fast Fourier Transform (FFT)](fft.html)
-    Numeric kernels and rewriting optimizations
+  <br>Numeric kernels and rewriting optimizations
 
 - [Sliding Stencil](stencil.html)
-    Rearranging loop shapes
+  <br>Rearranging loop shapes
 
 
 <!--

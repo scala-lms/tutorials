@@ -13,7 +13,7 @@ Therefore, it pays off to generate code that is specialized to a particular matr
 For further reference, see:
 
 - Shonan Challenge for Generative Programming ([PDF](http://homes.sice.indiana.edu/ccshan/metafx/pepm2013.pdf)) ([official code repository](https://github.com/StagedHPC/shonan-challenge))
-  Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
+  <br>Baris Aktemur, Yukiyoshi Kameyama, Oleg Kiselyov, Chung-chieh Shan. PEPM'13
 
 Outline:
 <div id="tableofcontents"></div>
