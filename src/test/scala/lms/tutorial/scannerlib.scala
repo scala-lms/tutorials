@@ -46,7 +46,6 @@ class EventHandler(srcs: (String, Int)*) {
   def run(f: (Int, StringScanner) => Unit) = {
 
     val selector = Selector.open()
-    val buffer = ByteBuffer.allocate(256);
 
     val socks = for ((addr, port) <- srcs) yield {
       val socketChannel = SocketChannel.open()
@@ -61,9 +60,10 @@ class EventHandler(srcs: (String, Int)*) {
         selector.select();
         for (key <- selector.selectedKeys.asScala) {
           if (key.isReadable) {
+            val buffer = ByteBuffer.allocate(256);
             val client = key.channel.asInstanceOf[SocketChannel];
             client.read(buffer)
-            f(socks.indexOf(client), new StringScanner(new String(buffer.array)))
+            f(socks.indexOf(client), new StringScanner(new String(buffer.array).trim()))
           }
         }
       }
