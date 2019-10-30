@@ -17,6 +17,7 @@ class QueryLiveTest extends TutorialFunSuite {
 
   def engine =
     new Engine with query_live.QueryInterpreter {
+      def code = ""
       override def eval = run
 
     //trait QueryCompiler extends Dsl with StagedQueryProcessor with ScannerBase {

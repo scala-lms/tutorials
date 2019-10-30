@@ -272,6 +272,7 @@ trait Engine extends QueryProcessor with SQLParser {
   def eval: Unit
   def prepare: Unit = {}
   def run: Unit = execQuery(PrintCSV(parseSql(query)))
+  def code: String
   def evalString = {
     val source = new java.io.ByteArrayOutputStream()
     utils.withOutputFull(new java.io.PrintStream(source)) {
@@ -295,6 +296,7 @@ object Run {
 
   def unstaged_engine: Engine =
     new Engine with MainEngine with query_unstaged.QueryInterpreter {
+      def code = "Not staged"
       override def eval = run
     }
 
@@ -373,6 +375,7 @@ object Run {
 
     try {
       engine.prepare
+      println(s"source code:\n\n${engine.code}")
       utils.time("eval")(engine.eval)
     } catch {
       case ex: Exception =>
