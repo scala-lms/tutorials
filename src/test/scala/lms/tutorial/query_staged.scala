@@ -48,7 +48,7 @@ Low-Level Processing Logic
     def escape(d: Char) = d match {
       case '\t' => "'\\t'"
       case '\n' => "'\\n'"
-      case _ => s"$d"
+      case _ => s"'$d'"
     }
     def next(d: Char) = unchecked[String](x,raw".next(${escape(d)})")
   }

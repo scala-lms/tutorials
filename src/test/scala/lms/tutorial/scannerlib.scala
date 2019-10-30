@@ -51,18 +51,21 @@ class EventHandler(srcs: (String, Int)*) {
     val socks = for ((addr, port) <- srcs) yield {
       val socketChannel = SocketChannel.open()
       socketChannel.connect(new InetSocketAddress(addr, port))
+      socketChannel.configureBlocking(false);
+      socketChannel.register(selector, SelectionKey.OP_READ);
       socketChannel
     }
 
     try {
       while (true) {
         selector.select();
-        for (key <- selector.selectedKeys.asScala)
+        for (key <- selector.selectedKeys.asScala) {
           if (key.isReadable) {
             val client = key.channel.asInstanceOf[SocketChannel];
             client.read(buffer)
             f(socks.indexOf(client), new StringScanner(new String(buffer.array)))
           }
+        }
       }
     } finally {
       socks.foreach(_.close)
