@@ -3,5 +3,5 @@ set -e
 
 cat .io.livecode.ch/header.txt $2 .io.livecode.ch/mid.txt $1 .io.livecode.ch/footer.txt >src/test/scala/lms/tutorial/out.scala
 
-sbt testOnly *OutTest
-cat src/out/out.check.scala
+sbt "testOnly *OutTest*"
+cat src/out/out.actual.scala

@@ -1,3 +1,3 @@
-    check("out", snippet.code)
+    exec("out", snippet.code)
   }
 }
