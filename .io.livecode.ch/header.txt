@@ -1,0 +1,8 @@
+package scala.lms.tutorial
+
+import scala.lms.common._
+import scala.reflect.SourceContext
+
+class OutTest extends TutorialFunSuite {
+  val under = ""
+
