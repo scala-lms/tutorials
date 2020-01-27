@@ -1,4 +1,8 @@
 #!/bin/bash
 set -e
 
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+export SBT_OPTS="${SBT_OPTS} -Dsbt.io.jdktimestamps=true"
+
 sbt test:compile
