@@ -1,4 +1,5 @@
 #!/bin/bash
 set -e
 
+cp ./.io.livecode.ch/plugins.sbt project/
 sbt test:compile
