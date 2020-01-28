@@ -16,7 +16,6 @@ function livecode_process_data(id, data) {
   }
   if (a.length==0) return data;
   $('#boxit-'+id).html(a.join('\n'));
-  MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
   return data.replace(tex, "");
 }
 </script>
