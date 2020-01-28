@@ -24,9 +24,8 @@ function livecode_process_data(id, data) {
   if (!boxit_editors[id]) {
     boxit_editors[id] = CodeMirror.fromTextArea(document.getElementById('boxit-'+id), {
       mode: 'text/x-scala',
-      tabMode: 'indent',
       lineNumbers: true,
-      extraKeys: {Tab: false, "Shift-Tab": false}
+      readOnly: true
     });
   }
   return data.replace(tex, "");
