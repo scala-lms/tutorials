@@ -20,7 +20,7 @@ function livecode_process_data(id, data) {
     return data;
   }
   $('#boxit-'+id).html(a.join('\n'));
-  $('editor-boxit'+id).removeClass('hidden');
+  $('#editor-boxit'+id).removeClass('hidden');
   if (!boxit_editors[id]) {
     boxit_editors[id] = CodeMirror.fromTextArea(document.getElementById('boxit-'+id), {
       mode: 'text/x-scala',
