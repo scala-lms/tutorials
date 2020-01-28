@@ -5,10 +5,10 @@
 {% block content %}
 <script>
 function livecode_html_extra(id) {
-  return '<div class=boxit id='+'boxit-'+id+'>hello</div>'
+  return '<div class=boxit id='+'boxit-'+id+'></div>'
 }
 function livecode_process_data(id, data) {
-  var tex = /\/\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\nEmitting Generated Code\n\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\/(.*?)\/\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\nEnd of Generated Code\n\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\//g;
+  var tex = /<code>(.*?)<\/code>/g;
   var m;
   var a = [];
   while ((m = tex.exec(data)) !== null) {
