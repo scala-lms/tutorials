@@ -19,14 +19,17 @@ function livecode_process_data(id, data) {
     $('#editor-boxit-'+id).addClass('hidden');
     return data;
   }
-  $('#boxit-'+id).html(a.join('\n'));
   $('#editor-boxit-'+id).removeClass('hidden');
+  var v = a.join('\n');
   if (!boxit_editors[id]) {
+    $('#boxit-'+id).html(v);
     boxit_editors[id] = CodeMirror.fromTextArea(document.getElementById('boxit-'+id), {
       mode: 'text/x-scala',
       lineNumbers: true,
       readOnly: true
     });
+  } else {
+    boxit_editors[id].setValue(v);
   }
   return data.replace(tex, "");
 }
