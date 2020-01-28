@@ -4,6 +4,7 @@
 
 {% block content %}
 <script>
+var boxit_editors = {};
 function livecode_html_extra(id) {
   return "<div class=hidden id=editor-boxit-"+id+"><textarea name=boxit-"+id+" id=boxit-"+id+"></textarea></div>"
 }
@@ -14,8 +15,20 @@ function livecode_process_data(id, data) {
   while ((m = tex.exec(data)) !== null) {
     a.push(m[1]);
   }
-  if (a.length==0) return data;
+  if (a.length==0) {
+    $('#editor-boxit-'+id).addClass('hidden');
+    return data;
+  }
   $('#boxit-'+id).html(a.join('\n'));
+  $('editor-boxit'+id).removeClass('hidden');
+  if (!boxit_editors[id]) {
+    boxit_editors[id] = CodeMirror.fromTextArea(document.getElementById('boxit-'+id), {
+      mode: 'text/x-scala',
+      tabMode: 'indent',
+      lineNumbers: true,
+      extraKeys: {Tab: false, "Shift-Tab": false}
+    });
+  }
   return data.replace(tex, "");
 }
 </script>
