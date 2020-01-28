@@ -8,7 +8,7 @@ function livecode_html_extra(id) {
   return '<div class=boxit id='+'boxit-'+id+'></div>'
 }
 function livecode_process_data(id, data) {
-  var tex = /<code>(.*)<\/code>/g;
+  var tex = /<code>([\s\S]*?)<\/code>/g;
   var m;
   var a = [];
   while ((m = tex.exec(data)) !== null) {
