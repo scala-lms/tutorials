@@ -5,7 +5,7 @@
 {% block content %}
 <script>
 function livecode_html_extra(id) {
-  return "<div id=editor-boxit-"+id+"><textarea name=boxit-"+id+" id=boxit-"+id+"></textarea></div>"
+  return "<div class=hidden id=editor-boxit-"+id+"><textarea name=boxit-"+id+" id=boxit-"+id+"></textarea></div>"
 }
 function livecode_process_data(id, data) {
   var tex = /<code>([\s\S]*?)<\/code>/g;
