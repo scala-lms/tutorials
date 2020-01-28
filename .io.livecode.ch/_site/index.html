@@ -3,6 +3,27 @@
 {% block title %}Generative Programming with LMS{% endblock %}
 
 {% block content %}
+<script>
+function livecode_html_extra(id) {
+  return '<div class=boxit id='+'boxit-'+id+'></div>'
+}
+function livecode_process_data(id, data) {
+  var tex = /\/*****************************************
+Emitting Generated Code
+*******************************************\/(.*?)\/*****************************************
+End of Generated Code
+*******************************************\//g;
+  var m;
+  var a = [];
+  while ((m = tex.exec(data)) !== null) {
+    a.push('<p>'+m[1]+'</p>');
+  }
+  if (a.length==0) return data;
+  $('#boxit-'+id).html(a.join('\n'));
+  MathJax.Hub.Queue(["Typeset",MathJax.Hub]);
+  return data.replace(tex, "");
+}
+</script>
 
 <div class="live norun" id="lib_a">
 val A = scala.Array
