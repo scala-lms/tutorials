@@ -5,14 +5,14 @@
 {% block content %}
 <script>
 function livecode_html_extra(id) {
-  return '<div class=boxit id='+'boxit-'+id+'></div>'
+  return '<pre class=boxit id='+'boxit-'+id+'></pre>'
 }
 function livecode_process_data(id, data) {
   var tex = /<code>([\s\S]*?)<\/code>/g;
   var m;
   var a = [];
   while ((m = tex.exec(data)) !== null) {
-    a.push('<p>'+m[1]+'</p>');
+    a.push('\n'+m[1]+'\n');
   }
   if (a.length==0) return data;
   $('#boxit-'+id).html(a.join('\n'));
