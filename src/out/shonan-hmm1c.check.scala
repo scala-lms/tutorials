@@ -12,8 +12,7 @@ class Snippet(px1: Array[Int]) extends (Array[Int] => Array[Int]) {
       x3 = x3 + 1
     }
     x2(2) = x2(2) + x0(2)
-    x2(4) = x2(4) + x0(2)
-    x2(4) = x2(4) + x0(4)
+    x2(4) = x2(4) + x0(2) + x0(4)
     x2
   }
 }
