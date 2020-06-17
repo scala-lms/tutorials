@@ -36,12 +36,12 @@ subclass of `DslDriver` that contains the necessary infrastructure.
     codegen.registerHeader("<mpi.h>")
     codegen.registerHeader("<string.h>")
     compilerCommand = "mpicc"
-    override def eval(a: T): Unit = { 
+    override def eval(a: T): Unit = {
       import scala.sys.process._
       import lms.core.utils._
       val f1 = f; // compile!
-      def f2(a: T) = (s"mpirun /tmp/snippet $a": ProcessBuilder).lines.foreach(Console.println _) 
-      time("eval")(f2(a)) 
+      def f2(a: T) = (s"mpirun -np 4 --mca btl_base_warn_component_unused 0 /tmp/snippet $a": ProcessBuilder).lines.foreach(Console.println _)
+      time("eval")(f2(a))
     }
 
     var pid: Rep[Int] = null

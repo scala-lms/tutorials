@@ -3,7 +3,7 @@ Emitting Generated Code
 *******************************************/
 class Snippet() extends (Unit => scala.lms.tutorial.Automaton[Char, Boolean]) {
   def apply(x0: Unit): scala.lms.tutorial.Automaton[Char, Boolean] = {
-    var x1: scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]] = null.asInstanceOf[scala.Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]]]
+    var x1: Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]] = null.asInstanceOf[Function1[Char, scala.lms.tutorial.Automaton[Char, Boolean]]]
     var x2: scala.lms.tutorial.Automaton[Char, Boolean] = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
     var x3: scala.lms.tutorial.Automaton[Char, Boolean] = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]
     var x4: scala.lms.tutorial.Automaton[Char, Boolean] = null.asInstanceOf[scala.lms.tutorial.Automaton[Char, Boolean]]

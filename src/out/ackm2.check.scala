@@ -3,8 +3,8 @@ Emitting Generated Code
 *******************************************/
 class Snippet() extends (Int => Int) {
   def apply(x0: Int): Int = {
-    var x1: scala.Function1[Int, Int] = null.asInstanceOf[scala.Function1[Int, Int]]
-    var x2: scala.Function1[Int, Int] = null.asInstanceOf[scala.Function1[Int, Int]]
+    var x1: Function1[Int, Int] = null.asInstanceOf[Function1[Int, Int]]
+    var x2: Function1[Int, Int] = null.asInstanceOf[Function1[Int, Int]]
     x1 = x3
     x2 = x4
     def x6(x5:Int): Int = {
