@@ -7,15 +7,15 @@ class Snippet() extends (Int => Int) {
     var x2: Function1[Int, Int] = null.asInstanceOf[Function1[Int, Int]]
     x1 = x3
     x2 = x4
-    def x6(x5:Int): Int = {
+    def x6(x5: Int): Int = {
       // ack_0
       x5 + 1
     }
-    def x4(x7:Int): Int = {
+    def x4(x7: Int): Int = {
       // ack_1
       if (x7 == 0) x6(1) else x6(x2(x7 - 1))
     }
-    def x3(x8:Int): Int = {
+    def x3(x8: Int): Int = {
       // ack_2
       if (x8 == 0) x4(1) else x4(x1(x8 - 1))
     }

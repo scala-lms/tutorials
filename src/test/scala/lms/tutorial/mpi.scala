@@ -35,7 +35,7 @@ subclass of `DslDriver` that contains the necessary infrastructure.
     }
     codegen.registerHeader("<mpi.h>")
     codegen.registerHeader("<string.h>")
-    compilerCommand = "mpicc"
+    override val compilerCommand = "mpicc"
     override def eval(a: T): Unit = {
       import scala.sys.process._
       import lms.core.utils._
@@ -78,21 +78,21 @@ subclass of `DslDriver` that contains the necessary infrastructure.
 First Step: Distributed Character Histogram
 -------------------------------------------
 
-As a first example of map-reduce-style processing, we would like to 
-compute a character histogram in a distributed fashion, counting the 
-number of occurances of each character in some input data across 
+As a first example of map-reduce-style processing, we would like to
+compute a character histogram in a distributed fashion, counting the
+number of occurances of each character in some input data across
 a cluster of machines.
 
 ### Sequential Reference Implementation
 ---------------------------------------
 
-The code below is a sequential reference implementation. The check 
+The code below is a sequential reference implementation. The check
 `if (pid == 0)` ensures that we only rum one instance of the code,
 even if multiple processes are launched (this is how MPI works).
 */
 
   test("charcount_seq") {
-    val str = 
+    val str =
       "My name is Ozymandias, King of Kings; " +
       "Look on my Works, ye Mighty, and despair!"
 
@@ -168,7 +168,7 @@ that the result is partioned by keys.
         def bucketR(i: Rep[Int]) = View(histogramR, i * bucketLen, bucketLen)
 
         // accumulator api
-        def apply(i: Rep[Char]) = new { 
+        def apply(i: Rep[Char]) = new {
           val b = bucket(i.toInt % nprocs)
           def += (n: Rep[Int]) = {
             b(i.toInt / nprocs) = b(i.toInt / nprocs) + n
@@ -246,7 +246,7 @@ such as hash tables.
 
 We provide an unstaged reference implementation below
 that simulates multi-thread or multi-process execution.
-This will serve as stepping stone for our actual MPI 
+This will serve as stepping stone for our actual MPI
 implementation.
 */
 
@@ -310,7 +310,7 @@ implementation.
       }
     }
 
-    case class WordGenWithOverhang(input: String) extends Generator[String] {      
+    case class WordGenWithOverhang(input: String) extends Generator[String] {
       val sc = StringScanner(input)
       var overhang = ""
       def skip() = sc.next(' ')
@@ -393,7 +393,7 @@ implementation.
           // want to do this in a chunked, round-robin, way?
         }
 
-        par { 
+        par {
           // only write to hm(curThread)(curThread)
           val hm1 = hm(curThread).hm(curThread)
           for (i <- 0 until nThreads) {
@@ -422,7 +422,7 @@ implementation.
         println(s"$w ${w.hashCode % 4} $c")
       }
     })
-    assert(actual == 
+    assert(actual ==
 """baz 3 1
 boom 3 3
 bang 0 1
@@ -451,7 +451,7 @@ bar 3 2
         println(s"$w ${w.hashCode % 4} $c")
       }
     })
-    assert(actual == 
+    assert(actual ==
 """Array(foo bar baz fo, o bar foo foo , foo boom bang , boom boom yum)
 Array(14, 14, 14, 13)
 bang 0 1
@@ -463,13 +463,13 @@ bar 3 2
 """)
   }
 
-/** 
+/**
 ### Staged and Distributed Implementation
 
-TODO / Exercise: complete the implementation by writing an mmap-based 
-Scanner (assuming each cluster node has access to a common file system) 
+TODO / Exercise: complete the implementation by writing an mmap-based
+Scanner (assuming each cluster node has access to a common file system)
 and adapting the hash table implementation used for `GroupBy` in the
-query tutorial to the distributed setting with communication along the 
+query tutorial to the distributed setting with communication along the
 lines used in the character histogram above.
 */
 
