@@ -29,20 +29,20 @@ typically compiled and launched with the `mpicc` and `mpirun` tools. We define a
 subclass of `DslDriver` that contains the necessary infrastructure.
 */
 
-  abstract class MPIDriver[T:Manifest,U:Manifest] extends DslDriverC[T,U] with ScannerLowerExp 
+  abstract class MPIDriver[T:Manifest,U:Manifest] extends DslDriverC[T,U] with ScannerLowerExp
   with query_optc.QueryCompiler{ q =>
     override val codegen = new DslGenC with CGenScannerLower with Run.CGenPreamble {
       val IR: q.type = q
     }
     codegen.registerHeader("<mpi.h>")
     codegen.registerHeader("<string.h>")
-    compilerCommand = "mpicc"
-    override def eval(a: T): Unit = { 
+    override val compilerCommand = "mpicc"
+    override def eval(a: T): Unit = {
       import scala.sys.process._
       import lms.core.utils._
       val f1 = f; // compile!
-      def f2(a: T) = (s"mpirun /tmp/snippet $a": ProcessBuilder).lines.foreach(Console.println _) 
-      time("eval")(f2(a)) 
+      def f2(a: T) = (s"mpirun /tmp/snippet $a": ProcessBuilder).lines.foreach(Console.println _)
+      time("eval")(f2(a))
     }
 
     var pid: Rep[Int] = null
@@ -74,13 +74,13 @@ subclass of `DslDriver` that contains the necessary infrastructure.
     def MPI_Barrier() = unchecked[Unit]("MPI_Barrier(MPI_COMM_WORLD)")
   }
 
-/** 
+/**
 ### Staged and Distributed Implementation
 
-TODO / Exercise: complete the implementation by writing an mmap-based 
-Scanner (assuming each cluster node has access to a common file system) 
+TODO / Exercise: complete the implementation by writing an mmap-based
+Scanner (assuming each cluster node has access to a common file system)
 and adapting the hash table implementation used for `GroupBy` in the
-query tutorial to the distributed setting with communication along the 
+query tutorial to the distributed setting with communication along the
 lines used in the character histogram above.
 */
   test("wordcount_staged_seq") {
@@ -118,13 +118,13 @@ lines used in the character histogram above.
           val keySchema = Vector("word")
           val dataSchema = Vector("#count")
           val hm = new HashMapAgg(keySchema, dataSchema)
-        
+
         // loop through string one word at a time
           parse(input).foreach { word: RString =>
             val key = Vector(word)
             hm(key) += Vector(RInt(1))
           }
-        
+
           hm.foreach {
             case (key, v) =>
               key.head.asInstanceOf[RString].printLen() // force cast to RString for printLen
@@ -142,7 +142,7 @@ lines used in the character histogram above.
         histogram.exchange()
 
         histogram.foreach { (c,n) =>
-          //if (n != 0) 
+          //if (n != 0)
           printf("%d: '%c' %d\n", pid, c, n)
         }*/
       }
@@ -151,7 +151,7 @@ lines used in the character histogram above.
     val actual = lms.core.utils.captureOut(snippet.eval("ARG")) // drop pid, since we don't know many here
     //println("Code generated:")
     //println(indent(snippet.code))
-  
+
     // run the code
     //println("Code output:")
     //try {
@@ -208,13 +208,13 @@ yum 1"""*/
           val keySchema = Vector("word")
           val dataSchema = Vector("#count")
           val hm = new HashMapAgg(keySchema, dataSchema)
-        
+
         // loop through string one word at a time
           parse(input).foreach { word: RString =>
             val key = Vector(word)
             hm(key) += Vector(RInt(1))
           }
-        
+
           hm.foreach {
             case (key, v) =>
               key.head.print()
