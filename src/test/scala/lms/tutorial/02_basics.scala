@@ -110,7 +110,7 @@ Scope extrusion can be prevented by appropriate type systems
 [(*)](DBLP:conf/pldi/WestbrookRIYAT10,DBLP:conf/pepm/KameyamaKS09), which are
 beyond the scope of this thesis. Scope extrusion is a real problem for code
 generators that imperatively manage staged program fragments. For generators
-expressed in a functional style it it far less of an issue, regardless of
+expressed in a functional style it is far less of an issue, regardless of
 whether the object program uses effects or not.
 
 ## Type Correctness through Deep Reuse of Types
