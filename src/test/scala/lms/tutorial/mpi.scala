@@ -87,7 +87,7 @@ a cluster of machines.
 ---------------------------------------
 
 The code below is a sequential reference implementation. The check
-`if (pid == 0)` ensures that we only rum one instance of the code,
+`if (pid == 0)` ensures that we only run one instance of the code,
 even if multiple processes are launched (this is how MPI works).
 */
 
