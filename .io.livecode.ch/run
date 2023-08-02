@@ -3,7 +3,7 @@ set -e
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-export SBT_OPTS="-J-Xms512M -J-Xmx512M -J-Xss2M -Dsbt.io.jdktimestamps=true"
+export SBT_OPTS="-Xms512M -Xmx512M -Xss2M -Dsbt.io.jdktimestamps=true"
 
 cat .io.livecode.ch/header.txt $2 .io.livecode.ch/mid.txt $1 .io.livecode.ch/footer.txt >src/test/scala/lms/tutorial/out.scala
 
