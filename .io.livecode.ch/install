@@ -3,7 +3,7 @@ set -e
 
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
-export SBT_OPTS="${SBT_OPTS} -Dsbt.io.jdktimestamps=true"
+export SBT_OPTS="-J-Xms512M -J-Xmx512M -J-Xss2M -Dsbt.io.jdktimestamps=true"
 
 rm .sbtopts
 
