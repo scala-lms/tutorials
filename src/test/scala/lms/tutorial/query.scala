@@ -23,6 +23,8 @@ See also:
   <br>Yannis Klonatos, Christoph Koch, Tiark Rompf, Hassan Chafi. VLDB'14
 - Functional pearl: A SQL to C Compiler in 500 Lines of Code ([PDF](https://www.cs.purdue.edu/homes/rompf/papers/rompf-icfp15.pdf))
   <br>Tiark Rompf, Nada Amin. ICFP'15
+- A SQL to C Copiler in 500 Lines of Code ([PDF](https://namin.seas.harvard.edu/sites/projects.iq.harvard.edu/files/namin/files/sql2c_jfp.pdf))
+  <br>Tiark Rompf, Nada Amin. JFP'19
 
 Outline:
 <div id="tableofcontents"></div>
