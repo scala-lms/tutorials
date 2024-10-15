@@ -3,7 +3,7 @@ package scala.lms.tutorial
 import scala.lms.common._
 import scala.reflect.SourceContext
 
-// sbt ~test-only *ShonanLive*
+// sbt ~testOnly *ShonanLive*
 
 class ShonanLiveTest extends TutorialFunSuite {
   val under = "0-live-"
